@@ -1,0 +1,58 @@
+basePath: /api
+definitions:
+  response.UniversityResponse:
+    properties:
+      alpha_two_code:
+        type: string
+      country:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
+host: localhost:8000
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server celler server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Julong Recruitment API Docs
+  version: "1.0"
+paths:
+  /universities:
+    get:
+      consumes:
+      - application/json
+      description: Find all universities
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.UniversityResponse'
+      security:
+      - BearerAuth: []
+      summary: Find all universities
+      tags:
+      - Universities
+securityDefinitions:
+  BearerAuth:
+    description: Bearer token for authentication
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
