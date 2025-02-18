@@ -37,5 +37,7 @@ func (dto *TemplateTaskAttachmentDTO) ConvertEntityToResponse(ent *entity.Templa
 			}
 			return dto.Viper.GetString("app.url") + ent.Path
 		}(),
+		CreatedAt: ent.CreatedAt,
+		UpdatedAt: ent.UpdatedAt,
 	}
 }

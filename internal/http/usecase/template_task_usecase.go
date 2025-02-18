@@ -95,8 +95,8 @@ func (uc *TemplateTaskUseCase) CreateTemplateTask(req *request.CreateTemplateTas
 	}
 	// create template task checklists
 	for _, checklist := range req.TemplateTaskChecklists {
-		if checklist.ID != "" || checklist.ID != uuid.Nil.String() {
-			parsedChecklistID, err := uuid.Parse(checklist.ID)
+		if checklist.ID != nil {
+			parsedChecklistID, err := uuid.Parse(*checklist.ID)
 			if err != nil {
 				uc.Log.Error("[TemplateTaskUseCase.CreateTemplateTask] " + err.Error())
 				return nil, err
@@ -204,8 +204,8 @@ func (uc *TemplateTaskUseCase) UpdateTemplateTask(req *request.UpdateTemplateTas
 	}
 	// create template task checklists
 	for _, checklist := range req.TemplateTaskChecklists {
-		if checklist.ID != "" || checklist.ID != uuid.Nil.String() {
-			parsedChecklistID, err := uuid.Parse(checklist.ID)
+		if checklist.ID != nil {
+			parsedChecklistID, err := uuid.Parse(*checklist.ID)
 			if err != nil {
 				uc.Log.Error("[TemplateTaskUseCase.CreateTemplateTask] " + err.Error())
 				return nil, err

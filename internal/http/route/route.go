@@ -11,12 +11,13 @@ import (
 )
 
 type RouteConfig struct {
-	App               *gin.Engine
-	Log               *logrus.Logger
-	Viper             *viper.Viper
-	AuthMiddleware    gin.HandlerFunc
-	UniversityHandler handler.IUniversityHandler
-	CoverHandler      handler.ICoverHandler
+	App                 *gin.Engine
+	Log                 *logrus.Logger
+	Viper               *viper.Viper
+	AuthMiddleware      gin.HandlerFunc
+	UniversityHandler   handler.IUniversityHandler
+	CoverHandler        handler.ICoverHandler
+	TemplateTaskHandler handler.ITemplateTaskHandler
 }
 
 func (c *RouteConfig) SetupRoutes() {
@@ -49,6 +50,15 @@ func (c *RouteConfig) SetupAPIRoutes() {
 				coverRoute.PUT("/update", c.CoverHandler.UpdateCover)
 				coverRoute.DELETE("/:id", c.CoverHandler.DeleteCover)
 			}
+			// template tasks
+			templateTaskRoute := apiRoute.Group("/template-tasks")
+			{
+				templateTaskRoute.GET("", c.TemplateTaskHandler.FindAllPaginated)
+				templateTaskRoute.GET("/:id", c.TemplateTaskHandler.FindByID)
+				templateTaskRoute.POST("", c.TemplateTaskHandler.CreateTemplateTask)
+				templateTaskRoute.PUT("/update", c.TemplateTaskHandler.UpdateTemplateTask)
+				templateTaskRoute.DELETE("/:id", c.TemplateTaskHandler.DeleteTemplateTask)
+			}
 		}
 	}
 }
@@ -57,12 +67,14 @@ func NewRouteConfig(app *gin.Engine, viper *viper.Viper, log *logrus.Logger) *Ro
 	authMiddleware := middleware.NewAuth(viper)
 	universityHandler := handler.UniversityHandlerFactory(log, viper)
 	coverHandler := handler.CoverHandlerFactory(log, viper)
+	templateTaskHandler := handler.TemplateTaskHandlerFactory(log, viper)
 	return &RouteConfig{
-		App:               app,
-		Log:               log,
-		Viper:             viper,
-		AuthMiddleware:    authMiddleware,
-		UniversityHandler: universityHandler,
-		CoverHandler:      coverHandler,
+		App:                 app,
+		Log:                 log,
+		Viper:               viper,
+		AuthMiddleware:      authMiddleware,
+		UniversityHandler:   universityHandler,
+		CoverHandler:        coverHandler,
+		TemplateTaskHandler: templateTaskHandler,
 	}
 }

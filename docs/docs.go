@@ -226,6 +226,193 @@ const docTemplate = `{
                 }
             }
         },
+        "/template-tasks": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Find all template tasks with pagination",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Template Tasks"
+                ],
+                "summary": "Find all template tasks with pagination",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page Size",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Created At",
+                        "name": "created_at",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.TemplateTaskResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create new template task",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Template Tasks"
+                ],
+                "summary": "Create new template task",
+                "parameters": [
+                    {
+                        "description": "Create Template Task",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.CreateTemplateTaskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.TemplateTaskResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/template-tasks/update": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update template task by id",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Template Tasks"
+                ],
+                "summary": "Update template task by id",
+                "parameters": [
+                    {
+                        "description": "Update Template Task",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UpdateTemplateTaskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.TemplateTaskResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/template-tasks/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Find template task by id",
+                "tags": [
+                    "Template Tasks"
+                ],
+                "summary": "Find template task by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Template Task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.TemplateTaskResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete template task by id",
+                "tags": [
+                    "Template Tasks"
+                ],
+                "summary": "Delete template task by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Template Task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/universities": {
             "get": {
                 "security": [
@@ -256,6 +443,164 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "entity.TemplateTaskPriorityEnum": {
+            "type": "string",
+            "enum": [
+                "LOW",
+                "MEDIUM",
+                "HIGH"
+            ],
+            "x-enum-varnames": [
+                "TEMPLATE_TASK_PRIORITY_ENUM_LOW",
+                "TEMPLATE_TASK_PRIORITY_ENUM_MEDIUM",
+                "TEMPLATE_TASK_PRIORITY_ENUM_HIGH"
+            ]
+        },
+        "entity.TemplateTaskStatusEnum": {
+            "type": "string",
+            "enum": [
+                "ACTIVE",
+                "INACTIVE"
+            ],
+            "x-enum-varnames": [
+                "TEMPLATE_TASK_STATUS_ENUM_ACTIVE",
+                "TEMPLATE_TASK_STATUS_ENUM_INACTIVE"
+            ]
+        },
+        "multipart.FileHeader": {
+            "type": "object",
+            "properties": {
+                "filename": {
+                    "type": "string"
+                },
+                "header": {
+                    "$ref": "#/definitions/textproto.MIMEHeader"
+                },
+                "size": {
+                    "type": "integer"
+                }
+            }
+        },
+        "request.CreateTemplateTaskRequest": {
+            "type": "object",
+            "required": [
+                "cover_file",
+                "name",
+                "priority",
+                "status"
+            ],
+            "properties": {
+                "cover_file": {
+                    "$ref": "#/definitions/multipart.FileHeader"
+                },
+                "cover_path": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "due_duration": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "priority": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "template_task_attachments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.TemplateTaskAttachmentRequest"
+                    }
+                },
+                "template_task_checklists": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.TemplateTaskChecklistRequest"
+                    }
+                }
+            }
+        },
+        "request.TemplateTaskAttachmentRequest": {
+            "type": "object",
+            "required": [
+                "file"
+            ],
+            "properties": {
+                "file": {
+                    "$ref": "#/definitions/multipart.FileHeader"
+                },
+                "path": {
+                    "type": "string"
+                }
+            }
+        },
+        "request.TemplateTaskChecklistRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "request.UpdateTemplateTaskRequest": {
+            "type": "object",
+            "required": [
+                "cover_file",
+                "id",
+                "name",
+                "priority",
+                "status"
+            ],
+            "properties": {
+                "cover_file": {
+                    "$ref": "#/definitions/multipart.FileHeader"
+                },
+                "cover_path": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "due_duration": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "priority": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "template_task_attachments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.TemplateTaskAttachmentRequest"
+                    }
+                },
+                "template_task_checklists": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.TemplateTaskChecklistRequest"
+                    }
+                }
+            }
+        },
         "response.CoverResponse": {
             "type": "object",
             "properties": {
@@ -267,6 +612,93 @@ const docTemplate = `{
                 },
                 "path": {
                     "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.TemplateTaskAttachmentResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "template_task_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.TemplateTaskChecklistResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "template_task_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.TemplateTaskResponse": {
+            "type": "object",
+            "properties": {
+                "coverPath": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "due_duration": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "priority": {
+                    "$ref": "#/definitions/entity.TemplateTaskPriorityEnum"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/entity.TemplateTaskStatusEnum"
+                },
+                "template_task_attachments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.TemplateTaskAttachmentResponse"
+                    }
+                },
+                "template_task_checklists": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.TemplateTaskChecklistResponse"
+                    }
                 },
                 "updated_at": {
                     "type": "string"
@@ -292,6 +724,15 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "textproto.MIMEHeader": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
                     "type": "string"
                 }
             }
