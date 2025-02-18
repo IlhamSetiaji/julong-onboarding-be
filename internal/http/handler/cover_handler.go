@@ -14,6 +14,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"gorm.io/gorm"
 )
 
 type ICoverHandler interface {
@@ -29,6 +30,7 @@ type CoverHandler struct {
 	Viper    *viper.Viper
 	Validate *validator.Validate
 	UseCase  usecase.ICoverUseCase
+	DB       *gorm.DB
 }
 
 func NewCoverHandler(
@@ -36,12 +38,14 @@ func NewCoverHandler(
 	viper *viper.Viper,
 	validate *validator.Validate,
 	useCase usecase.ICoverUseCase,
+	db *gorm.DB,
 ) ICoverHandler {
 	return &CoverHandler{
 		Log:      log,
 		Viper:    viper,
 		Validate: validate,
 		UseCase:  useCase,
+		DB:       db,
 	}
 }
 
@@ -51,7 +55,8 @@ func CoverHandlerFactory(
 ) ICoverHandler {
 	useCase := usecase.CoverUseCaseFactory(log, viper)
 	validate := config.NewValidator(viper)
-	return NewCoverHandler(log, viper, validate, useCase)
+	db := config.NewDatabase()
+	return NewCoverHandler(log, viper, validate, useCase, db)
 }
 
 // CreateCover create a new cover
@@ -93,10 +98,25 @@ func (h *CoverHandler) CreateCover(ctx *gin.Context) {
 		req.Path = filePath
 	}
 
+	tx := h.DB.WithContext(ctx).Begin()
+	if tx.Error != nil {
+		h.Log.Warnf("Failed begin transaction : %+v", tx.Error)
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, "Failed to begin transaction", tx.Error.Error())
+		return
+	}
+	defer tx.Rollback()
+
 	res, err := h.UseCase.CreateCover(&req)
 	if err != nil {
 		h.Log.Error("[CoverHandler.CreateCover] " + err.Error())
+		tx.Rollback()
 		utils.ErrorResponse(ctx, http.StatusInternalServerError, "internal server error", err.Error())
+		return
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		h.Log.Warnf("Failed commit transaction : %+v", err)
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, "Failed to commit transaction", err.Error())
 		return
 	}
 
@@ -237,11 +257,24 @@ func (h *CoverHandler) UpdateCover(ctx *gin.Context) {
 		req.File = nil
 		req.Path = filePath
 	}
+	tx := h.DB.WithContext(ctx).Begin()
+	if tx.Error != nil {
+		h.Log.Warnf("Failed begin transaction : %+v", tx.Error)
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, "Failed to begin transaction", tx.Error.Error())
+		return
+	}
+	defer tx.Rollback()
 
 	res, err := h.UseCase.UpdateCover(parsedId, &req)
 	if err != nil {
 		h.Log.Error("[CoverHandler.UpdateCover] " + err.Error())
 		utils.ErrorResponse(ctx, http.StatusInternalServerError, "internal server error", err.Error())
+		return
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		h.Log.Warnf("Failed commit transaction : %+v", err)
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, "Failed to commit transaction", err.Error())
 		return
 	}
 
@@ -268,10 +301,24 @@ func (h *CoverHandler) DeleteCover(ctx *gin.Context) {
 		return
 	}
 
+	tx := h.DB.WithContext(ctx).Begin()
+	if tx.Error != nil {
+		h.Log.Warnf("Failed begin transaction : %+v", tx.Error)
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, "Failed to begin transaction", tx.Error.Error())
+		return
+	}
+	defer tx.Rollback()
+
 	err = h.UseCase.DeleteCover(parsedId)
 	if err != nil {
 		h.Log.Error("[CoverHandler.DeleteCover] " + err.Error())
 		utils.ErrorResponse(ctx, http.StatusInternalServerError, "internal server error", err.Error())
+		return
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		h.Log.Warnf("Failed commit transaction : %+v", err)
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, "Failed to commit transaction", err.Error())
 		return
 	}
 

@@ -1,0 +1,112 @@
+package repository
+
+import (
+	"github.com/IlhamSetiaji/julong-onboarding-be/internal/config"
+	"github.com/IlhamSetiaji/julong-onboarding-be/internal/entity"
+	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
+)
+
+type ITemplateTaskRepository interface {
+	CreateTemplateTask(ent *entity.TemplateTask) (*entity.TemplateTask, error)
+	UpdateTemplateTask(ent *entity.TemplateTask) (*entity.TemplateTask, error)
+	DeleteTemplateTask(ent *entity.TemplateTask) error
+	FindByID(id uuid.UUID) (*entity.TemplateTask, error)
+	FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}) (*[]entity.TemplateTask, int64, error)
+}
+
+type TemplateTaskRepository struct {
+	Log *logrus.Logger
+	DB  *gorm.DB
+}
+
+func NewTemplateTaskRepository(
+	log *logrus.Logger,
+	db *gorm.DB,
+) *TemplateTaskRepository {
+	return &TemplateTaskRepository{
+		Log: log,
+		DB:  db,
+	}
+}
+
+func TemplateTaskRepositoryFactory(
+	log *logrus.Logger,
+) ITemplateTaskRepository {
+	db := config.NewDatabase()
+	return NewTemplateTaskRepository(log, db)
+}
+
+func (r *TemplateTaskRepository) CreateTemplateTask(ent *entity.TemplateTask) (*entity.TemplateTask, error) {
+	if err := r.DB.Create(ent).Error; err != nil {
+		r.Log.Error("[TemplateTaskRepository.CreateTemplateTask] Error when create template task: ", err)
+		return nil, err
+	}
+
+	if err := r.DB.First(ent, ent.ID).Error; err != nil {
+		r.Log.Error("[TemplateTaskRepository.CreateTemplateTask] Error when get template task: ", err)
+		return nil, err
+	}
+
+	return ent, nil
+}
+
+func (r *TemplateTaskRepository) UpdateTemplateTask(ent *entity.TemplateTask) (*entity.TemplateTask, error) {
+	if err := r.DB.Model(&entity.TemplateTask{}).Where("id = ?", ent.ID).Updates(ent).Error; err != nil {
+		r.Log.Error("[TemplateTaskRepository.UpdateTemplateTask] Error when update template task: ", err)
+		return nil, err
+	}
+
+	if err := r.DB.First(ent, ent.ID).Error; err != nil {
+		r.Log.Error("[TemplateTaskRepository.UpdateTemplateTask] Error when get template task: ", err)
+		return nil, err
+	}
+
+	return ent, nil
+}
+
+func (r *TemplateTaskRepository) DeleteTemplateTask(ent *entity.TemplateTask) error {
+	if err := r.DB.Delete(ent).Error; err != nil {
+		r.Log.Error("[TemplateTaskRepository.DeleteTemplateTask] Error when delete template task: ", err)
+		return err
+	}
+
+	return nil
+}
+
+func (r *TemplateTaskRepository) FindByID(id uuid.UUID) (*entity.TemplateTask, error) {
+	var templateTask entity.TemplateTask
+	if err := r.DB.Preload("TemplateTaskAttachments").Preload("TemplateTaskChecklists").First(&templateTask, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		} else {
+			r.Log.Error("[TemplateTaskRepository.FindByID] Error when get template task: ", err)
+			return nil, err
+		}
+	}
+
+	return &templateTask, nil
+}
+
+func (r *TemplateTaskRepository) FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}) (*[]entity.TemplateTask, int64, error) {
+	var templateTasks []entity.TemplateTask
+	var total int64
+
+	query := r.DB.Preload("TemplateTaskAttachments").Preload("TemplateTaskChecklists").Where("name LIKE ?", "%"+search+"%")
+	for key, value := range sort {
+		query = query.Order(key + " " + value.(string))
+	}
+
+	if err := query.Offset((page - 1) * pageSize).Limit(pageSize).Find(&templateTasks).Error; err != nil {
+		r.Log.Error("[TemplateTaskRepository.FindAllPaginated] Error when get template tasks: ", err)
+		return nil, 0, err
+	}
+
+	if err := query.Count(&total).Error; err != nil {
+		r.Log.Error("[TemplateTaskRepository.FindAllPaginated] Error when count template tasks: ", err)
+		return nil, 0, err
+	}
+
+	return &templateTasks, total, nil
+}

@@ -73,3 +73,32 @@ func EducationLevelValidation(fl validator.FieldLevel) bool {
 		return false
 	}
 }
+
+func TemplateTaskPriorityValidation(fl validator.FieldLevel) bool {
+	priority := fl.Field().String()
+	if priority == "" {
+		return true
+	}
+	switch entity.TemplateTaskPriorityEnum(priority) {
+	case entity.TEMPLATE_TASK_PRIORITY_ENUM_LOW,
+		entity.TEMPLATE_TASK_PRIORITY_ENUM_MEDIUM,
+		entity.TEMPLATE_TASK_PRIORITY_ENUM_HIGH:
+		return true
+	default:
+		return false
+	}
+}
+
+func TemplateTaskStatusValidation(fl validator.FieldLevel) bool {
+	status := fl.Field().String()
+	if status == "" {
+		return true
+	}
+	switch entity.TemplateTaskStatusEnum(status) {
+	case entity.TEMPLATE_TASK_STATUS_ENUM_ACTIVE,
+		entity.TEMPLATE_TASK_STATUS_ENUM_INACTIVE:
+		return true
+	default:
+		return false
+	}
+}
