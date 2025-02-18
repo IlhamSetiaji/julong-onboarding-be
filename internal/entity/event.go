@@ -16,15 +16,16 @@ const (
 )
 
 type Event struct {
-	gorm.Model  `json:"-"`
-	ID          uuid.UUID       `json:"id" gorm:"type:char(36);primaryKey;"`
-	Name        string          `json:"name" gorm:"type:varchar(255);not null"`
-	StartDate   time.Time       `json:"start_date" gorm:"type:date;not null"`
-	EndDate     time.Time       `json:"end_date" gorm:"type:date;not null"`
-	Description string          `json:"description" gorm:"type:text;default:null"`
-	Status      EventStatusEnum `json:"status" gorm:"type:varchar(255);not null;default:'UPCOMING'"`
+	gorm.Model     `json:"-"`
+	ID             uuid.UUID       `json:"id" gorm:"type:char(36);primaryKey;"`
+	TemplateTaskID uuid.UUID       `json:"template_task_id" gorm:"type:char(36);not null"`
+	Name           string          `json:"name" gorm:"type:varchar(255);not null"`
+	StartDate      time.Time       `json:"start_date" gorm:"type:date;not null"`
+	EndDate        time.Time       `json:"end_date" gorm:"type:date;not null"`
+	Description    string          `json:"description" gorm:"type:text;default:null"`
+	Status         EventStatusEnum `json:"status" gorm:"type:varchar(255);not null;default:'UPCOMING'"`
 
-	EventTasks     []EventTask     `json:"event_tasks" gorm:"foreignKey:EventID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	TemplateTask   *TemplateTask   `json:"template_task" gorm:"foreignKey:TemplateTaskID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	EventEmployees []EventEmployee `json:"event_employees" gorm:"foreignKey:EventID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 

@@ -1,5 +1,16 @@
 basePath: /api
 definitions:
+  response.CoverResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      path:
+        type: string
+      updated_at:
+        type: string
+    type: object
   response.UniversityResponse:
     properties:
       alpha_two_code:
@@ -18,7 +29,7 @@ definitions:
 externalDocs:
   description: OpenAPI
   url: https://swagger.io/resources/open-api/
-host: localhost:8000
+host: localhost:8001
 info:
   contact:
     email: support@swagger.io
@@ -29,9 +40,136 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: http://swagger.io/terms/
-  title: Julong Recruitment API Docs
+  title: Julong Onboarding API Docs
   version: "1.0"
 paths:
+  /covers:
+    get:
+      consumes:
+      - application/json
+      description: Find all covers with pagination
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Page Size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search
+        in: query
+        name: search
+        type: string
+      - description: Created At
+        in: query
+        name: created_at
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.CoverResponse'
+      security:
+      - BearerAuth: []
+      summary: Find all covers with pagination
+      tags:
+      - Covers
+    post:
+      consumes:
+      - multipart/form-data
+      description: Create a new cover
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.CoverResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new cover
+      tags:
+      - Covers
+  /covers/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete cover by id
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Delete cover by id
+      tags:
+      - Covers
+    get:
+      consumes:
+      - application/json
+      description: Find cover by id
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.CoverResponse'
+      security:
+      - BearerAuth: []
+      summary: Find cover by id
+      tags:
+      - Covers
+  /covers/update:
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update cover by id
+      parameters:
+      - description: ID
+        in: formData
+        name: id
+        required: true
+        type: string
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.CoverResponse'
+      security:
+      - BearerAuth: []
+      summary: Update cover by id
+      tags:
+      - Covers
   /universities:
     get:
       consumes:

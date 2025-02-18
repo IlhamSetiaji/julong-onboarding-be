@@ -35,7 +35,7 @@ type TemplateTask struct {
 
 	TemplateTaskAttachments []TemplateTaskAttachment `json:"template_task_attachments" gorm:"foreignKey:TemplateTaskID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	TemplateTaskChecklists  []TemplateTaskChecklist  `json:"template_task_checklists" gorm:"foreignKey:TemplateTaskID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	EventTasks              []EventTask              `json:"event_tasks" gorm:"foreignKey:TemplateTaskID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Events                  []Event                  `json:"events" gorm:"foreignKey:TemplateTaskID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 func (t *TemplateTask) BeforeCreate(tx *gorm.DB) (err error) {

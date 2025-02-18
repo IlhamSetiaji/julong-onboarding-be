@@ -46,13 +46,15 @@ type EmployeeTask struct {
 	EndDate          time.Time                `json:"end_date" gorm:"type:date;not null"`
 	IsDone           string                   `json:"is_done" gorm:"type:varchar(255);not null;default:'NO'"`
 	Proof            *string                  `json:"proof" gorm:"type:varchar(255);default:null"`
-	Progress         *int                     `json:"progress" gorm:"type:int;default:0"`
 	Status           EmployeeTaskStatusEnum   `json:"status" gorm:"type:varchar(255);not null;default:'ACTIVE'"`
 	Kanban           EmployeeTaskKanbanEnum   `json:"kanban" gorm:"type:varchar(255);not null;default:'TO_DO'"`
+	Notes            string                   `json:"notes" gorm:"type:text;default:null"`
 
-	TemplateTask           *TemplateTask           `json:"template_task" gorm:"foreignKey:TemplateTaskID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	EmployeeTaskChecklists []EmployeeTaskChecklist `json:"employee_task_checklists" gorm:"foreignKey:EmployeeTaskID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	EmployeeHiring         *EmployeeHiring         `json:"employee_hiring" gorm:"foreignKey:EmployeeHiringID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	TemplateTask            *TemplateTask            `json:"template_task" gorm:"foreignKey:TemplateTaskID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	EmployeeTaskChecklists  []EmployeeTaskChecklist  `json:"employee_task_checklists" gorm:"foreignKey:EmployeeTaskID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	EmployeeHiring          *EmployeeHiring          `json:"employee_hiring" gorm:"foreignKey:EmployeeHiringID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	EmployeeTaskAttachments []EmployeeTaskAttachment `json:"employee_task_attachments" gorm:"foreignKey:EmployeeTaskID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	EmployeeTaskFiles       []EmployeeTaskFiles      `json:"employee_task_files" gorm:"foreignKey:EmployeeTaskID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 func (e *EmployeeTask) BeforeCreate(tx *gorm.DB) (err error) {

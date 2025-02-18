@@ -44,7 +44,7 @@ func generateSwaggerDocs(mode string) {
 	fmt.Println("Swagger documentation generated successfully!")
 }
 
-// @title           Julong Recruitment API Docs
+// @title           Julong Onboarding API Docs
 // @version         1.0
 // @description     This is a sample server celler server.
 // @termsOfService  http://swagger.io/terms/
@@ -56,7 +56,7 @@ func generateSwaggerDocs(mode string) {
 // @license.name  Apache 2.0
 // @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host      localhost:8000
+// @host      localhost:8001
 // @BasePath  /api
 
 // @securityDefinitions.apikey  BearerAuth

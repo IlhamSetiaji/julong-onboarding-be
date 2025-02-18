@@ -16,6 +16,7 @@ type RouteConfig struct {
 	Viper             *viper.Viper
 	AuthMiddleware    gin.HandlerFunc
 	UniversityHandler handler.IUniversityHandler
+	CoverHandler      handler.ICoverHandler
 }
 
 func (c *RouteConfig) SetupRoutes() {
@@ -39,6 +40,15 @@ func (c *RouteConfig) SetupAPIRoutes() {
 			{
 				universityRoute.GET("", c.UniversityHandler.FindAll)
 			}
+			// covers
+			coverRoute := apiRoute.Group("/covers")
+			{
+				coverRoute.GET("", c.CoverHandler.FindAllPaginated)
+				coverRoute.GET("/:id", c.CoverHandler.FindByID)
+				coverRoute.POST("", c.CoverHandler.CreateCover)
+				coverRoute.PUT("/update", c.CoverHandler.UpdateCover)
+				coverRoute.DELETE("/:id", c.CoverHandler.DeleteCover)
+			}
 		}
 	}
 }
@@ -46,11 +56,13 @@ func (c *RouteConfig) SetupAPIRoutes() {
 func NewRouteConfig(app *gin.Engine, viper *viper.Viper, log *logrus.Logger) *RouteConfig {
 	authMiddleware := middleware.NewAuth(viper)
 	universityHandler := handler.UniversityHandlerFactory(log, viper)
+	coverHandler := handler.CoverHandlerFactory(log, viper)
 	return &RouteConfig{
 		App:               app,
 		Log:               log,
 		Viper:             viper,
 		AuthMiddleware:    authMiddleware,
 		UniversityHandler: universityHandler,
+		CoverHandler:      coverHandler,
 	}
 }

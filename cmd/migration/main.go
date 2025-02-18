@@ -17,10 +17,11 @@ func main() {
 		&entity.TemplateTaskAttachment{},
 		&entity.TemplateTaskChecklist{},
 		&entity.EmployeeTask{},
+		&entity.EmployeeTaskAttachment{},
+		&entity.EmployeeTaskFiles{},
 		&entity.EmployeeHiring{},
 		&entity.EmployeeTaskChecklist{},
 		&entity.Event{},
-		&entity.EventTask{},
 		&entity.EventEmployee{},
 	)
 	if err != nil {
