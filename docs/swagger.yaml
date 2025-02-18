@@ -214,6 +214,47 @@ info:
   title: Julong Onboarding API Docs
   version: "1.0"
 paths:
+  /api/template-tasks/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete template task attachment by ID
+      parameters:
+      - description: Template Task Attachment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: success delete template task attachment
+          schema:
+            type: string
+      summary: Delete template task attachment by ID
+      tags:
+      - Template Task Attachments
+    get:
+      consumes:
+      - application/json
+      description: Find template task attachment by ID
+      parameters:
+      - description: Template Task Attachment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.TemplateTaskAttachmentResponse'
+      summary: Find template task attachment by ID
+      tags:
+      - Template Task Attachments
   /covers:
     get:
       consumes:

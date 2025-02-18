@@ -24,6 +24,68 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/template-tasks/{id}": {
+            "get": {
+                "description": "Find template task attachment by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Template Task Attachments"
+                ],
+                "summary": "Find template task attachment by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Template Task Attachment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.TemplateTaskAttachmentResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete template task attachment by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Template Task Attachments"
+                ],
+                "summary": "Delete template task attachment by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Template Task Attachment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "success delete template task attachment",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/covers": {
             "get": {
                 "security": [

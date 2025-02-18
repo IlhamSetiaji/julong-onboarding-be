@@ -11,13 +11,14 @@ import (
 )
 
 type RouteConfig struct {
-	App                 *gin.Engine
-	Log                 *logrus.Logger
-	Viper               *viper.Viper
-	AuthMiddleware      gin.HandlerFunc
-	UniversityHandler   handler.IUniversityHandler
-	CoverHandler        handler.ICoverHandler
-	TemplateTaskHandler handler.ITemplateTaskHandler
+	App                           *gin.Engine
+	Log                           *logrus.Logger
+	Viper                         *viper.Viper
+	AuthMiddleware                gin.HandlerFunc
+	UniversityHandler             handler.IUniversityHandler
+	CoverHandler                  handler.ICoverHandler
+	TemplateTaskHandler           handler.ITemplateTaskHandler
+	TemplateTaskAttachmentHandler handler.ITemplateTaskAttachmentHandler
 }
 
 func (c *RouteConfig) SetupRoutes() {
@@ -59,6 +60,12 @@ func (c *RouteConfig) SetupAPIRoutes() {
 				templateTaskRoute.PUT("/update", c.TemplateTaskHandler.UpdateTemplateTask)
 				templateTaskRoute.DELETE("/:id", c.TemplateTaskHandler.DeleteTemplateTask)
 			}
+			// template task attachments
+			templateTaskAttachmentRoute := apiRoute.Group("/template-task-attachments")
+			{
+				templateTaskAttachmentRoute.GET("/:id", c.TemplateTaskAttachmentHandler.FindByID)
+				templateTaskAttachmentRoute.DELETE("/:id", c.TemplateTaskAttachmentHandler.DeleteTemplateTaskAttachment)
+			}
 		}
 	}
 }
@@ -68,13 +75,15 @@ func NewRouteConfig(app *gin.Engine, viper *viper.Viper, log *logrus.Logger) *Ro
 	universityHandler := handler.UniversityHandlerFactory(log, viper)
 	coverHandler := handler.CoverHandlerFactory(log, viper)
 	templateTaskHandler := handler.TemplateTaskHandlerFactory(log, viper)
+	templateTaskAttachmentHandler := handler.TemplateTaskAttachmentHandlerFactory(log, viper)
 	return &RouteConfig{
-		App:                 app,
-		Log:                 log,
-		Viper:               viper,
-		AuthMiddleware:      authMiddleware,
-		UniversityHandler:   universityHandler,
-		CoverHandler:        coverHandler,
-		TemplateTaskHandler: templateTaskHandler,
+		App:                           app,
+		Log:                           log,
+		Viper:                         viper,
+		AuthMiddleware:                authMiddleware,
+		UniversityHandler:             universityHandler,
+		CoverHandler:                  coverHandler,
+		TemplateTaskHandler:           templateTaskHandler,
+		TemplateTaskAttachmentHandler: templateTaskAttachmentHandler,
 	}
 }

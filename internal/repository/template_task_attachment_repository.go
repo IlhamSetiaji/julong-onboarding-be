@@ -12,6 +12,7 @@ type ITemplateTaskAttachmentRepository interface {
 	CreateTemplateTaskAttachment(ent *entity.TemplateTaskAttachment) (*entity.TemplateTaskAttachment, error)
 	DeleteByTemplateTaskID(id uuid.UUID) error
 	DeleteTemplateTaskAttachment(ent *entity.TemplateTaskAttachment) error
+	FindByID(id uuid.UUID) (*entity.TemplateTaskAttachment, error)
 }
 
 type TemplateTaskAttachmentRepository struct {
@@ -66,4 +67,18 @@ func (r *TemplateTaskAttachmentRepository) DeleteTemplateTaskAttachment(ent *ent
 	}
 
 	return nil
+}
+
+func (r *TemplateTaskAttachmentRepository) FindByID(id uuid.UUID) (*entity.TemplateTaskAttachment, error) {
+	var ent entity.TemplateTaskAttachment
+	if err := r.DB.Where("id = ?", id).First(&ent).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		} else {
+			r.Log.Error("[TemplateTaskAttachmentRepository.FindByID] Error when get template task attachment: ", err)
+			return nil, err
+		}
+	}
+
+	return &ent, nil
 }
