@@ -29,8 +29,13 @@ func CoverDTOFactory(log *logrus.Logger, viper *viper.Viper) ICoverDTO {
 
 func (dto *CoverDTO) ConvertEntityToResponse(ent *entity.Cover) *response.CoverResponse {
 	return &response.CoverResponse{
-		ID:        ent.ID,
-		Path:      dto.Viper.GetString("app.url") + ent.Path,
+		ID: ent.ID,
+		Path: func() string {
+			if ent.Path == "" {
+				return ""
+			}
+			return ent.Path
+		}(),
 		CreatedAt: ent.CreatedAt,
 		UpdatedAt: ent.UpdatedAt,
 	}
