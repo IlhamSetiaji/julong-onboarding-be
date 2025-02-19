@@ -34,3 +34,10 @@ type EmployeeTaskResponse struct {
 	EmployeeTaskAttachments []EmployeeTaskAttachmentResponse `json:"employee_task_attachments"`
 	EmployeeTaskChecklists  []EmployeeTaskChecklistResponse  `json:"employee_task_checklists"`
 }
+
+type EmployeeTaskKanbanResponse struct {
+	ToDo       []EmployeeTaskResponse `json:"to_do"`
+	InProgress []EmployeeTaskResponse `json:"in_progress"`
+	NeedReview []EmployeeTaskResponse `json:"need_review"`
+	Completed  []EmployeeTaskResponse `json:"completed"`
+}

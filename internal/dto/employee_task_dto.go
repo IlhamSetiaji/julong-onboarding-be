@@ -11,6 +11,7 @@ import (
 
 type IEmployeeTaskDTO interface {
 	ConvertEntityToResponse(ent *entity.EmployeeTask) *response.EmployeeTaskResponse
+	ConvertEntitiesToKanbanResponse(entities []entity.EmployeeTask) *response.EmployeeTaskKanbanResponse
 }
 
 type EmployeeTaskDTO struct {
@@ -115,5 +116,33 @@ func (dto *EmployeeTaskDTO) ConvertEntityToResponse(ent *entity.EmployeeTask) *r
 			}
 			return attachments
 		}(),
+	}
+}
+
+func (dto *EmployeeTaskDTO) ConvertEntitiesToKanbanResponse(entities []entity.EmployeeTask) *response.EmployeeTaskKanbanResponse {
+	var toDo []response.EmployeeTaskResponse
+	var inProgress []response.EmployeeTaskResponse
+	var needReview []response.EmployeeTaskResponse
+	var completed []response.EmployeeTaskResponse
+
+	for _, ent := range entities {
+		response := dto.ConvertEntityToResponse(&ent)
+		switch ent.Kanban {
+		case entity.EMPLOYEE_TASK_KANBAN_ENUM_TODO:
+			toDo = append(toDo, *response)
+		case entity.EPMLOYEE_TASK_KANBAN_ENUM_IN_PROGRESS:
+			inProgress = append(inProgress, *response)
+		case entity.EMPLOYEE_TASK_KANBAN_ENUM_NEED_REVIEW:
+			needReview = append(needReview, *response)
+		case entity.EMPLOYEE_TASK_KANBAN_ENUM_COMPLETED:
+			completed = append(completed, *response)
+		}
+	}
+
+	return &response.EmployeeTaskKanbanResponse{
+		ToDo:       toDo,
+		InProgress: inProgress,
+		NeedReview: needReview,
+		Completed:  completed,
 	}
 }

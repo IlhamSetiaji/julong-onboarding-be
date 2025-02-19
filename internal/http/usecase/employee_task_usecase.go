@@ -21,7 +21,7 @@ type IEmployeeTaskUseCase interface {
 	FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}) (*[]response.EmployeeTaskResponse, int64, error)
 	FindByID(id uuid.UUID) (*response.EmployeeTaskResponse, error)
 	CountByKanbanAndEmployeeID(kanban entity.EmployeeTaskKanbanEnum, employeeID uuid.UUID) (int64, error)
-	FindAllByEmployeeID(employeeID uuid.UUID) (*[]response.EmployeeTaskResponse, error)
+	FindAllByEmployeeID(employeeID uuid.UUID) (*response.EmployeeTaskKanbanResponse, error)
 }
 
 type EmployeeTaskUseCase struct {
@@ -451,17 +451,14 @@ func (uc *EmployeeTaskUseCase) CountByKanbanAndEmployeeID(kanban entity.Employee
 	return count, nil
 }
 
-func (uc *EmployeeTaskUseCase) FindAllByEmployeeID(employeeID uuid.UUID) (*[]response.EmployeeTaskResponse, error) {
+func (uc *EmployeeTaskUseCase) FindAllByEmployeeID(employeeID uuid.UUID) (*response.EmployeeTaskKanbanResponse, error) {
 	employeeTasks, err := uc.Repository.FindAllByEmployeeID(employeeID)
 	if err != nil {
 		uc.Log.Error("[EmployeeTaskUseCase.FindAllByEmployeeID] error finding all by employee id: ", err)
 		return nil, err
 	}
 
-	var responses []response.EmployeeTaskResponse
-	for _, employeeTask := range *employeeTasks {
-		responses = append(responses, *uc.DTO.ConvertEntityToResponse(&employeeTask))
-	}
+	formattedResponse := uc.DTO.ConvertEntitiesToKanbanResponse(*employeeTasks)
 
-	return &responses, nil
+	return formattedResponse, nil
 }
