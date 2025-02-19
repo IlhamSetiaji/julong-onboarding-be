@@ -51,7 +51,7 @@ COPY init-config.sh /app/init-config.sh
 RUN chmod +x /app/init-config.sh
 
 # Expose the port on which the application will run
-EXPOSE 8000
+EXPOSE 8001
 
 # Command to run the initialization script
 CMD ["/app/init-config.sh"]
