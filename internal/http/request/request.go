@@ -102,3 +102,48 @@ func TemplateTaskStatusValidation(fl validator.FieldLevel) bool {
 		return false
 	}
 }
+
+func EmployeeTaskPriorityValidation(fl validator.FieldLevel) bool {
+	priority := fl.Field().String()
+	if priority == "" {
+		return true
+	}
+	switch entity.EmployeeTaskPriorityEnum(priority) {
+	case entity.EMPLOYEE_TASK_PRIORITY_ENUM_LOW,
+		entity.EMPLOYEE_TASK_PRIORITY_ENUM_MEDIUM,
+		entity.EMPLOYEE_TASK_PRIORITY_ENUM_HIGH:
+		return true
+	default:
+		return false
+	}
+}
+
+func EmployeeTaskStatusValidation(fl validator.FieldLevel) bool {
+	status := fl.Field().String()
+	if status == "" {
+		return true
+	}
+	switch entity.EmployeeTaskStatusEnum(status) {
+	case entity.EMPLOYEE_TASK_STATUS_ENUM_ACTIVE,
+		entity.EMPLOYEE_TASK_STATUS_ENUM_INACTIVE:
+		return true
+	default:
+		return false
+	}
+}
+
+func EmployeeTaskKanbanValidation(fl validator.FieldLevel) bool {
+	kanban := fl.Field().String()
+	if kanban == "" {
+		return true
+	}
+	switch entity.EmployeeTaskKanbanEnum(kanban) {
+	case entity.EMPLOYEE_TASK_KANBAN_ENUM_TODO,
+		entity.EPMLOYEE_TASK_KANBAN_ENUM_IN_PROGRESS,
+		entity.EMPLOYEE_TASK_KANBAN_ENUM_NEED_REVIEW,
+		entity.EMPLOYEE_TASK_KANBAN_ENUM_COMPLETED:
+		return true
+	default:
+		return false
+	}
+}

@@ -14,5 +14,8 @@ func NewValidator(viper *viper.Viper) *validator.Validate {
 	validate.RegisterValidation("education_level_validation", request.EducationLevelValidation)
 	validate.RegisterValidation("template_task_status_validation", request.TemplateTaskStatusValidation)
 	validate.RegisterValidation("template_task_priority_validation", request.TemplateTaskPriorityValidation)
+	validate.RegisterValidation("employee_task_status_validation", request.EmployeeTaskStatusValidation)
+	validate.RegisterValidation("employee_task_priority_validation", request.EmployeeTaskPriorityValidation)
+	validate.RegisterValidation("employee_task_kanban_validation", request.EmployeeTaskKanbanValidation)
 	return validate
 }

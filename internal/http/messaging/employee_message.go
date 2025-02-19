@@ -35,7 +35,7 @@ func (m *EmployeeMessage) SendFindEmployeeByIDMessage(req request.SendFindEmploy
 		ID:          uuid.New().String(),
 		MessageType: "find_employee_by_id",
 		MessageData: payload,
-		ReplyTo:     "julong_recruitment",
+		ReplyTo:     "julong_onboarding",
 	}
 
 	log.Printf("INFO: document message: %v", docMsg)

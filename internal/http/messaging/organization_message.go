@@ -41,7 +41,7 @@ func (m *OrganizationMessage) SendFindOrganizationByIDMessage(req request.SendFi
 		ID:          uuid.New().String(),
 		MessageType: "find_organization_by_id",
 		MessageData: payload,
-		ReplyTo:     "julong_recruitment",
+		ReplyTo:     "julong_onboarding",
 	}
 
 	log.Printf("INFO: document message: %v", docMsg)
@@ -85,7 +85,7 @@ func (m *OrganizationMessage) SendFindAllOrganizationMessage(includedIDs []strin
 		ID:          uuid.New().String(),
 		MessageType: "find_all_organization",
 		MessageData: payload,
-		ReplyTo:     "julong_recruitment",
+		ReplyTo:     "julong_onboarding",
 	}
 
 	log.Printf("INFO: document message: %v", docMsg)
@@ -136,7 +136,7 @@ func (m *OrganizationMessage) SendFindOrganizationLocationByIDMessage(req reques
 		ID:          uuid.New().String(),
 		MessageType: "find_organization_location_by_id",
 		MessageData: payload,
-		ReplyTo:     "julong_recruitment",
+		ReplyTo:     "julong_onboarding",
 	}
 
 	log.Printf("INFO: document message: %v", docMsg)
@@ -179,7 +179,7 @@ func (m *OrganizationMessage) SendFindOrganizationStructureByIDMessage(req reque
 		ID:          uuid.New().String(),
 		MessageType: "find_organization_structure_by_id",
 		MessageData: payload,
-		ReplyTo:     "julong_recruitment",
+		ReplyTo:     "julong_onboarding",
 	}
 
 	log.Printf("INFO: document message: %v", docMsg)
@@ -228,7 +228,7 @@ func (m *OrganizationMessage) SendFindOrganizationLocationsPaginatedMessage(page
 		ID:          uuid.New().String(),
 		MessageType: "find_organization_locations_paginated",
 		MessageData: payload,
-		ReplyTo:     "julong_recruitment",
+		ReplyTo:     "julong_onboarding",
 	}
 
 	log.Printf("INFO: document message: %v", docMsg)
@@ -284,7 +284,7 @@ func (m *OrganizationMessage) SendFindAllOrganizationLocationsMessage(includedID
 		ID:          uuid.New().String(),
 		MessageType: "find_all_organization_locations_by_ids",
 		MessageData: payload,
-		ReplyTo:     "julong_recruitment",
+		ReplyTo:     "julong_onboarding",
 	}
 
 	log.Printf("INFO: document message: %v", docMsg)
@@ -338,7 +338,7 @@ func (m *OrganizationMessage) SendFindAllOrgStructureChildrenIDsMessage(parentID
 		ID:          uuid.New().String(),
 		MessageType: "find_all_org_structure_children_ids",
 		MessageData: payload,
-		ReplyTo:     "julong_recruitment",
+		ReplyTo:     "julong_onboarding",
 	}
 
 	log.Printf("INFO: document message: %v", docMsg)

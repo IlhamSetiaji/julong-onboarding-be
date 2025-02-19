@@ -40,7 +40,7 @@ func (m *JobPlafonMessage) SendCheckJobExistMessage(req request.CheckJobExistMes
 		ID:          uuid.New().String(),
 		MessageType: "find_job_by_id",
 		MessageData: payload,
-		ReplyTo:     "julong_recruitment",
+		ReplyTo:     "julong_onboarding",
 	}
 
 	log.Printf("INFO: document message: %v", docMsg)
@@ -85,7 +85,7 @@ func (m *JobPlafonMessage) SendFindJobByIDMessage(req request.SendFindJobByIDMes
 		ID:          uuid.New().String(),
 		MessageType: "find_job_by_id",
 		MessageData: payload,
-		ReplyTo:     "julong_recruitment",
+		ReplyTo:     "julong_onboarding",
 	}
 
 	log.Printf("INFO: document message: %v", docMsg)
@@ -128,7 +128,7 @@ func (m *JobPlafonMessage) SendFindJobLevelByIDMessage(req request.SendFindJobLe
 		ID:          uuid.New().String(),
 		MessageType: "find_job_level_by_id",
 		MessageData: payload,
-		ReplyTo:     "julong_recruitment",
+		ReplyTo:     "julong_onboarding",
 	}
 
 	log.Printf("INFO: document message: %v", docMsg)
@@ -173,7 +173,7 @@ func (m *JobPlafonMessage) SendCheckJobByJobLevelMessage(req request.CheckJobByJ
 		ID:          uuid.New().String(),
 		MessageType: "check_job_by_job_level",
 		MessageData: payload,
-		ReplyTo:     "julong_recruitment",
+		ReplyTo:     "julong_onboarding",
 	}
 
 	log.Printf("INFO: document message: %v", docMsg)

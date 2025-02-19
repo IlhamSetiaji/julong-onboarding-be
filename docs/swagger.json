@@ -319,6 +319,294 @@
                 }
             }
         },
+        "/employee-tasks": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Find all employee task paginated",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employee Task"
+                ],
+                "summary": "Find all employee task paginated",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page Size",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Created At",
+                        "name": "created_at",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.EmployeeTaskResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create new employee task",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employee Task"
+                ],
+                "summary": "Create new employee task",
+                "parameters": [
+                    {
+                        "description": "Create Template Task",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.CreateEmployeeTaskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.EmployeeTaskResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/employee-tasks/count": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Count employee task by kanban and employee id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employee Task"
+                ],
+                "summary": "Count employee task by kanban and employee id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Kanban",
+                        "name": "kanban",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Employee ID",
+                        "name": "employee_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.EmployeeTaskResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/employee-tasks/employee": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Find all employee task by employee id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employee Task"
+                ],
+                "summary": "Find all employee task by employee id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Employee ID",
+                        "name": "employee_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.EmployeeTaskResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/employee-tasks/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Find employee task by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employee Task"
+                ],
+                "summary": "Find employee task by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Employee Task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.EmployeeTaskResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update employee task",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employee Task"
+                ],
+                "summary": "Update employee task",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Employee Task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update Employee Task",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UpdateEmployeeTaskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.EmployeeTaskResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete employee task",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employee Task"
+                ],
+                "summary": "Delete employee task",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Employee Task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success delete employee task",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/template-tasks": {
             "get": {
                 "security": [
@@ -536,6 +824,45 @@
         }
     },
     "definitions": {
+        "entity.EmployeeTaskKanbanEnum": {
+            "type": "string",
+            "enum": [
+                "TO_DO",
+                "IN_PROGRESS",
+                "NEED_REVIEW",
+                "COMPLETED"
+            ],
+            "x-enum-varnames": [
+                "EMPLOYEE_TASK_KANBAN_ENUM_TODO",
+                "EPMLOYEE_TASK_KANBAN_ENUM_IN_PROGRESS",
+                "EMPLOYEE_TASK_KANBAN_ENUM_NEED_REVIEW",
+                "EMPLOYEE_TASK_KANBAN_ENUM_COMPLETED"
+            ]
+        },
+        "entity.EmployeeTaskPriorityEnum": {
+            "type": "string",
+            "enum": [
+                "LOW",
+                "MEDIUM",
+                "HIGH"
+            ],
+            "x-enum-varnames": [
+                "EMPLOYEE_TASK_PRIORITY_ENUM_LOW",
+                "EMPLOYEE_TASK_PRIORITY_ENUM_MEDIUM",
+                "EMPLOYEE_TASK_PRIORITY_ENUM_HIGH"
+            ]
+        },
+        "entity.EmployeeTaskStatusEnum": {
+            "type": "string",
+            "enum": [
+                "ACTIVE",
+                "INACTIVE"
+            ],
+            "x-enum-varnames": [
+                "EMPLOYEE_TASK_STATUS_ENUM_ACTIVE",
+                "EMPLOYEE_TASK_STATUS_ENUM_INACTIVE"
+            ]
+        },
         "entity.TemplateTaskPriorityEnum": {
             "type": "string",
             "enum": [
@@ -571,6 +898,55 @@
                 },
                 "size": {
                     "type": "integer"
+                }
+            }
+        },
+        "request.CreateEmployeeTaskRequest": {
+            "type": "object",
+            "required": [
+                "cover_path",
+                "employee_id",
+                "end_date",
+                "name",
+                "priority",
+                "start_date"
+            ],
+            "properties": {
+                "cover_path": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "employee_id": {
+                    "type": "string"
+                },
+                "employee_task_attachments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.EmployeeTaskAttachmentRequest"
+                    }
+                },
+                "employee_task_checklists": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.EmployeeTaskChecklistRequest"
+                    }
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "priority": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "template_task_id": {
+                    "type": "string"
                 }
             }
         },
@@ -616,6 +992,40 @@
                 }
             }
         },
+        "request.EmployeeTaskAttachmentRequest": {
+            "type": "object",
+            "required": [
+                "file"
+            ],
+            "properties": {
+                "file": {
+                    "$ref": "#/definitions/multipart.FileHeader"
+                },
+                "path": {
+                    "type": "string"
+                }
+            }
+        },
+        "request.EmployeeTaskChecklistRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "is_checked": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "verified_by": {
+                    "type": "string"
+                }
+            }
+        },
         "request.TemplateTaskAttachmentRequest": {
             "type": "object",
             "required": [
@@ -640,6 +1050,84 @@
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "request.UpdateEmployeeTaskRequest": {
+            "type": "object",
+            "required": [
+                "cover_path",
+                "employee_id",
+                "end_date",
+                "id",
+                "name",
+                "priority",
+                "start_date"
+            ],
+            "properties": {
+                "cover_path": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "employee_id": {
+                    "type": "string"
+                },
+                "employee_task_attachments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.EmployeeTaskAttachmentRequest"
+                    }
+                },
+                "employee_task_checklists": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.EmployeeTaskChecklistRequest"
+                    }
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_done": {
+                    "type": "string",
+                    "enum": [
+                        "YES",
+                        "NO"
+                    ]
+                },
+                "kanban": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "priority": {
+                    "type": "string"
+                },
+                "proof": {
+                    "$ref": "#/definitions/multipart.FileHeader"
+                },
+                "proof_path": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "template_task_id": {
+                    "type": "string"
+                },
+                "verified_by": {
                     "type": "string"
                 }
             }
@@ -706,6 +1194,138 @@
                     "type": "string"
                 },
                 "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.EmployeeTaskAttachmentResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "employee_task_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "path_origin": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.EmployeeTaskChecklistResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "employee_task_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_checked": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "verified_by": {
+                    "type": "string"
+                },
+                "verified_by_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.EmployeeTaskResponse": {
+            "type": "object",
+            "properties": {
+                "cover_path": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "employee_id": {
+                    "type": "string"
+                },
+                "employee_name": {
+                    "type": "string"
+                },
+                "employee_task_attachments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.EmployeeTaskAttachmentResponse"
+                    }
+                },
+                "employee_task_checklists": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.EmployeeTaskChecklistResponse"
+                    }
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_done": {
+                    "type": "string"
+                },
+                "kanban": {
+                    "$ref": "#/definitions/entity.EmployeeTaskKanbanEnum"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "priority": {
+                    "$ref": "#/definitions/entity.EmployeeTaskPriorityEnum"
+                },
+                "proof": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/entity.EmployeeTaskStatusEnum"
+                },
+                "template_task": {
+                    "$ref": "#/definitions/response.TemplateTaskResponse"
+                },
+                "template_task_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "verified_by": {
+                    "type": "string"
+                },
+                "verified_by_name": {
                     "type": "string"
                 }
             }

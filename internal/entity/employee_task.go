@@ -32,28 +32,26 @@ const (
 )
 
 type EmployeeTask struct {
-	gorm.Model       `json:"-"`
-	ID               uuid.UUID                `json:"id" gorm:"type:char(36);primaryKey;"`
-	CoverPath        *string                  `json:"cover_path" gorm:"type:varchar(255);default:null"`
-	EmployeeID       *uuid.UUID               `json:"employee_id" gorm:"type:char(36);not null"`
-	EmployeeHiringID uuid.UUID                `json:"employee_hiring_id" gorm:"type:char(36);not null"`
-	TemplateTaskID   uuid.UUID                `json:"template_task_id" gorm:"type:char(36);not null"`
-	VerifiedBy       *uuid.UUID               `json:"verified_by" gorm:"type:char(36);default:null"`
-	Name             string                   `json:"name" gorm:"type:varchar(255);not null"`
-	Priority         EmployeeTaskPriorityEnum `json:"priority" gorm:"type:varchar(255);not null"`
-	Description      string                   `json:"description" gorm:"type:text;default:null"`
-	StartDate        time.Time                `json:"start_date" gorm:"type:date;not null"`
-	EndDate          time.Time                `json:"end_date" gorm:"type:date;not null"`
-	IsDone           string                   `json:"is_done" gorm:"type:varchar(255);not null;default:'NO'"`
-	Proof            *string                  `json:"proof" gorm:"type:varchar(255);default:null"`
-	Status           EmployeeTaskStatusEnum   `json:"status" gorm:"type:varchar(255);not null;default:'ACTIVE'"`
-	Kanban           EmployeeTaskKanbanEnum   `json:"kanban" gorm:"type:varchar(255);not null;default:'TO_DO'"`
-	Notes            string                   `json:"notes" gorm:"type:text;default:null"`
-	Source           string                   `json:"source" gorm:"type:varchar(255);default:null"`
+	gorm.Model     `json:"-"`
+	ID             uuid.UUID                `json:"id" gorm:"type:char(36);primaryKey;"`
+	CoverPath      *string                  `json:"cover_path" gorm:"type:varchar(255);default:null"`
+	EmployeeID     *uuid.UUID               `json:"employee_id" gorm:"type:char(36);not null"`
+	TemplateTaskID *uuid.UUID               `json:"template_task_id" gorm:"type:char(36);default:null"`
+	VerifiedBy     *uuid.UUID               `json:"verified_by" gorm:"type:char(36);default:null"`
+	Name           string                   `json:"name" gorm:"type:varchar(255);not null"`
+	Priority       EmployeeTaskPriorityEnum `json:"priority" gorm:"type:varchar(255);not null"`
+	Description    string                   `json:"description" gorm:"type:text;default:null"`
+	StartDate      time.Time                `json:"start_date" gorm:"type:date;not null"`
+	EndDate        time.Time                `json:"end_date" gorm:"type:date;not null"`
+	IsDone         string                   `json:"is_done" gorm:"type:varchar(255);not null;default:'NO'"`
+	Proof          *string                  `json:"proof" gorm:"type:varchar(255);default:null"`
+	Status         EmployeeTaskStatusEnum   `json:"status" gorm:"type:varchar(255);not null;default:'ACTIVE'"`
+	Kanban         EmployeeTaskKanbanEnum   `json:"kanban" gorm:"type:varchar(255);not null;default:'TO_DO'"`
+	Notes          string                   `json:"notes" gorm:"type:text;default:null"`
+	Source         string                   `json:"source" gorm:"type:varchar(255);default:null"`
 
 	TemplateTask            *TemplateTask            `json:"template_task" gorm:"foreignKey:TemplateTaskID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	EmployeeTaskChecklists  []EmployeeTaskChecklist  `json:"employee_task_checklists" gorm:"foreignKey:EmployeeTaskID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	EmployeeHiring          *EmployeeHiring          `json:"employee_hiring" gorm:"foreignKey:EmployeeHiringID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	EmployeeTaskAttachments []EmployeeTaskAttachment `json:"employee_task_attachments" gorm:"foreignKey:EmployeeTaskID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	EmployeeTaskFiles       []EmployeeTaskFiles      `json:"employee_task_files" gorm:"foreignKey:EmployeeTaskID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
