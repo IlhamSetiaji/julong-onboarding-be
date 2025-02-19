@@ -12,3 +12,8 @@ type UpdateCoverRequest struct {
 	File *multipart.FileHeader `form:"file" validate:"required"`
 	Path string                `form:"path" validate:"omitempty"`
 }
+
+type UploadCoverRequest struct {
+	File *multipart.FileHeader `form:"file" validate:"required"`
+	Path string                `form:"path" validate:"omitempty"`
+}

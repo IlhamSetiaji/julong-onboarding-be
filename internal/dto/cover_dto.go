@@ -34,9 +34,10 @@ func (dto *CoverDTO) ConvertEntityToResponse(ent *entity.Cover) *response.CoverR
 			if ent.Path == "" {
 				return ""
 			}
-			return ent.Path
+			return dto.Viper.GetString("app.url") + ent.Path
 		}(),
-		CreatedAt: ent.CreatedAt,
-		UpdatedAt: ent.UpdatedAt,
+		PathOrigin: ent.Path,
+		CreatedAt:  ent.CreatedAt,
+		UpdatedAt:  ent.UpdatedAt,
 	}
 }

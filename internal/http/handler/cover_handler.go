@@ -23,6 +23,7 @@ type ICoverHandler interface {
 	FindAllPaginated(ctx *gin.Context)
 	UpdateCover(ctx *gin.Context)
 	DeleteCover(ctx *gin.Context)
+	UploadCover(ctx *gin.Context)
 }
 
 type CoverHandler struct {
@@ -323,4 +324,49 @@ func (h *CoverHandler) DeleteCover(ctx *gin.Context) {
 	}
 
 	utils.SuccessResponse(ctx, http.StatusNoContent, "success delete cover", nil)
+}
+
+// UploadCover upload cover
+//
+// @Summary Upload cover
+// @Description Upload cover
+// @Tags Covers
+// @Accept multipart/form-data
+// @Produce json
+// @Param file formData file true "File"
+// @Success 201 {object} response.CoverResponse
+// @Security BearerAuth
+// @Router /covers/upload [post]
+func (h *CoverHandler) UploadCover(ctx *gin.Context) {
+	var req request.UploadCoverRequest
+	if err := ctx.ShouldBind(&req); err != nil {
+		h.Log.Error("[CoverHandler.UploadCover] " + err.Error())
+		utils.BadRequestResponse(ctx, err.Error(), err.Error())
+		return
+	}
+
+	if err := h.Validate.Struct(req); err != nil {
+		h.Log.Error("[CoverHandler.UploadCover] " + err.Error())
+		utils.BadRequestResponse(ctx, err.Error(), err.Error())
+		return
+	}
+
+	// handle file upload
+	if req.File != nil {
+		timestamp := time.Now().UnixNano()
+		filePath := "storage/covers/" + strconv.FormatInt(timestamp, 10) + "_" + req.File.Filename
+		if err := ctx.SaveUploadedFile(req.File, filePath); err != nil {
+			h.Log.Error("failed to save cover file: ", err)
+			utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to save cover file", err.Error())
+			return
+		}
+
+		req.File = nil
+		req.Path = filePath
+	}
+
+	utils.SuccessResponse(ctx, http.StatusCreated, "success upload cover", gin.H{
+		"path":        h.Viper.GetString("app.url") + req.Path,
+		"path_origin": req.Path,
+	})
 }

@@ -45,7 +45,8 @@ func (dto *TemplateTaskDTO) ConvertEntityToResponse(ent *entity.TemplateTask) *r
 			combinedUrl := dto.Viper.GetString("app.url") + *ent.CoverPath
 			return &combinedUrl
 		}(),
-		Priority: ent.Priority,
+		CoverPathOrigin: ent.CoverPath,
+		Priority:        ent.Priority,
 		DueDuration: func() *int {
 			if ent.DueDuration == nil {
 				return nil

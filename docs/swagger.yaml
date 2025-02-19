@@ -29,9 +29,9 @@ definitions:
     type: object
   request.CreateTemplateTaskRequest:
     properties:
-      cover_file:
-        $ref: '#/definitions/multipart.FileHeader'
       cover_path:
+        description: CoverFile               *multipart.FileHeader           `form:"cover_file"
+          validate:"required"`
         type: string
       description:
         type: string
@@ -52,7 +52,7 @@ definitions:
           $ref: '#/definitions/request.TemplateTaskChecklistRequest'
         type: array
     required:
-    - cover_file
+    - cover_path
     - name
     - priority
     - status
@@ -77,9 +77,9 @@ definitions:
     type: object
   request.UpdateTemplateTaskRequest:
     properties:
-      cover_file:
-        $ref: '#/definitions/multipart.FileHeader'
       cover_path:
+        description: CoverFile               *multipart.FileHeader           `form:"cover_file"
+          validate:"required"`
         type: string
       description:
         type: string
@@ -102,7 +102,7 @@ definitions:
           $ref: '#/definitions/request.TemplateTaskChecklistRequest'
         type: array
     required:
-    - cover_file
+    - cover_path
     - id
     - name
     - priority
@@ -116,6 +116,8 @@ definitions:
         type: string
       path:
         type: string
+      path_origin:
+        type: string
       updated_at:
         type: string
     type: object
@@ -126,6 +128,8 @@ definitions:
       id:
         type: string
       path:
+        type: string
+      path_origin:
         type: string
       template_task_id:
         type: string
@@ -147,6 +151,8 @@ definitions:
     type: object
   response.TemplateTaskResponse:
     properties:
+      cover_path_origin:
+        type: string
       coverPath:
         type: string
       created_at:
@@ -380,6 +386,29 @@ paths:
       security:
       - BearerAuth: []
       summary: Update cover by id
+      tags:
+      - Covers
+  /covers/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload cover
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.CoverResponse'
+      security:
+      - BearerAuth: []
+      summary: Upload cover
       tags:
       - Covers
   /template-tasks:

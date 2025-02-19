@@ -1,10 +1,8 @@
 package request
 
-import "mime/multipart"
-
 type CreateTemplateTaskRequest struct {
-	CoverFile               *multipart.FileHeader           `form:"cover_file" validate:"required"`
-	CoverPath               string                          `form:"cover_path" validate:"omitempty"`
+	// CoverFile               *multipart.FileHeader           `form:"cover_file" validate:"required"`
+	CoverPath               string                          `form:"cover_path" validate:"required"`
 	Name                    string                          `form:"name" validate:"required"`
 	Priority                string                          `form:"priority" validate:"required,template_task_priority_validation"`
 	DueDuration             *int                            `form:"due_duration" validate:"omitempty,numeric"`
@@ -15,9 +13,9 @@ type CreateTemplateTaskRequest struct {
 }
 
 type UpdateTemplateTaskRequest struct {
-	ID                      string                          `form:"id" validate:"required"`
-	CoverFile               *multipart.FileHeader           `form:"cover_file" validate:"required"`
-	CoverPath               string                          `form:"cover_path" validate:"omitempty"`
+	ID string `form:"id" validate:"required"`
+	// CoverFile               *multipart.FileHeader           `form:"cover_file" validate:"required"`
+	CoverPath               string                          `form:"cover_path" validate:"required"`
 	Name                    string                          `form:"name" validate:"required"`
 	Priority                string                          `form:"priority" validate:"required,template_task_priority_validation"`
 	DueDuration             *int                            `form:"due_duration" validate:"omitempty,numeric"`

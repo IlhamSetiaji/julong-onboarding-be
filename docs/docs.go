@@ -219,6 +219,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/covers/upload": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Upload cover",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Covers"
+                ],
+                "summary": "Upload cover",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "File",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.CoverResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/covers/{id}": {
             "get": {
                 "security": [
@@ -546,16 +583,14 @@ const docTemplate = `{
         "request.CreateTemplateTaskRequest": {
             "type": "object",
             "required": [
-                "cover_file",
+                "cover_path",
                 "name",
                 "priority",
                 "status"
             ],
             "properties": {
-                "cover_file": {
-                    "$ref": "#/definitions/multipart.FileHeader"
-                },
                 "cover_path": {
+                    "description": "CoverFile               *multipart.FileHeader           ` + "`" + `form:\"cover_file\" validate:\"required\"` + "`" + `",
                     "type": "string"
                 },
                 "description": {
@@ -618,17 +653,15 @@ const docTemplate = `{
         "request.UpdateTemplateTaskRequest": {
             "type": "object",
             "required": [
-                "cover_file",
+                "cover_path",
                 "id",
                 "name",
                 "priority",
                 "status"
             ],
             "properties": {
-                "cover_file": {
-                    "$ref": "#/definitions/multipart.FileHeader"
-                },
                 "cover_path": {
+                    "description": "CoverFile               *multipart.FileHeader           ` + "`" + `form:\"cover_file\" validate:\"required\"` + "`" + `",
                     "type": "string"
                 },
                 "description": {
@@ -675,6 +708,9 @@ const docTemplate = `{
                 "path": {
                     "type": "string"
                 },
+                "path_origin": {
+                    "type": "string"
+                },
                 "updated_at": {
                     "type": "string"
                 }
@@ -690,6 +726,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "path": {
+                    "type": "string"
+                },
+                "path_origin": {
                     "type": "string"
                 },
                 "template_task_id": {
@@ -724,6 +763,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "coverPath": {
+                    "type": "string"
+                },
+                "cover_path_origin": {
                     "type": "string"
                 },
                 "created_at": {

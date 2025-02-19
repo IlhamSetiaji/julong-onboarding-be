@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "julong-recruitment",
+    "name": "julong-onboarding",
     "version": "1.0.0",
     "env": "${APP_ENV}",
     "url": "${APP_URL}",
@@ -9,9 +9,9 @@
   },
   "web": {
     "prefork": false,
-    "port": 8000,
+    "port": 8001,
     "cookie": {
-      "name": "julong-recruitment",
+      "name": "julong-onboarding",
       "secure": false,
       "http_only": true,
       "max_age": 86400,

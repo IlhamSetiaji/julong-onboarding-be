@@ -85,18 +85,18 @@ func (h *TemplateTaskHandler) CreateTemplateTask(ctx *gin.Context) {
 	}
 
 	// Handle cover file upload
-	if req.CoverFile != nil {
-		timestamp := time.Now().UnixNano()
-		filePath := "storage/template_tasks/covers/" + strconv.FormatInt(timestamp, 10) + "_" + req.CoverFile.Filename
-		if err := ctx.SaveUploadedFile(req.CoverFile, filePath); err != nil {
-			h.Log.Error("failed to save cover file: ", err)
-			utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to save cover file", err.Error())
-			return
-		}
+	// if req.CoverFile != nil {
+	// 	timestamp := time.Now().UnixNano()
+	// 	filePath := "storage/template_tasks/covers/" + strconv.FormatInt(timestamp, 10) + "_" + req.CoverFile.Filename
+	// 	if err := ctx.SaveUploadedFile(req.CoverFile, filePath); err != nil {
+	// 		h.Log.Error("failed to save cover file: ", err)
+	// 		utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to save cover file", err.Error())
+	// 		return
+	// 	}
 
-		req.CoverFile = nil
-		req.CoverPath = filePath
-	}
+	// 	req.CoverFile = nil
+	// 	req.CoverPath = filePath
+	// }
 
 	// Handle attachments file upload manually
 	form, _ := ctx.MultipartForm()
@@ -188,18 +188,18 @@ func (h *TemplateTaskHandler) UpdateTemplateTask(ctx *gin.Context) {
 	}
 
 	// Handle cover file upload
-	if req.CoverFile != nil {
-		timestamp := time.Now().UnixNano()
-		filePath := "storage/template_tasks/covers/" + strconv.FormatInt(timestamp, 10) + "_" + req.CoverFile.Filename
-		if err := ctx.SaveUploadedFile(req.CoverFile, filePath); err != nil {
-			h.Log.Error("failed to save cover file: ", err)
-			utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to save cover file", err.Error())
-			return
-		}
+	// if req.CoverFile != nil {
+	// 	timestamp := time.Now().UnixNano()
+	// 	filePath := "storage/template_tasks/covers/" + strconv.FormatInt(timestamp, 10) + "_" + req.CoverFile.Filename
+	// 	if err := ctx.SaveUploadedFile(req.CoverFile, filePath); err != nil {
+	// 		h.Log.Error("failed to save cover file: ", err)
+	// 		utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to save cover file", err.Error())
+	// 		return
+	// 	}
 
-		req.CoverFile = nil
-		req.CoverPath = filePath
-	}
+	// 	req.CoverFile = nil
+	// 	req.CoverPath = filePath
+	// }
 
 	// Handle attachments file upload manually
 	form, _ := ctx.MultipartForm()

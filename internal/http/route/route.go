@@ -24,7 +24,7 @@ type RouteConfig struct {
 func (c *RouteConfig) SetupRoutes() {
 	c.App.GET("/", func(ctx *gin.Context) {
 		ctx.JSON(200, gin.H{
-			"message": "Hello world",
+			"message": "Welcome to Julong Onboarding API",
 		})
 	})
 
@@ -48,6 +48,7 @@ func (c *RouteConfig) SetupAPIRoutes() {
 				coverRoute.GET("", c.CoverHandler.FindAllPaginated)
 				coverRoute.GET("/:id", c.CoverHandler.FindByID)
 				coverRoute.POST("", c.CoverHandler.CreateCover)
+				coverRoute.POST("/upload", c.CoverHandler.UploadCover)
 				coverRoute.PUT("/update", c.CoverHandler.UpdateCover)
 				coverRoute.DELETE("/:id", c.CoverHandler.DeleteCover)
 			}
