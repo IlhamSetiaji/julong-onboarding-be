@@ -1,5 +1,6 @@
 config.json
 julong-onboarding-be.exe
 julong-onboarding-be
-storage/
+storage/*
+!storage/covers/
 main.exe
