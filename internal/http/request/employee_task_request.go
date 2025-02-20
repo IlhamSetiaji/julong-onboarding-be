@@ -35,3 +35,9 @@ type UpdateEmployeeTaskRequest struct {
 	EmployeeTaskAttachments []EmployeeTaskAttachmentRequest `form:"employee_task_attachments" validate:"omitempty,dive"`
 	EmployeeTaskChecklists  []EmployeeTaskChecklistRequest  `form:"employee_task_checklists" validate:"omitempty,dive"`
 }
+
+type UpdateEmployeeTaskOnlyRequest struct {
+	ID        *string `form:"id" validate:"required"`
+	StartDate string  `form:"start_date" validate:"required,datetime=2006-01-02"`
+	EndDate   string  `form:"end_date" validate:"required,datetime=2006-01-02"`
+}

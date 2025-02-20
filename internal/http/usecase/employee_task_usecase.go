@@ -23,6 +23,7 @@ type IEmployeeTaskUseCase interface {
 	CountByKanbanAndEmployeeID(kanban entity.EmployeeTaskKanbanEnum, employeeID uuid.UUID) (int64, error)
 	FindAllByEmployeeID(employeeID uuid.UUID) (*response.EmployeeTaskKanbanResponse, error)
 	FindAllByEmployeeIDAndKanbanPaginated(employeeID uuid.UUID, kanban entity.EmployeeTaskKanbanEnum, page, pageSize int, search string, sort map[string]interface{}) (*[]response.EmployeeTaskResponse, int64, error)
+	UpdateEmployeeTaskOnly(req *request.UpdateEmployeeTaskOnlyRequest) (*response.EmployeeTaskResponse, error)
 }
 
 type EmployeeTaskUseCase struct {
@@ -477,4 +478,53 @@ func (uc *EmployeeTaskUseCase) FindAllByEmployeeIDAndKanbanPaginated(employeeID 
 	}
 
 	return &responses, total, nil
+}
+
+func (uc *EmployeeTaskUseCase) UpdateEmployeeTaskOnly(req *request.UpdateEmployeeTaskOnlyRequest) (*response.EmployeeTaskResponse, error) {
+	parsedID, err := uuid.Parse(*req.ID)
+	if err != nil {
+		uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskOnly] error parsing id: ", err)
+		return nil, err
+	}
+	empTask, err := uc.Repository.FindByID(parsedID)
+	if err != nil {
+		uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskOnly] error finding employee task by id: ", err)
+		return nil, err
+	}
+	if empTask == nil {
+		return nil, errors.New("employee task not found")
+	}
+
+	parsedStartDate, err := time.Parse("2006-01-02", req.StartDate)
+	if err != nil {
+		uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskOnly] error parsing start date: ", err)
+		return nil, err
+	}
+
+	parsedEndDate, err := time.Parse("2006-01-02", req.EndDate)
+	if err != nil {
+		uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskOnly] error parsing end date: ", err)
+		return nil, err
+	}
+
+	employeeTask, err := uc.Repository.UpdateEmployeeTask(&entity.EmployeeTask{
+		ID:        parsedID,
+		StartDate: parsedStartDate,
+		EndDate:   parsedEndDate,
+	})
+	if err != nil {
+		uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskOnly] error updating employee task: ", err)
+		return nil, err
+	}
+
+	findById, err := uc.Repository.FindByID(employeeTask.ID)
+	if err != nil {
+		uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskOnly] error finding employee task by id: ", err)
+		return nil, err
+	}
+	if findById == nil {
+		return nil, errors.New("employee task not found")
+	}
+
+	return uc.DTO.ConvertEntityToResponse(findById), nil
 }
