@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"errors"
+
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/dto"
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/http/response"
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/repository"
@@ -55,7 +57,15 @@ func (uc *TemplateTaskAttachmentUseCase) FindByID(id uuid.UUID) (*response.Templ
 }
 
 func (uc *TemplateTaskAttachmentUseCase) DeleteTemplateTaskAttachment(id uuid.UUID) error {
-	err := uc.Repository.DeleteByTemplateTaskID(id)
+	ent, err := uc.Repository.FindByID(id)
+	if err != nil {
+		uc.Log.Error("[TemplateTaskAttachmentUseCase.DeleteTemplateTaskAttachment] " + err.Error())
+		return err
+	}
+	if ent == nil {
+		return errors.New("Template Task Attachment not found")
+	}
+	err = uc.Repository.DeleteTemplateTaskAttachment(ent)
 	if err != nil {
 		uc.Log.Error("[TemplateTaskAttachmentUseCase.DeleteTemplateTaskAttachment] " + err.Error())
 		return err

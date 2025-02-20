@@ -22,6 +22,7 @@ type IEmployeeTaskUseCase interface {
 	FindByID(id uuid.UUID) (*response.EmployeeTaskResponse, error)
 	CountByKanbanAndEmployeeID(kanban entity.EmployeeTaskKanbanEnum, employeeID uuid.UUID) (int64, error)
 	FindAllByEmployeeID(employeeID uuid.UUID) (*response.EmployeeTaskKanbanResponse, error)
+	FindAllByEmployeeIDAndKanbanPaginated(employeeID uuid.UUID, kanban entity.EmployeeTaskKanbanEnum, page, pageSize int, search string, sort map[string]interface{}) (*[]response.EmployeeTaskResponse, int64, error)
 }
 
 type EmployeeTaskUseCase struct {
@@ -461,4 +462,19 @@ func (uc *EmployeeTaskUseCase) FindAllByEmployeeID(employeeID uuid.UUID) (*respo
 	formattedResponse := uc.DTO.ConvertEntitiesToKanbanResponse(*employeeTasks)
 
 	return formattedResponse, nil
+}
+
+func (uc *EmployeeTaskUseCase) FindAllByEmployeeIDAndKanbanPaginated(employeeID uuid.UUID, kanban entity.EmployeeTaskKanbanEnum, page, pageSize int, search string, sort map[string]interface{}) (*[]response.EmployeeTaskResponse, int64, error) {
+	employeeTasks, total, err := uc.Repository.FindAllByEmployeeIDAndKanbanPaginated(employeeID, kanban, page, pageSize, search, sort)
+	if err != nil {
+		uc.Log.Error("[EmployeeTaskUseCase.FindAllByEmployeeIDAndKanbanPaginated] error finding all by employee id and kanban: ", err)
+		return nil, 0, err
+	}
+
+	var responses []response.EmployeeTaskResponse
+	for _, employeeTask := range *employeeTasks {
+		responses = append(responses, *uc.DTO.ConvertEntityToResponse(&employeeTask))
+	}
+
+	return &responses, total, nil
 }

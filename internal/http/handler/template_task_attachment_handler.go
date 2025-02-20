@@ -57,12 +57,12 @@ func TemplateTaskAttachmentHandlerFactory(
 // @Produce json
 // @Param id path string true "Template Task Attachment ID"
 // @Success 200 {object} response.TemplateTaskAttachmentResponse
-// @Router /api/template-tasks/{id} [get]
+// @Router /api/template-task-attachments/{id} [get]
 func (h *TemplateTaskAttachmentHandler) FindByID(ctx *gin.Context) {
 	id := ctx.Param("id")
 	parsedId, err := uuid.Parse(id)
 	if err != nil {
-		h.Log.Error("[CoverHandler.FindByID] " + err.Error())
+		h.Log.Error("[TemplateTaskAttachmentHandler.FindByID] " + err.Error())
 		utils.BadRequestResponse(ctx, "invalid id", err.Error())
 		return
 	}
@@ -91,7 +91,7 @@ func (h *TemplateTaskAttachmentHandler) FindByID(ctx *gin.Context) {
 // @Produce json
 // @Param id path string true "Template Task Attachment ID"
 // @Success 204 {string} string "success delete template task attachment"
-// @Router /api/template-tasks/{id} [delete]
+// @Router /api/template-task-attachments/{id} [delete]
 func (h *TemplateTaskAttachmentHandler) DeleteTemplateTaskAttachment(ctx *gin.Context) {
 	id := ctx.Param("id")
 	parsedId, err := uuid.Parse(id)

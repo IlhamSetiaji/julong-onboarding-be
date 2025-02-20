@@ -26,6 +26,7 @@ type IEmployeeTaskHandler interface {
 	FindAllPaginated(ctx *gin.Context)
 	CountByKanbanAndEmployeeID(ctx *gin.Context)
 	FindAllByEmployeeID(ctx *gin.Context)
+	FindAllByEmployeeIDAndKanbanPaginated(ctx *gin.Context)
 }
 
 type EmployeeTaskHandler struct {
@@ -464,4 +465,76 @@ func (h *EmployeeTaskHandler) FindAllByEmployeeID(ctx *gin.Context) {
 	}
 
 	utils.SuccessResponse(ctx, http.StatusOK, "success find all employee task", res)
+}
+
+// FindAllByEmployeeIDAndKanbanPaginated find all employee task by employee id and kanban paginated
+//
+// @Summary Find all employee task by employee id and kanban paginated
+// @Description Find all employee task by employee id and kanban paginated
+// @Tags Employee Task
+// @Accept  json
+// @Produce  json
+// @Param employee_id query string true "Employee ID"
+// @Param kanban query string true "Kanban"
+// @Param page query int false "Page"
+// @Param page_size query int false "Page Size"
+// @Param search query string false "Search"
+// @Param created_at query string false "Created At"
+// @Success 200 {object} response.EmployeeTaskResponse
+// @Security BearerAuth
+// @Router /employee-tasks/employee-kanban [get]
+func (h *EmployeeTaskHandler) FindAllByEmployeeIDAndKanbanPaginated(ctx *gin.Context) {
+	employeeID := ctx.Query("employee_id")
+	if employeeID == "" {
+		utils.BadRequestResponse(ctx, "employee_id is required", "employee_id is required")
+		return
+	}
+
+	parsedEmployeeID, err := uuid.Parse(employeeID)
+	if err != nil {
+		utils.BadRequestResponse(ctx, "invalid employee_id", "invalid employee_id")
+		return
+	}
+
+	kanban := ctx.Query("kanban")
+	if kanban == "" {
+		utils.BadRequestResponse(ctx, "kanban is required", "kanban is required")
+		return
+	}
+
+	page, err := strconv.Atoi(ctx.Query("page"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	pageSize, err := strconv.Atoi(ctx.Query("page_size"))
+	if err != nil || pageSize < 1 {
+		pageSize = 10
+	}
+
+	search := ctx.Query("search")
+	if search == "" {
+		search = ""
+	}
+
+	createdAt := ctx.Query("created_at")
+	if createdAt == "" {
+		createdAt = "DESC"
+	}
+
+	sort := map[string]interface{}{
+		"created_at": createdAt,
+	}
+
+	res, total, err := h.UseCase.FindAllByEmployeeIDAndKanbanPaginated(parsedEmployeeID, entity.EmployeeTaskKanbanEnum(kanban), page, pageSize, search, sort)
+	if err != nil {
+		h.Log.Error("[EmployeeTaskHandler.FindAllByEmployeeIDAndKanbanPaginated] " + err.Error())
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, "internal server error", err.Error())
+		return
+	}
+
+	utils.SuccessResponse(ctx, http.StatusOK, "success find all employee task", gin.H{
+		"employee_tasks": res,
+		"total":          total,
+	})
 }

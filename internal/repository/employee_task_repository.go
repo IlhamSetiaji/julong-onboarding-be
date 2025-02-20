@@ -16,6 +16,7 @@ type IEmployeeTaskRepository interface {
 	FindAllByEmployeeID(employeeID uuid.UUID) (*[]entity.EmployeeTask, error)
 	FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}) (*[]entity.EmployeeTask, int64, error)
 	CountByKeys(keys map[string]interface{}) (int64, error)
+	FindAllByEmployeeIDAndKanbanPaginated(employeeID uuid.UUID, kanban entity.EmployeeTaskKanbanEnum, page, pageSize int, search string, sort map[string]interface{}) (*[]entity.EmployeeTask, int64, error)
 }
 
 type EmployeeTaskRepository struct {
@@ -133,4 +134,26 @@ func (r *EmployeeTaskRepository) FindAllByEmployeeID(employeeID uuid.UUID) (*[]e
 	}
 
 	return &employeeTasks, nil
+}
+
+func (r *EmployeeTaskRepository) FindAllByEmployeeIDAndKanbanPaginated(employeeID uuid.UUID, kanban entity.EmployeeTaskKanbanEnum, page, pageSize int, search string, sort map[string]interface{}) (*[]entity.EmployeeTask, int64, error) {
+	var employeeTasks []entity.EmployeeTask
+	var total int64
+
+	query := r.DB.Preload("EmployeeTaskAttachments").Preload("EmployeeTaskChecklists").Where("employee_id = ?", employeeID).Where("kanban = ?", kanban)
+	for key, value := range sort {
+		query = query.Order(key + " " + value.(string))
+	}
+
+	if err := query.Offset((page - 1) * pageSize).Limit(pageSize).Find(&employeeTasks).Error; err != nil {
+		r.Log.Error("[EmployeeTaskRepository.FindAllByEmployeeIDAndKanbanPaginated] Error when get employee tasks by employee id and kanban: ", err)
+		return nil, 0, err
+	}
+
+	if err := query.Count(&total).Error; err != nil {
+		r.Log.Error("[EmployeeTaskRepository.FindAllByEmployeeIDAndKanbanPaginated] Error when count employee tasks by employee id and kanban: ", err)
+		return nil, 0, err
+	}
+
+	return &employeeTasks, total, nil
 }

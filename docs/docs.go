@@ -24,7 +24,69 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/template-tasks/{id}": {
+        "/api/employee-task-attachments/{id}": {
+            "get": {
+                "description": "Find employee task attachment by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employee Task Attachments"
+                ],
+                "summary": "Find employee task attachment by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Employee Task Attachment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.EmployeeTaskAttachmentResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete employee task attachment by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employee Task Attachments"
+                ],
+                "summary": "Delete employee task attachment by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Employee Task Attachment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success delete employee task attachment",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/template-task-attachments/{id}": {
             "get": {
                 "description": "Find template task attachment by ID",
                 "consumes": [
@@ -485,6 +547,74 @@ const docTemplate = `{
                         "name": "employee_id",
                         "in": "query",
                         "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.EmployeeTaskResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/employee-tasks/employee-kanban": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Find all employee task by employee id and kanban paginated",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employee Task"
+                ],
+                "summary": "Find all employee task by employee id and kanban paginated",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Employee ID",
+                        "name": "employee_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Kanban",
+                        "name": "kanban",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page Size",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Created At",
+                        "name": "created_at",
+                        "in": "query"
                     }
                 ],
                 "responses": {

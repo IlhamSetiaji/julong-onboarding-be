@@ -20,6 +20,7 @@ type RouteConfig struct {
 	TemplateTaskHandler           handler.ITemplateTaskHandler
 	TemplateTaskAttachmentHandler handler.ITemplateTaskAttachmentHandler
 	EmployeeTaskHandler           handler.IEmployeeTaskHandler
+	EmployeeTaskAttachmentHandler handler.IEmployeeTaskAttachmentHandler
 }
 
 func (c *RouteConfig) SetupRoutes() {
@@ -72,12 +73,19 @@ func (c *RouteConfig) SetupAPIRoutes() {
 			employeeTaskRoute := apiRoute.Group("/employee-tasks")
 			{
 				employeeTaskRoute.GET("", c.EmployeeTaskHandler.FindAllPaginated)
+				employeeTaskRoute.GET("/employee-kanban", c.EmployeeTaskHandler.FindAllByEmployeeIDAndKanbanPaginated)
 				employeeTaskRoute.GET("/employee", c.EmployeeTaskHandler.FindAllByEmployeeID)
 				employeeTaskRoute.GET("/count", c.EmployeeTaskHandler.CountByKanbanAndEmployeeID)
 				employeeTaskRoute.GET("/:id", c.EmployeeTaskHandler.FindByID)
 				employeeTaskRoute.POST("", c.EmployeeTaskHandler.CreateEmployeeTask)
 				employeeTaskRoute.PUT("/update", c.EmployeeTaskHandler.UpdateEmployeeTask)
 				employeeTaskRoute.DELETE("/:id", c.EmployeeTaskHandler.DeleteEmployeeTask)
+			}
+			// employee task attachments
+			employeeTaskAttachmentRoute := apiRoute.Group("/employee-task-attachments")
+			{
+				employeeTaskAttachmentRoute.GET("/:id", c.EmployeeTaskAttachmentHandler.FindByID)
+				employeeTaskAttachmentRoute.DELETE("/:id", c.EmployeeTaskAttachmentHandler.DeleteEmployeeTaskAttachment)
 			}
 		}
 	}
@@ -90,6 +98,7 @@ func NewRouteConfig(app *gin.Engine, viper *viper.Viper, log *logrus.Logger) *Ro
 	templateTaskHandler := handler.TemplateTaskHandlerFactory(log, viper)
 	templateTaskAttachmentHandler := handler.TemplateTaskAttachmentHandlerFactory(log, viper)
 	employeeTaskHandler := handler.EmployeeTaskHandlerFactory(log, viper)
+	employeeTaskAttachmentHandler := handler.EmployeeTaskAttachmentHandlerFactory(log, viper)
 	return &RouteConfig{
 		App:                           app,
 		Log:                           log,
@@ -100,5 +109,6 @@ func NewRouteConfig(app *gin.Engine, viper *viper.Viper, log *logrus.Logger) *Ro
 		TemplateTaskHandler:           templateTaskHandler,
 		TemplateTaskAttachmentHandler: templateTaskAttachmentHandler,
 		EmployeeTaskHandler:           employeeTaskHandler,
+		EmployeeTaskAttachmentHandler: employeeTaskAttachmentHandler,
 	}
 }

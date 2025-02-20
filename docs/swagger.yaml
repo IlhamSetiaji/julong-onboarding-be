@@ -447,7 +447,48 @@ info:
   title: Julong Onboarding API Docs
   version: "1.0"
 paths:
-  /api/template-tasks/{id}:
+  /api/employee-task-attachments/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete employee task attachment by ID
+      parameters:
+      - description: Employee Task Attachment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success delete employee task attachment
+          schema:
+            type: string
+      summary: Delete employee task attachment by ID
+      tags:
+      - Employee Task Attachments
+    get:
+      consumes:
+      - application/json
+      description: Find employee task attachment by ID
+      parameters:
+      - description: Employee Task Attachment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.EmployeeTaskAttachmentResponse'
+      summary: Find employee task attachment by ID
+      tags:
+      - Employee Task Attachments
+  /api/template-task-attachments/{id}:
     delete:
       consumes:
       - application/json
@@ -817,6 +858,50 @@ paths:
       security:
       - BearerAuth: []
       summary: Find all employee task by employee id
+      tags:
+      - Employee Task
+  /employee-tasks/employee-kanban:
+    get:
+      consumes:
+      - application/json
+      description: Find all employee task by employee id and kanban paginated
+      parameters:
+      - description: Employee ID
+        in: query
+        name: employee_id
+        required: true
+        type: string
+      - description: Kanban
+        in: query
+        name: kanban
+        required: true
+        type: string
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Page Size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search
+        in: query
+        name: search
+        type: string
+      - description: Created At
+        in: query
+        name: created_at
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.EmployeeTaskResponse'
+      security:
+      - BearerAuth: []
+      summary: Find all employee task by employee id and kanban paginated
       tags:
       - Employee Task
   /template-tasks:
