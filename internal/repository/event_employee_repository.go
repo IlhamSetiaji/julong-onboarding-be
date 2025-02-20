@@ -3,13 +3,14 @@ package repository
 import (
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/config"
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/entity"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
 type IEventEmployeeRepository interface {
 	CreateEventEmployee(ent *entity.EventEmployee) (*entity.EventEmployee, error)
-	DeleteByEventID(eventID string) error
+	DeleteByEventID(eventID uuid.UUID) error
 }
 
 type EventEmployeeRepository struct {
@@ -43,7 +44,7 @@ func (r *EventEmployeeRepository) CreateEventEmployee(ent *entity.EventEmployee)
 	return ent, nil
 }
 
-func (r *EventEmployeeRepository) DeleteByEventID(eventID string) error {
+func (r *EventEmployeeRepository) DeleteByEventID(eventID uuid.UUID) error {
 	if err := r.DB.Where("event_id = ?", eventID).Delete(&entity.EventEmployee{}).Error; err != nil {
 		r.Log.Error("[EventEmployeeRepository.DeleteByEventID] Error when delete event employee by event id: ", err)
 		return err

@@ -12,7 +12,7 @@ type IEventRepository interface {
 	CreateEvent(event *entity.Event) (*entity.Event, error)
 	UpdateEvent(event *entity.Event) (*entity.Event, error)
 	DeleteEvent(event *entity.Event) error
-	FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}) ([]entity.Event, int64, error)
+	FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}) (*[]entity.Event, int64, error)
 	FindByID(id uuid.UUID) (*entity.Event, error)
 }
 
@@ -90,7 +90,7 @@ func (r *EventRepository) FindByID(id uuid.UUID) (*entity.Event, error) {
 	return &event, nil
 }
 
-func (r *EventRepository) FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}) ([]entity.Event, int64, error) {
+func (r *EventRepository) FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}) (*[]entity.Event, int64, error) {
 	var events []entity.Event
 	var total int64
 
@@ -116,5 +116,5 @@ func (r *EventRepository) FindAllPaginated(page, pageSize int, search string, so
 		return nil, 0, err
 	}
 
-	return events, total, nil
+	return &events, total, nil
 }

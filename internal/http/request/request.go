@@ -147,3 +147,18 @@ func EmployeeTaskKanbanValidation(fl validator.FieldLevel) bool {
 		return false
 	}
 }
+
+func EventStatusValidation(fl validator.FieldLevel) bool {
+	status := fl.Field().String()
+	if status == "" {
+		return true
+	}
+	switch entity.EventStatusEnum(status) {
+	case entity.EVENT_STATUS_ENUM_UPCOMING,
+		entity.EVENT_STATUS_ENUM_ONGOING,
+		entity.EVENT_STATUS_ENUM_FINISHED:
+		return true
+	default:
+		return false
+	}
+}
