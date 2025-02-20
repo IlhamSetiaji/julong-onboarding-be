@@ -111,7 +111,7 @@ func (r *EventRepository) FindAllPaginated(page, pageSize int, search string, so
 		query = query.Order(key + " " + value.(string))
 	}
 
-	if err := query.Offset((page - 1) * pageSize).Limit(pageSize).Preload("EventAttachments").Find(&events).Error; err != nil {
+	if err := query.Offset((page - 1) * pageSize).Limit(pageSize).Find(&events).Error; err != nil {
 		r.Log.Error("[EventRepository.FindAllPaginated] Error when get event: ", err)
 		return nil, 0, err
 	}

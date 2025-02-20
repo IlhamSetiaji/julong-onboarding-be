@@ -21,6 +21,7 @@ type RouteConfig struct {
 	TemplateTaskAttachmentHandler handler.ITemplateTaskAttachmentHandler
 	EmployeeTaskHandler           handler.IEmployeeTaskHandler
 	EmployeeTaskAttachmentHandler handler.IEmployeeTaskAttachmentHandler
+	EventHandler                  handler.IEventHandler
 }
 
 func (c *RouteConfig) SetupRoutes() {
@@ -87,6 +88,15 @@ func (c *RouteConfig) SetupAPIRoutes() {
 				employeeTaskAttachmentRoute.GET("/:id", c.EmployeeTaskAttachmentHandler.FindByID)
 				employeeTaskAttachmentRoute.DELETE("/:id", c.EmployeeTaskAttachmentHandler.DeleteEmployeeTaskAttachment)
 			}
+			// events
+			eventRoute := apiRoute.Group("/events")
+			{
+				eventRoute.GET("", c.EventHandler.FindAllPaginated)
+				eventRoute.GET("/:id", c.EventHandler.FindByID)
+				eventRoute.POST("", c.EventHandler.CreateEvent)
+				eventRoute.PUT("/update", c.EventHandler.UpdateEvent)
+				eventRoute.DELETE("/:id", c.EventHandler.DeleteEvent)
+			}
 		}
 	}
 }
@@ -99,6 +109,7 @@ func NewRouteConfig(app *gin.Engine, viper *viper.Viper, log *logrus.Logger) *Ro
 	templateTaskAttachmentHandler := handler.TemplateTaskAttachmentHandlerFactory(log, viper)
 	employeeTaskHandler := handler.EmployeeTaskHandlerFactory(log, viper)
 	employeeTaskAttachmentHandler := handler.EmployeeTaskAttachmentHandlerFactory(log, viper)
+	eventHandler := handler.EventHandlerFactory(log, viper)
 	return &RouteConfig{
 		App:                           app,
 		Log:                           log,
@@ -110,5 +121,6 @@ func NewRouteConfig(app *gin.Engine, viper *viper.Viper, log *logrus.Logger) *Ro
 		TemplateTaskAttachmentHandler: templateTaskAttachmentHandler,
 		EmployeeTaskHandler:           employeeTaskHandler,
 		EmployeeTaskAttachmentHandler: employeeTaskAttachmentHandler,
+		EventHandler:                  eventHandler,
 	}
 }

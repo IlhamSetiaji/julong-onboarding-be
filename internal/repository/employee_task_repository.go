@@ -17,6 +17,7 @@ type IEmployeeTaskRepository interface {
 	FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}) (*[]entity.EmployeeTask, int64, error)
 	CountByKeys(keys map[string]interface{}) (int64, error)
 	FindAllByEmployeeIDAndKanbanPaginated(employeeID uuid.UUID, kanban entity.EmployeeTaskKanbanEnum, page, pageSize int, search string, sort map[string]interface{}) (*[]entity.EmployeeTask, int64, error)
+	FindByKeys(keys map[string]interface{}) (*entity.EmployeeTask, error)
 }
 
 type EmployeeTaskRepository struct {
@@ -156,4 +157,19 @@ func (r *EmployeeTaskRepository) FindAllByEmployeeIDAndKanbanPaginated(employeeI
 	}
 
 	return &employeeTasks, total, nil
+}
+
+func (r *EmployeeTaskRepository) FindByKeys(keys map[string]interface{}) (*entity.EmployeeTask, error) {
+	var ent entity.EmployeeTask
+
+	if err := r.DB.Preload("EmployeeTaskAttachments").Preload("EmployeeTaskChecklists").Where(keys).First(&ent).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		} else {
+			r.Log.Error("[EmployeeTaskRepository.FindByKeys] Error when get employee task by keys: ", err)
+			return nil, err
+		}
+	}
+
+	return &ent, nil
 }

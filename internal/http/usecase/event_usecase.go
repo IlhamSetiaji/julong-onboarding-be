@@ -1,9 +1,11 @@
 package usecase
 
 import (
+	"context"
 	"errors"
 	"time"
 
+	"github.com/IlhamSetiaji/julong-onboarding-be/internal/config"
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/dto"
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/entity"
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/http/request"
@@ -12,12 +14,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"gorm.io/gorm"
 )
 
 type IEventUseCase interface {
-	CreateEvent(req *request.CreateEventRequest) (*response.EventResponse, error)
-	UpdateEvent(req *request.UpdateEventRequest) (*response.EventResponse, error)
-	DeleteEvent(id uuid.UUID) error
+	CreateEvent(ctx context.Context, req *request.CreateEventRequest) (*response.EventResponse, error)
+	UpdateEvent(ctx context.Context, req *request.UpdateEventRequest) (*response.EventResponse, error)
+	DeleteEvent(ctx context.Context, id uuid.UUID) error
 	FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}) (*[]response.EventResponse, int64, error)
 	FindByID(id uuid.UUID) (*response.EventResponse, error)
 }
@@ -30,6 +33,7 @@ type EventUseCase struct {
 	TemplateTaskRepository  repository.ITemplateTaskRepository
 	Viper                   *viper.Viper
 	EmployeeTaskRepository  repository.IEmployeeTaskRepository
+	DB                      *gorm.DB
 }
 
 func NewEventUseCase(
@@ -40,6 +44,7 @@ func NewEventUseCase(
 	templateTaskRepository repository.ITemplateTaskRepository,
 	viper *viper.Viper,
 	employeeTaskRepository repository.IEmployeeTaskRepository,
+	db *gorm.DB,
 ) IEventUseCase {
 	return &EventUseCase{
 		Log:                     log,
@@ -49,6 +54,7 @@ func NewEventUseCase(
 		TemplateTaskRepository:  templateTaskRepository,
 		Viper:                   viper,
 		EmployeeTaskRepository:  employeeTaskRepository,
+		DB:                      db,
 	}
 }
 
@@ -58,6 +64,7 @@ func EventUseCaseFactory(log *logrus.Logger, viper *viper.Viper) IEventUseCase {
 	eventEmployeeRepository := repository.EventEmployeeRepositoryFactory(log)
 	templateTaskRepository := repository.TemplateTaskRepositoryFactory(log)
 	employeeTaskRepository := repository.EmployeeTaskRepositoryFactory(log)
+	db := config.NewDatabase()
 	return NewEventUseCase(
 		log,
 		eventDTO,
@@ -66,10 +73,18 @@ func EventUseCaseFactory(log *logrus.Logger, viper *viper.Viper) IEventUseCase {
 		templateTaskRepository,
 		viper,
 		employeeTaskRepository,
+		db,
 	)
 }
 
-func (uc *EventUseCase) CreateEvent(req *request.CreateEventRequest) (*response.EventResponse, error) {
+func (uc *EventUseCase) CreateEvent(ctx context.Context, req *request.CreateEventRequest) (*response.EventResponse, error) {
+	tx := uc.DB.WithContext(ctx).Begin()
+	if tx.Error != nil {
+		uc.Log.Errorf("[EventUseCase.CreateEvent] error when starting transaction: %s", tx.Error)
+		return nil, errors.New("[EventUseCase.CreateEvent] error when starting transaction: " + tx.Error.Error())
+	}
+	defer tx.Rollback()
+
 	parsedTemplateTaskID, err := uuid.Parse(req.TemplateTaskID)
 	if err != nil {
 		return nil, err
@@ -100,12 +115,14 @@ func (uc *EventUseCase) CreateEvent(req *request.CreateEventRequest) (*response.
 		Status:         entity.EventStatusEnum(req.Status),
 	})
 	if err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 
 	// delete event employees
 	err = uc.EventEmployeeRepository.DeleteByEventID(event.ID)
 	if err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 
@@ -113,6 +130,7 @@ func (uc *EventUseCase) CreateEvent(req *request.CreateEventRequest) (*response.
 	for _, eventEmployee := range req.EventEmployees {
 		parsedEmployeeID, err := uuid.Parse(eventEmployee.EmployeeID)
 		if err != nil {
+			tx.Rollback()
 			return nil, err
 		}
 
@@ -121,11 +139,13 @@ func (uc *EventUseCase) CreateEvent(req *request.CreateEventRequest) (*response.
 			EmployeeID: &parsedEmployeeID,
 		})
 		if err != nil {
+			tx.Rollback()
 			return nil, err
 		}
 
 		employeeTasks, err := uc.EmployeeTaskRepository.FindAllByEmployeeID(parsedEmployeeID)
 		if err != nil {
+			tx.Rollback()
 			return nil, err
 		}
 
@@ -137,17 +157,49 @@ func (uc *EventUseCase) CreateEvent(req *request.CreateEventRequest) (*response.
 					EndDate:   parsedEndDate,
 				})
 				if err != nil {
+					tx.Rollback()
 					return nil, err
 				}
+			}
+		}
+
+		empTaskExist, err := uc.EmployeeTaskRepository.FindByKeys(map[string]interface{}{
+			"employee_id":      parsedEmployeeID,
+			"template_task_id": parsedTemplateTaskID,
+		})
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+		if empTaskExist == nil {
+			_, err = uc.EmployeeTaskRepository.CreateEmployeeTask(&entity.EmployeeTask{
+				EmployeeID:     &parsedEmployeeID,
+				TemplateTaskID: &parsedTemplateTaskID,
+				StartDate:      parsedStartDate,
+				EndDate:        parsedEndDate,
+				CoverPath:      templateTask.CoverPath,
+				Name:           templateTask.Name,
+				Description:    templateTask.Description,
+				Status:         entity.EMPLOYEE_TASK_STATUS_ENUM_ACTIVE,
+				Kanban:         entity.EMPLOYEE_TASK_KANBAN_ENUM_TODO,
+				Priority:       entity.EmployeeTaskPriorityEnum(templateTask.Priority),
+				IsDone:         "NO",
+				Source:         "ONBOARDING",
+			})
+			if err != nil {
+				tx.Rollback()
+				return nil, err
 			}
 		}
 	}
 
 	findById, err := uc.Repository.FindByID(event.ID)
 	if err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 	if findById == nil {
+		tx.Rollback()
 		return nil, errors.New("event not found")
 	}
 
@@ -155,7 +207,14 @@ func (uc *EventUseCase) CreateEvent(req *request.CreateEventRequest) (*response.
 	return resp, nil
 }
 
-func (uc *EventUseCase) UpdateEvent(req *request.UpdateEventRequest) (*response.EventResponse, error) {
+func (uc *EventUseCase) UpdateEvent(ctx context.Context, req *request.UpdateEventRequest) (*response.EventResponse, error) {
+	tx := uc.DB.WithContext(ctx).Begin()
+	if tx.Error != nil {
+		uc.Log.Errorf("[EventUseCase.UpdateEvent] error when starting transaction: %s", tx.Error)
+		return nil, errors.New("[EventUseCase.UpdateEvent] error when starting transaction: " + tx.Error.Error())
+	}
+	defer tx.Rollback()
+
 	parsedID, err := uuid.Parse(req.ID)
 	if err != nil {
 		return nil, err
@@ -199,12 +258,14 @@ func (uc *EventUseCase) UpdateEvent(req *request.UpdateEventRequest) (*response.
 		Status:         entity.EventStatusEnum(req.Status),
 	})
 	if err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 
 	// delete event employees
 	err = uc.EventEmployeeRepository.DeleteByEventID(event.ID)
 	if err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 
@@ -212,6 +273,7 @@ func (uc *EventUseCase) UpdateEvent(req *request.UpdateEventRequest) (*response.
 	for _, eventEmployee := range req.EventEmployees {
 		parsedEmployeeID, err := uuid.Parse(eventEmployee.EmployeeID)
 		if err != nil {
+			tx.Rollback()
 			return nil, err
 		}
 
@@ -220,11 +282,13 @@ func (uc *EventUseCase) UpdateEvent(req *request.UpdateEventRequest) (*response.
 			EmployeeID: &parsedEmployeeID,
 		})
 		if err != nil {
+			tx.Rollback()
 			return nil, err
 		}
 
 		employeeTasks, err := uc.EmployeeTaskRepository.FindAllByEmployeeID(parsedEmployeeID)
 		if err != nil {
+			tx.Rollback()
 			return nil, err
 		}
 
@@ -236,17 +300,49 @@ func (uc *EventUseCase) UpdateEvent(req *request.UpdateEventRequest) (*response.
 					EndDate:   parsedEndDate,
 				})
 				if err != nil {
+					tx.Rollback()
 					return nil, err
 				}
+			}
+		}
+
+		empTaskExist, err := uc.EmployeeTaskRepository.FindByKeys(map[string]interface{}{
+			"employee_id":      parsedEmployeeID,
+			"template_task_id": parsedTemplateTaskID,
+		})
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+		if empTaskExist == nil {
+			_, err = uc.EmployeeTaskRepository.CreateEmployeeTask(&entity.EmployeeTask{
+				EmployeeID:     &parsedEmployeeID,
+				TemplateTaskID: &parsedTemplateTaskID,
+				StartDate:      parsedStartDate,
+				EndDate:        parsedEndDate,
+				CoverPath:      templateTask.CoverPath,
+				Name:           templateTask.Name,
+				Description:    templateTask.Description,
+				Status:         entity.EMPLOYEE_TASK_STATUS_ENUM_ACTIVE,
+				Kanban:         entity.EMPLOYEE_TASK_KANBAN_ENUM_TODO,
+				Priority:       entity.EmployeeTaskPriorityEnum(templateTask.Priority),
+				IsDone:         "NO",
+				Source:         "ONBOARDING",
+			})
+			if err != nil {
+				tx.Rollback()
+				return nil, err
 			}
 		}
 	}
 
 	findById, err := uc.Repository.FindByID(event.ID)
 	if err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 	if findById == nil {
+		tx.Rollback()
 		return nil, errors.New("event not found")
 	}
 
@@ -254,7 +350,14 @@ func (uc *EventUseCase) UpdateEvent(req *request.UpdateEventRequest) (*response.
 	return resp, nil
 }
 
-func (uc *EventUseCase) DeleteEvent(id uuid.UUID) error {
+func (uc *EventUseCase) DeleteEvent(ctx context.Context, id uuid.UUID) error {
+	tx := uc.DB.WithContext(ctx).Begin()
+	if tx.Error != nil {
+		uc.Log.Errorf("[EventUseCase.DeleteEvent] error when starting transaction: %s", tx.Error)
+		return errors.New("[EventUseCase.DeleteEvent] error when starting transaction: " + tx.Error.Error())
+	}
+	defer tx.Rollback()
+
 	exist, err := uc.Repository.FindByID(id)
 	if err != nil {
 		return err
@@ -265,6 +368,7 @@ func (uc *EventUseCase) DeleteEvent(id uuid.UUID) error {
 
 	err = uc.Repository.DeleteEvent(exist)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 
