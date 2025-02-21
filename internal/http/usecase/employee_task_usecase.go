@@ -172,11 +172,17 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTas
 					}
 					verifiedBy = &parsedVerifiedBy
 				}
+				var isChecked string
+				if checklistReq.IsChecked != nil {
+					isChecked = *checklistReq.IsChecked
+				} else {
+					isChecked = "NO"
+				}
 				_, err := uc.EmployeeTaskChecklistRepository.UpdateEmployeeTaskChecklist(&entity.EmployeeTaskChecklist{
 					ID:             parsedChecklistID,
 					EmployeeTaskID: employeeTask.ID,
 					Name:           checklistReq.Name,
-					IsChecked:      *checklistReq.IsChecked,
+					IsChecked:      isChecked,
 					VerifiedBy:     verifiedBy,
 				})
 				if err != nil {
@@ -340,11 +346,17 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 					}
 					verifiedBy = &parsedVerifiedBy
 				}
+				var isChecked string
+				if checklistReq.IsChecked != nil {
+					isChecked = *checklistReq.IsChecked
+				} else {
+					isChecked = "NO"
+				}
 				_, err := uc.EmployeeTaskChecklistRepository.UpdateEmployeeTaskChecklist(&entity.EmployeeTaskChecklist{
 					ID:             parsedChecklistID,
 					EmployeeTaskID: employeeTask.ID,
 					Name:           checklistReq.Name,
-					IsChecked:      *checklistReq.IsChecked,
+					IsChecked:      isChecked,
 					VerifiedBy:     verifiedBy,
 				})
 				if err != nil {
