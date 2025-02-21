@@ -67,15 +67,15 @@ func EmployeeTaskUseCaseFactory(log *logrus.Logger, viper *viper.Viper) IEmploye
 
 func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTaskRequest) (*response.EmployeeTaskResponse, error) {
 	var templateTaskUUID *uuid.UUID
-	if req.TemplateTaskID != nil {
+	if req.TemplateTaskID != nil && *req.TemplateTaskID != "" {
 		parsedTemplateTaskID, err := uuid.Parse(*req.TemplateTaskID)
 		if err != nil {
-			uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error parsing template task id: ", err)
+			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error parsing template task id: ", err)
 			return nil, err
 		}
 		templateTask, err := uc.TemplateTaskRepository.FindByID(parsedTemplateTaskID)
 		if err != nil {
-			uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error finding template task by id: ", err)
+			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error finding template task by id: ", err)
 			return nil, err
 		}
 		if templateTask == nil {
@@ -87,19 +87,19 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTas
 
 	parsedEmployeeID, err := uuid.Parse(*req.EmployeeID)
 	if err != nil {
-		uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error parsing employee id: ", err)
+		uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error parsing employee id: ", err)
 		return nil, err
 	}
 
 	parsedStartDate, err := time.Parse("2006-01-02", req.StartDate)
 	if err != nil {
-		uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error parsing start date: ", err)
+		uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error parsing start date: ", err)
 		return nil, err
 	}
 
 	parsedEndDate, err := time.Parse("2006-01-02", req.EndDate)
 	if err != nil {
-		uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error parsing end date: ", err)
+		uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error parsing end date: ", err)
 		return nil, err
 	}
 
@@ -115,7 +115,7 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTas
 		Source:         "ONBOARDING",
 	})
 	if err != nil {
-		uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error creating employee task: ", err)
+		uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error creating employee task: ", err)
 		return nil, err
 	}
 
@@ -126,7 +126,7 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTas
 			Path:           attachmentReq.Path,
 		})
 		if err != nil {
-			uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error creating employee task attachment: ", err)
+			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error creating employee task attachment: ", err)
 			return nil, err
 		}
 	}
@@ -134,7 +134,7 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTas
 	// delete employee task checklists
 	err = uc.EmployeeTaskChecklistRepository.DeleteByEmployeeTaskID(employeeTask.ID)
 	if err != nil {
-		uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error deleting employee task checklists: ", err)
+		uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error deleting employee task checklists: ", err)
 		return nil, err
 	}
 
@@ -143,14 +143,14 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTas
 		if checklistReq.ID != nil {
 			parsedChecklistID, err := uuid.Parse(*checklistReq.ID)
 			if err != nil {
-				uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error parsing checklist id: ", err)
+				uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error parsing checklist id: ", err)
 				return nil, err
 			}
 			exist, err := uc.EmployeeTaskChecklistRepository.FindByKeys(map[string]interface{}{
 				"id": parsedChecklistID,
 			})
 			if err != nil {
-				uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error finding checklist by id: ", err)
+				uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error finding checklist by id: ", err)
 				return nil, err
 			}
 			if exist == nil {
@@ -159,7 +159,7 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTas
 					Name:           checklistReq.Name,
 				})
 				if err != nil {
-					uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error creating employee task checklist: ", err)
+					uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error creating employee task checklist: ", err)
 					return nil, err
 				}
 			} else {
@@ -167,7 +167,7 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTas
 				if checklistReq.VerifiedBy != nil {
 					parsedVerifiedBy, err := uuid.Parse(*checklistReq.VerifiedBy)
 					if err != nil {
-						uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error parsing verified by: ", err)
+						uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error parsing verified by: ", err)
 						return nil, err
 					}
 					verifiedBy = &parsedVerifiedBy
@@ -186,7 +186,7 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTas
 					VerifiedBy:     verifiedBy,
 				})
 				if err != nil {
-					uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error updating employee task checklist: ", err)
+					uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error updating employee task checklist: ", err)
 					return nil, err
 				}
 			}
@@ -196,7 +196,7 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTas
 				Name:           checklistReq.Name,
 			})
 			if err != nil {
-				uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error creating employee task checklist: ", err)
+				uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error creating employee task checklist: ", err)
 				return nil, err
 			}
 		}
@@ -204,7 +204,7 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTas
 
 	findById, err := uc.Repository.FindByID(employeeTask.ID)
 	if err != nil {
-		uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error finding employee task by id: ", err)
+		uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error finding employee task by id: ", err)
 		return nil, err
 	}
 	if findById == nil {
@@ -230,15 +230,15 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 	}
 
 	var templateTaskUUID *uuid.UUID
-	if req.TemplateTaskID != nil {
+	if req.TemplateTaskID != nil && *req.TemplateTaskID != "" {
 		parsedTemplateTaskID, err := uuid.Parse(*req.TemplateTaskID)
 		if err != nil {
-			uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error parsing template task id: ", err)
+			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error parsing template task id: ", err)
 			return nil, err
 		}
 		templateTask, err := uc.TemplateTaskRepository.FindByID(parsedTemplateTaskID)
 		if err != nil {
-			uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error finding template task by id: ", err)
+			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error finding template task by id: ", err)
 			return nil, err
 		}
 		if templateTask == nil {
@@ -249,10 +249,10 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 	}
 
 	var verifiedBy *uuid.UUID
-	if req.VerifiedBy != nil {
+	if req.VerifiedBy != nil && *req.VerifiedBy != "" {
 		parsedVerifiedBy, err := uuid.Parse(*req.VerifiedBy)
 		if err != nil {
-			uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error parsing verified by: ", err)
+			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error parsing verified by: ", err)
 			return nil, err
 		}
 		verifiedBy = &parsedVerifiedBy
@@ -260,19 +260,19 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 
 	parsedEmployeeID, err := uuid.Parse(*req.EmployeeID)
 	if err != nil {
-		uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error parsing employee id: ", err)
+		uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error parsing employee id: ", err)
 		return nil, err
 	}
 
 	parsedStartDate, err := time.Parse("2006-01-02", req.StartDate)
 	if err != nil {
-		uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error parsing start date: ", err)
+		uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error parsing start date: ", err)
 		return nil, err
 	}
 
 	parsedEndDate, err := time.Parse("2006-01-02", req.EndDate)
 	if err != nil {
-		uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error parsing end date: ", err)
+		uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error parsing end date: ", err)
 		return nil, err
 	}
 
@@ -294,7 +294,7 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 		Notes:          req.Notes,
 	})
 	if err != nil {
-		uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error creating employee task: ", err)
+		uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error creating employee task: ", err)
 		return nil, err
 	}
 
@@ -305,7 +305,7 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 			Path:           attachmentReq.Path,
 		})
 		if err != nil {
-			uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error creating employee task attachment: ", err)
+			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error creating employee task attachment: ", err)
 			return nil, err
 		}
 	}
@@ -316,14 +316,14 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 		if checklistReq.ID != nil {
 			parsedChecklistID, err := uuid.Parse(*checklistReq.ID)
 			if err != nil {
-				uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error parsing checklist id: ", err)
+				uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error parsing checklist id: ", err)
 				return nil, err
 			}
 			exist, err := uc.EmployeeTaskChecklistRepository.FindByKeys(map[string]interface{}{
 				"id": parsedChecklistID,
 			})
 			if err != nil {
-				uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error finding checklist by id: ", err)
+				uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error finding checklist by id: ", err)
 				return nil, err
 			}
 			if exist == nil {
@@ -332,7 +332,7 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 					Name:           checklistReq.Name,
 				})
 				if err != nil {
-					uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error creating employee task checklist: ", err)
+					uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error creating employee task checklist: ", err)
 					return nil, err
 				}
 			} else {
@@ -341,7 +341,7 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 				if checklistReq.VerifiedBy != nil {
 					parsedVerifiedBy, err := uuid.Parse(*checklistReq.VerifiedBy)
 					if err != nil {
-						uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error parsing verified by: ", err)
+						uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error parsing verified by: ", err)
 						return nil, err
 					}
 					verifiedBy = &parsedVerifiedBy
@@ -360,7 +360,7 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 					VerifiedBy:     verifiedBy,
 				})
 				if err != nil {
-					uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error updating employee task checklist: ", err)
+					uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error updating employee task checklist: ", err)
 					return nil, err
 				}
 			}
@@ -370,7 +370,7 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 				Name:           checklistReq.Name,
 			})
 			if err != nil {
-				uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error creating employee task checklist: ", err)
+				uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error creating employee task checklist: ", err)
 				return nil, err
 			}
 		}
@@ -379,13 +379,13 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 	// delete employee task checklists
 	err = uc.EmployeeTaskChecklistRepository.DeleteByEmployeeTaskIDAndNotInChecklistIDs(employeeTask.ID, checklistIds)
 	if err != nil {
-		uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error deleting employee task checklists: ", err)
+		uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error deleting employee task checklists: ", err)
 		return nil, err
 	}
 
 	findById, err := uc.Repository.FindByID(employeeTask.ID)
 	if err != nil {
-		uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error finding employee task by id: ", err)
+		uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error finding employee task by id: ", err)
 		return nil, err
 	}
 	if findById == nil {
