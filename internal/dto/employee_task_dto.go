@@ -66,6 +66,18 @@ func (dto *EmployeeTaskDTO) ConvertEntityToResponse(ent *entity.EmployeeTask) *r
 		}
 	}
 
+	var progress, progressVerified int
+	if ent.EmployeeTaskChecklists != nil && len(ent.EmployeeTaskChecklists) > 0 {
+		for _, checklist := range ent.EmployeeTaskChecklists {
+			if checklist.IsChecked == "YES" {
+				progress++
+			}
+			if checklist.IsChecked == "YES" && checklist.VerifiedBy != nil {
+				progressVerified++
+			}
+		}
+	}
+
 	return &response.EmployeeTaskResponse{
 		ID: ent.ID,
 		CoverPath: func() *string {
@@ -91,12 +103,14 @@ func (dto *EmployeeTaskDTO) ConvertEntityToResponse(ent *entity.EmployeeTask) *r
 			path := dto.Viper.GetString("app.url") + *ent.Proof
 			return &path
 		}(),
-		Status:    ent.Status,
-		Kanban:    ent.Kanban,
-		Notes:     ent.Notes,
-		Source:    ent.Source,
-		CreatedAt: ent.CreatedAt,
-		UpdatedAt: ent.UpdatedAt,
+		Status:           ent.Status,
+		Kanban:           ent.Kanban,
+		Notes:            ent.Notes,
+		Source:           ent.Source,
+		Progress:         progress,
+		ProgressVerified: progressVerified,
+		CreatedAt:        ent.CreatedAt,
+		UpdatedAt:        ent.UpdatedAt,
 
 		VerifiedByName: verifiedByName,
 		EmployeeName:   employeeName,

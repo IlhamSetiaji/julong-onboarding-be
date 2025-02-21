@@ -8,24 +8,26 @@ import (
 )
 
 type EmployeeTaskResponse struct {
-	ID             uuid.UUID                       `json:"id"`
-	CoverPath      *string                         `json:"cover_path"`
-	EmployeeID     *uuid.UUID                      `json:"employee_id"`
-	TemplateTaskID *uuid.UUID                      `json:"template_task_id"`
-	VerifiedBy     *uuid.UUID                      `json:"verified_by"`
-	Name           string                          `json:"name"`
-	Priority       entity.EmployeeTaskPriorityEnum `json:"priority"`
-	Description    string                          `json:"description"`
-	StartDate      time.Time                       `json:"start_date"`
-	EndDate        time.Time                       `json:"end_date"`
-	IsDone         string                          `json:"is_done"`
-	Proof          *string                         `json:"proof"`
-	Status         entity.EmployeeTaskStatusEnum   `json:"status"`
-	Kanban         entity.EmployeeTaskKanbanEnum   `json:"kanban"`
-	Notes          string                          `json:"notes"`
-	Source         string                          `json:"source"`
-	CreatedAt      time.Time                       `json:"created_at"`
-	UpdatedAt      time.Time                       `json:"updated_at"`
+	ID               uuid.UUID                       `json:"id"`
+	CoverPath        *string                         `json:"cover_path"`
+	EmployeeID       *uuid.UUID                      `json:"employee_id"`
+	TemplateTaskID   *uuid.UUID                      `json:"template_task_id"`
+	VerifiedBy       *uuid.UUID                      `json:"verified_by"`
+	Name             string                          `json:"name"`
+	Priority         entity.EmployeeTaskPriorityEnum `json:"priority"`
+	Description      string                          `json:"description"`
+	StartDate        time.Time                       `json:"start_date"`
+	EndDate          time.Time                       `json:"end_date"`
+	IsDone           string                          `json:"is_done"`
+	Proof            *string                         `json:"proof"`
+	Status           entity.EmployeeTaskStatusEnum   `json:"status"`
+	Kanban           entity.EmployeeTaskKanbanEnum   `json:"kanban"`
+	Notes            string                          `json:"notes"`
+	Source           string                          `json:"source"`
+	Progress         int                             `json:"progress"`
+	ProgressVerified int                             `json:"progress_verified"`
+	CreatedAt        time.Time                       `json:"created_at"`
+	UpdatedAt        time.Time                       `json:"updated_at"`
 
 	VerifiedByName string `json:"verified_by_name"`
 	EmployeeName   string `json:"employee_name"`

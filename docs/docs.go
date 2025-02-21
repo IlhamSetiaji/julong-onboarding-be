@@ -1729,6 +1729,12 @@ const docTemplate = `{
                 "priority": {
                     "$ref": "#/definitions/entity.EmployeeTaskPriorityEnum"
                 },
+                "progress": {
+                    "type": "integer"
+                },
+                "progress_verified": {
+                    "type": "integer"
+                },
                 "proof": {
                     "type": "string"
                 },
