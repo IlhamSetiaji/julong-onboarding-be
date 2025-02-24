@@ -14,6 +14,7 @@ type ITemplateTaskRepository interface {
 	DeleteTemplateTask(ent *entity.TemplateTask) error
 	FindByID(id uuid.UUID) (*entity.TemplateTask, error)
 	FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}) (*[]entity.TemplateTask, int64, error)
+	FindAll() (*[]entity.TemplateTask, error)
 }
 
 type TemplateTaskRepository struct {
@@ -109,4 +110,15 @@ func (r *TemplateTaskRepository) FindAllPaginated(page, pageSize int, search str
 	}
 
 	return &templateTasks, total, nil
+}
+
+func (r *TemplateTaskRepository) FindAll() (*[]entity.TemplateTask, error) {
+	var templateTasks []entity.TemplateTask
+
+	if err := r.DB.Where("status = ?", entity.TEMPLATE_TASK_STATUS_ENUM_ACTIVE).Find(&templateTasks).Error; err != nil {
+		r.Log.Error("[TemplateTaskRepository.FindAll] Error when get template tasks: ", err)
+		return nil, err
+	}
+
+	return &templateTasks, nil
 }

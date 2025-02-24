@@ -41,3 +41,8 @@ type UpdateEmployeeTaskOnlyRequest struct {
 	StartDate string  `form:"start_date" validate:"required,datetime=2006-01-02"`
 	EndDate   string  `form:"end_date" validate:"required,datetime=2006-01-02"`
 }
+
+type CreateEmployeeTasksForRecruitment struct {
+	EmployeeID string `json:"employee_id" validate:"required,uuid"`
+	JoinedDate string `json:"joined_date" validate:"required,datetime=2006-01-02"`
+}

@@ -9,6 +9,7 @@ import (
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/http/request"
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/http/response"
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/http/service"
+	"github.com/IlhamSetiaji/julong-onboarding-be/internal/http/usecase"
 	"github.com/IlhamSetiaji/julong-onboarding-be/utils"
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/sirupsen/logrus"
@@ -183,6 +184,39 @@ func handleMsg(docMsg *request.RabbitMQRequest, log *logrus.Logger, viper *viper
 
 		msgData = map[string]interface{}{
 			"user_profile": resp,
+		}
+	case "create_employee_tasks":
+		employeeID, ok := docMsg.MessageData["employee_id"].(string)
+		if !ok {
+			log.Errorf("Invalid request format: missing 'employee_id'")
+			msgData = map[string]interface{}{
+				"error": errors.New("missing 'employee_id'").Error(),
+			}
+			break
+		}
+		joinedDate, ok := docMsg.MessageData["joined_date"].(string)
+		if !ok {
+			log.Errorf("Invalid request format: missing 'joined_date'")
+			msgData = map[string]interface{}{
+				"error": errors.New("missing 'joined_date'").Error(),
+			}
+			break
+		}
+		templateTaskUseCaseFactory := usecase.EmployeeTaskUseCaseFactory(log, viper)
+		err := templateTaskUseCaseFactory.CreateEmployeeTasksForRecruitment(&request.CreateEmployeeTasksForRecruitment{
+			EmployeeID: employeeID,
+			JoinedDate: joinedDate,
+		})
+		if err != nil {
+			log.Errorf("ERROR: fail create employee tasks: %s", err.Error())
+			msgData = map[string]interface{}{
+				"error": err.Error(),
+			}
+			break
+		}
+
+		msgData = map[string]interface{}{
+			"message": "success",
 		}
 	default:
 		log.Printf("Unknown message type, please recheck your type: %s", docMsg.MessageType)

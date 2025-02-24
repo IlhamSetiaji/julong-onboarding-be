@@ -24,6 +24,7 @@ type IEmployeeTaskUseCase interface {
 	FindAllByEmployeeID(employeeID uuid.UUID) (*response.EmployeeTaskKanbanResponse, error)
 	FindAllByEmployeeIDAndKanbanPaginated(employeeID uuid.UUID, kanban entity.EmployeeTaskKanbanEnum, page, pageSize int, search string, sort map[string]interface{}) (*[]response.EmployeeTaskResponse, int64, error)
 	UpdateEmployeeTaskOnly(req *request.UpdateEmployeeTaskOnlyRequest) (*response.EmployeeTaskResponse, error)
+	CreateEmployeeTasksForRecruitment(req *request.CreateEmployeeTasksForRecruitment) error
 }
 
 type EmployeeTaskUseCase struct {
@@ -34,6 +35,7 @@ type EmployeeTaskUseCase struct {
 	TemplateTaskRepository           repository.ITemplateTaskRepository
 	EmployeeTaskAttachmentRepository repository.IEmployeeTaskAttachmentRepository
 	EmployeeTaskChecklistRepository  repository.IEmployeeTaskChecklistRepository
+	EmployeeHiringRepository         repository.IEmployeeHiringRepository
 }
 
 func NewEmployeeTaskUseCase(
@@ -44,6 +46,7 @@ func NewEmployeeTaskUseCase(
 	templateTaskRepository repository.ITemplateTaskRepository,
 	etaRepo repository.IEmployeeTaskAttachmentRepository,
 	etcRepo repository.IEmployeeTaskChecklistRepository,
+	ehRepo repository.IEmployeeHiringRepository,
 ) IEmployeeTaskUseCase {
 	return &EmployeeTaskUseCase{
 		Log:                              log,
@@ -53,6 +56,7 @@ func NewEmployeeTaskUseCase(
 		TemplateTaskRepository:           templateTaskRepository,
 		EmployeeTaskAttachmentRepository: etaRepo,
 		EmployeeTaskChecklistRepository:  etcRepo,
+		EmployeeHiringRepository:         ehRepo,
 	}
 }
 
@@ -62,7 +66,8 @@ func EmployeeTaskUseCaseFactory(log *logrus.Logger, viper *viper.Viper) IEmploye
 	ttRepository := repository.TemplateTaskRepositoryFactory(log)
 	etaRepo := repository.EmployeeTaskAttachmentRepositoryFactory(log)
 	etcRepo := repository.EmployeeTaskChecklistRepositoryFactory(log)
-	return NewEmployeeTaskUseCase(log, etDTO, repo, viper, ttRepository, etaRepo, etcRepo)
+	ehRepo := repository.EmployeeHiringRepositoryFactory(log)
+	return NewEmployeeTaskUseCase(log, etDTO, repo, viper, ttRepository, etaRepo, etcRepo, ehRepo)
 }
 
 func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTaskRequest) (*response.EmployeeTaskResponse, error) {
@@ -539,4 +544,70 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTaskOnly(req *request.UpdateEmploye
 	}
 
 	return uc.DTO.ConvertEntityToResponse(findById), nil
+}
+
+func (uc *EmployeeTaskUseCase) CreateEmployeeTasksForRecruitment(req *request.CreateEmployeeTasksForRecruitment) error {
+	templateTasks, err := uc.TemplateTaskRepository.FindAll()
+	if err != nil {
+		uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error finding all template tasks: ", err)
+		return nil
+	}
+
+	parsedEmployeeID, err := uuid.Parse(req.EmployeeID)
+	if err != nil {
+		uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error parsing employee id: ", err)
+		return nil
+	}
+
+	parsedjoinedDate, err := time.Parse("2006-01-02", req.JoinedDate)
+	if err != nil {
+		uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error parsing joined date: ", err)
+		return nil
+	}
+
+	// create employee tasks
+	if len(*templateTasks) > 0 {
+		for _, templateTask := range *templateTasks {
+			empTaskExist, err := uc.Repository.FindByKeys(map[string]interface{}{
+				"employee_id":      parsedEmployeeID,
+				"template_task_id": templateTask.ID,
+			})
+			if err != nil {
+				uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error finding employee task by keys: ", err)
+				continue
+			}
+			if empTaskExist == nil {
+				_, err = uc.Repository.CreateEmployeeTask(&entity.EmployeeTask{
+					EmployeeID:     &parsedEmployeeID,
+					TemplateTaskID: &templateTask.ID,
+					StartDate:      parsedjoinedDate,
+					EndDate:        parsedjoinedDate.AddDate(0, 0, *templateTask.DueDuration),
+					CoverPath:      templateTask.CoverPath,
+					Name:           templateTask.Name,
+					Description:    templateTask.Description,
+					Status:         entity.EMPLOYEE_TASK_STATUS_ENUM_ACTIVE,
+					Kanban:         entity.EMPLOYEE_TASK_KANBAN_ENUM_TODO,
+					Priority:       entity.EmployeeTaskPriorityEnum(templateTask.Priority),
+					IsDone:         "NO",
+					Source:         "ONBOARDING",
+				})
+				if err != nil {
+					uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error creating employee task: ", err)
+					continue
+				}
+
+				_, err := uc.EmployeeHiringRepository.CreateEmployeeHiring(&entity.EmployeeHiring{
+					EmployeeID: parsedEmployeeID,
+					HiringDate: parsedjoinedDate,
+				})
+
+				if err != nil {
+					uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error creating employee hiring: ", err)
+					continue
+				}
+			}
+		}
+	}
+
+	return nil
 }
