@@ -12,8 +12,6 @@ type EmployeeHiring struct {
 	ID         uuid.UUID `json:"id" gorm:"type:char(36);primaryKey;"`
 	EmployeeID uuid.UUID `json:"employee_id" gorm:"type:char(36);not null"`
 	HiringDate time.Time `json:"hiring_date" gorm:"type:date;not null"`
-
-	EmployeeTasks []EmployeeTask `json:"employee_tasks" gorm:"foreignKey:EmployeeHiringID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 func (e *EmployeeHiring) BeforeCreate(tx *gorm.DB) (err error) {

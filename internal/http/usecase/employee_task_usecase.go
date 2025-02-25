@@ -550,19 +550,27 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTasksForRecruitment(req *request.Cr
 	templateTasks, err := uc.TemplateTaskRepository.FindAll()
 	if err != nil {
 		uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error finding all template tasks: ", err)
-		return nil
+		return err
 	}
 
 	parsedEmployeeID, err := uuid.Parse(req.EmployeeID)
 	if err != nil {
 		uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error parsing employee id: ", err)
-		return nil
+		return err
 	}
 
-	parsedjoinedDate, err := time.Parse("2006-01-02", req.JoinedDate)
+	parsedJoinedDate, err := time.Parse("2006-01-02 15:04:05 -0700 MST", req.JoinedDate)
 	if err != nil {
 		uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error parsing joined date: ", err)
-		return nil
+		return err
+	}
+
+	_, err = uc.EmployeeHiringRepository.CreateEmployeeHiring(&entity.EmployeeHiring{
+		EmployeeID: parsedEmployeeID,
+		HiringDate: parsedJoinedDate,
+	})
+	if err != nil {
+		uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error creating employee hiring: ", err)
 	}
 
 	// create employee tasks
@@ -580,8 +588,8 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTasksForRecruitment(req *request.Cr
 				_, err = uc.Repository.CreateEmployeeTask(&entity.EmployeeTask{
 					EmployeeID:     &parsedEmployeeID,
 					TemplateTaskID: &templateTask.ID,
-					StartDate:      parsedjoinedDate,
-					EndDate:        parsedjoinedDate.AddDate(0, 0, *templateTask.DueDuration),
+					StartDate:      parsedJoinedDate,
+					EndDate:        parsedJoinedDate.AddDate(0, 0, *templateTask.DueDuration),
 					CoverPath:      templateTask.CoverPath,
 					Name:           templateTask.Name,
 					Description:    templateTask.Description,
@@ -593,16 +601,6 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTasksForRecruitment(req *request.Cr
 				})
 				if err != nil {
 					uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error creating employee task: ", err)
-					continue
-				}
-
-				_, err := uc.EmployeeHiringRepository.CreateEmployeeHiring(&entity.EmployeeHiring{
-					EmployeeID: parsedEmployeeID,
-					HiringDate: parsedjoinedDate,
-				})
-
-				if err != nil {
-					uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error creating employee hiring: ", err)
 					continue
 				}
 			}
