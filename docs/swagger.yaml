@@ -368,6 +368,21 @@ definitions:
       verified_by_name:
         type: string
     type: object
+  response.EmployeeTaskProgressResponse:
+    properties:
+      completed:
+        type: integer
+      employee_id:
+        type: string
+      in_progress:
+        type: integer
+      need_review:
+        type: integer
+      to_do:
+        type: integer
+      total_task:
+        type: integer
+    type: object
   response.EmployeeTaskResponse:
     properties:
       cover_path:
@@ -1021,6 +1036,29 @@ paths:
       security:
       - BearerAuth: []
       summary: Find all employee task by employee id and kanban paginated
+      tags:
+      - Employee Task
+  /employee-tasks/employee-kanban/count:
+    get:
+      consumes:
+      - application/json
+      description: Count kanban progress by employee id
+      parameters:
+      - description: Employee ID
+        in: query
+        name: employee_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.EmployeeTaskProgressResponse'
+      security:
+      - BearerAuth: []
+      summary: Count kanban progress by employee id
       tags:
       - Employee Task
   /events:

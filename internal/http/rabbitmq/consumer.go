@@ -11,6 +11,7 @@ import (
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/http/service"
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/http/usecase"
 	"github.com/IlhamSetiaji/julong-onboarding-be/utils"
+	"github.com/google/uuid"
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -217,6 +218,44 @@ func handleMsg(docMsg *request.RabbitMQRequest, log *logrus.Logger, viper *viper
 
 		msgData = map[string]interface{}{
 			"message": "success",
+		}
+	case "count_kanban_progress_by_employee_id":
+		employeeID, ok := docMsg.MessageData["employee_id"].(string)
+		if !ok {
+			log.Errorf("Invalid request format: missing 'employee_id'")
+			msgData = map[string]interface{}{
+				"error": errors.New("missing 'employee_id'").Error(),
+			}
+			break
+		}
+		parsedEmployeeUUID, err := uuid.Parse(employeeID)
+		if err != nil {
+			log.Errorf("Invalid request format: invalid 'employee_id'")
+			msgData = map[string]interface{}{
+				"error": errors.New("invalid 'employee_id'").Error(),
+			}
+			break
+		}
+
+		employeeTaskUseCaseFactory := usecase.EmployeeTaskUseCaseFactory(log, viper)
+		resp, err := employeeTaskUseCaseFactory.CountKanbanProgressByEmployeeID(parsedEmployeeUUID)
+		if err != nil {
+			log.Errorf("ERROR: fail count kanban progress by employee id: %s", err.Error())
+			msgData = map[string]interface{}{
+				"error": err.Error(),
+			}
+			break
+		} else {
+			log.Printf("INFO: success count kanban progress by employee id")
+		}
+
+		msgData = map[string]interface{}{
+			"employee_id": employeeID,
+			"total_task":  resp.TotalTask,
+			"to_do":       resp.ToDo,
+			"in_progress": resp.InProgress,
+			"need_review": resp.NeedReview,
+			"completed":   resp.Completed,
 		}
 	default:
 		log.Printf("Unknown message type, please recheck your type: %s", docMsg.MessageType)

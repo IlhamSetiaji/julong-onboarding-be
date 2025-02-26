@@ -106,13 +106,22 @@ func (uc *EventUseCase) CreateEvent(ctx context.Context, req *request.CreateEven
 		return nil, err
 	}
 
+	var status entity.EventStatusEnum
+	if parsedStartDate.After(time.Now()) {
+		status = entity.EVENT_STATUS_ENUM_UPCOMING
+	} else if parsedStartDate.Before(time.Now()) && parsedEndDate.After(time.Now()) {
+		status = entity.EVENT_STATUS_ENUM_ONGOING
+	} else {
+		status = entity.EVENT_STATUS_ENUM_FINISHED
+	}
+
 	event, err := uc.Repository.CreateEvent(&entity.Event{
 		Name:           req.Name,
 		TemplateTaskID: parsedTemplateTaskID,
 		StartDate:      parsedStartDate,
 		EndDate:        parsedEndDate,
 		Description:    req.Description,
-		Status:         entity.EventStatusEnum(req.Status),
+		Status:         status,
 	})
 	if err != nil {
 		tx.Rollback()

@@ -43,3 +43,12 @@ type EmployeeTaskKanbanResponse struct {
 	NeedReview []EmployeeTaskResponse `json:"need_review"`
 	Completed  []EmployeeTaskResponse `json:"completed"`
 }
+
+type EmployeeTaskProgressResponse struct {
+	EmployeeID uuid.UUID `json:"employee_id"`
+	TotalTask  int       `json:"total_task"`
+	ToDo       int       `json:"to_do"`
+	InProgress int       `json:"in_progress"`
+	NeedReview int       `json:"need_review"`
+	Completed  int       `json:"completed"`
+}

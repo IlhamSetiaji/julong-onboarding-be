@@ -27,6 +27,7 @@ type IEmployeeTaskHandler interface {
 	CountByKanbanAndEmployeeID(ctx *gin.Context)
 	FindAllByEmployeeID(ctx *gin.Context)
 	FindAllByEmployeeIDAndKanbanPaginated(ctx *gin.Context)
+	CountKanbanProgressByEmployeeID(ctx *gin.Context)
 }
 
 type EmployeeTaskHandler struct {
@@ -537,4 +538,38 @@ func (h *EmployeeTaskHandler) FindAllByEmployeeIDAndKanbanPaginated(ctx *gin.Con
 		"employee_tasks": res,
 		"total":          total,
 	})
+}
+
+// CountKanbanProgressByEmployeeID count kanban progress by employee id
+//
+// @Summary Count kanban progress by employee id
+// @Description Count kanban progress by employee id
+// @Tags Employee Task
+// @Accept  json
+// @Produce  json
+// @Param employee_id query string true "Employee ID"
+// @Success 200 {object} response.EmployeeTaskProgressResponse
+// @Security BearerAuth
+// @Router /employee-tasks/employee-kanban/count [get]
+func (h *EmployeeTaskHandler) CountKanbanProgressByEmployeeID(ctx *gin.Context) {
+	employeeID := ctx.Query("employee_id")
+	if employeeID == "" {
+		utils.BadRequestResponse(ctx, "employee_id is required", "employee_id is required")
+		return
+	}
+
+	parsedEmployeeID, err := uuid.Parse(employeeID)
+	if err != nil {
+		utils.BadRequestResponse(ctx, "invalid employee_id", "invalid employee_id")
+		return
+	}
+
+	res, err := h.UseCase.CountKanbanProgressByEmployeeID(parsedEmployeeID)
+	if err != nil {
+		h.Log.Error("[EmployeeTaskHandler.CountKanbanProgressByEmployeeID] " + err.Error())
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, "internal server error", err.Error())
+		return
+	}
+
+	utils.SuccessResponse(ctx, http.StatusOK, "success count kanban progress by employee id", res)
 }

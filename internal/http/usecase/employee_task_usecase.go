@@ -25,6 +25,7 @@ type IEmployeeTaskUseCase interface {
 	FindAllByEmployeeIDAndKanbanPaginated(employeeID uuid.UUID, kanban entity.EmployeeTaskKanbanEnum, page, pageSize int, search string, sort map[string]interface{}) (*[]response.EmployeeTaskResponse, int64, error)
 	UpdateEmployeeTaskOnly(req *request.UpdateEmployeeTaskOnlyRequest) (*response.EmployeeTaskResponse, error)
 	CreateEmployeeTasksForRecruitment(req *request.CreateEmployeeTasksForRecruitment) error
+	CountKanbanProgressByEmployeeID(employeeID uuid.UUID) (*response.EmployeeTaskProgressResponse, error)
 }
 
 type EmployeeTaskUseCase struct {
@@ -608,4 +609,59 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTasksForRecruitment(req *request.Cr
 	}
 
 	return nil
+}
+
+func (uc *EmployeeTaskUseCase) CountKanbanProgressByEmployeeID(employeeID uuid.UUID) (*response.EmployeeTaskProgressResponse, error) {
+	totalTask, err := uc.Repository.CountByKeys(map[string]interface{}{
+		"employee_id": employeeID,
+	})
+	if err != nil {
+		uc.Log.Error("[EmployeeTaskUseCase.CountKanbanProgressByEmployeeID] error counting total task: ", err)
+		return nil, err
+	}
+
+	toDo, err := uc.Repository.CountByKeys(map[string]interface{}{
+		"employee_id": employeeID,
+		"kanban":      entity.EMPLOYEE_TASK_KANBAN_ENUM_TODO,
+	})
+	if err != nil {
+		uc.Log.Error("[EmployeeTaskUseCase.CountKanbanProgressByEmployeeID] error counting to do: ", err)
+		return nil, err
+	}
+
+	inProgress, err := uc.Repository.CountByKeys(map[string]interface{}{
+		"employee_id": employeeID,
+		"kanban":      entity.EPMLOYEE_TASK_KANBAN_ENUM_IN_PROGRESS,
+	})
+	if err != nil {
+		uc.Log.Error("[EmployeeTaskUseCase.CountKanbanProgressByEmployeeID] error counting in progress: ", err)
+		return nil, err
+	}
+
+	needReview, err := uc.Repository.CountByKeys(map[string]interface{}{
+		"employee_id": employeeID,
+		"kanban":      entity.EMPLOYEE_TASK_KANBAN_ENUM_NEED_REVIEW,
+	})
+	if err != nil {
+		uc.Log.Error("[EmployeeTaskUseCase.CountKanbanProgressByEmployeeID] error counting need review: ", err)
+		return nil, err
+	}
+
+	completed, err := uc.Repository.CountByKeys(map[string]interface{}{
+		"employee_id": employeeID,
+		"kanban":      entity.EMPLOYEE_TASK_KANBAN_ENUM_COMPLETED,
+	})
+	if err != nil {
+		uc.Log.Error("[EmployeeTaskUseCase.CountKanbanProgressByEmployeeID] error counting completed: ", err)
+		return nil, err
+	}
+
+	return &response.EmployeeTaskProgressResponse{
+		EmployeeID: employeeID,
+		TotalTask:  int(totalTask),
+		ToDo:       int(toDo),
+		InProgress: int(inProgress),
+		NeedReview: int(needReview),
+		Completed:  int(completed),
+	}, nil
 }

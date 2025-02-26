@@ -15,6 +15,7 @@ type ITemplateTaskRepository interface {
 	FindByID(id uuid.UUID) (*entity.TemplateTask, error)
 	FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}, status entity.TemplateTaskStatusEnum) (*[]entity.TemplateTask, int64, error)
 	FindAll() (*[]entity.TemplateTask, error)
+	CountKanbanProgressByEmployeeID(employeeID uuid.UUID, kanban entity.EmployeeTaskKanbanEnum) (int, error)
 }
 
 type TemplateTaskRepository struct {
@@ -125,4 +126,14 @@ func (r *TemplateTaskRepository) FindAll() (*[]entity.TemplateTask, error) {
 	}
 
 	return &templateTasks, nil
+}
+
+func (r *TemplateTaskRepository) CountKanbanProgressByEmployeeID(employeeID uuid.UUID, kanban entity.EmployeeTaskKanbanEnum) (int, error) {
+	var total int64
+	if err := r.DB.Model(&entity.EmployeeTask{}).Where("employee_id = ? AND kanban = ?", employeeID, kanban).Count(&total).Error; err != nil {
+		r.Log.Error("[TemplateTaskRepository.CountKanbanProgressByEmployeeID] Error when count kanban progress by employee id: ", err)
+		return 0, err
+	}
+
+	return int(total), nil
 }

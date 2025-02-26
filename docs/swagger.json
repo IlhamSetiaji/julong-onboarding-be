@@ -621,6 +621,43 @@
                 }
             }
         },
+        "/employee-tasks/employee-kanban/count": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Count kanban progress by employee id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employee Task"
+                ],
+                "summary": "Count kanban progress by employee id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Employee ID",
+                        "name": "employee_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.EmployeeTaskProgressResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/employee-tasks/{id}": {
             "get": {
                 "security": [
@@ -1669,6 +1706,29 @@
                 },
                 "verified_by_name": {
                     "type": "string"
+                }
+            }
+        },
+        "response.EmployeeTaskProgressResponse": {
+            "type": "object",
+            "properties": {
+                "completed": {
+                    "type": "integer"
+                },
+                "employee_id": {
+                    "type": "string"
+                },
+                "in_progress": {
+                    "type": "integer"
+                },
+                "need_review": {
+                    "type": "integer"
+                },
+                "to_do": {
+                    "type": "integer"
+                },
+                "total_task": {
+                    "type": "integer"
                 }
             }
         },
