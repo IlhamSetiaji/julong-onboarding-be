@@ -13,7 +13,7 @@ type ITemplateTaskRepository interface {
 	UpdateTemplateTask(ent *entity.TemplateTask) (*entity.TemplateTask, error)
 	DeleteTemplateTask(ent *entity.TemplateTask) error
 	FindByID(id uuid.UUID) (*entity.TemplateTask, error)
-	FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}) (*[]entity.TemplateTask, int64, error)
+	FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}, status entity.TemplateTaskStatusEnum) (*[]entity.TemplateTask, int64, error)
 	FindAll() (*[]entity.TemplateTask, error)
 }
 
@@ -90,13 +90,17 @@ func (r *TemplateTaskRepository) FindByID(id uuid.UUID) (*entity.TemplateTask, e
 	return &templateTask, nil
 }
 
-func (r *TemplateTaskRepository) FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}) (*[]entity.TemplateTask, int64, error) {
+func (r *TemplateTaskRepository) FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}, status entity.TemplateTaskStatusEnum) (*[]entity.TemplateTask, int64, error) {
 	var templateTasks []entity.TemplateTask
 	var total int64
 
 	query := r.DB.Preload("TemplateTaskAttachments").Preload("TemplateTaskChecklists").Where("name LIKE ?", "%"+search+"%")
 	for key, value := range sort {
 		query = query.Order(key + " " + value.(string))
+	}
+
+	if status != "" {
+		query = query.Where("status = ?", status)
 	}
 
 	if err := query.Offset((page - 1) * pageSize).Limit(pageSize).Find(&templateTasks).Error; err != nil {

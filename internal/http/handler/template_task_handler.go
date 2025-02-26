@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/config"
+	"github.com/IlhamSetiaji/julong-onboarding-be/internal/entity"
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/http/request"
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/http/usecase"
 	"github.com/IlhamSetiaji/julong-onboarding-be/utils"
@@ -371,10 +372,15 @@ func (h *TemplateTaskHandler) FindAllPaginated(ctx *gin.Context) {
 		createdAt = "DESC"
 	}
 
+	status := ctx.Query("status")
+	if status == "" {
+		status = ""
+	}
+
 	sort := map[string]interface{}{
 		"created_at": createdAt,
 	}
-	res, total, err := h.UseCase.FindAllPaginated(page, pageSize, search, sort)
+	res, total, err := h.UseCase.FindAllPaginated(page, pageSize, search, sort, entity.TemplateTaskStatusEnum(status))
 	if err != nil {
 		h.Log.Error("[TemplateTaskHandler.FindAllPaginated] " + err.Error())
 		utils.ErrorResponse(ctx, http.StatusInternalServerError, "internal server error", err.Error())

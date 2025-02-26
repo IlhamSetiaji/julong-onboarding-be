@@ -17,7 +17,7 @@ type ITemplateTaskUseCase interface {
 	CreateTemplateTask(req *request.CreateTemplateTaskRequest) (*response.TemplateTaskResponse, error)
 	UpdateTemplateTask(req *request.UpdateTemplateTaskRequest) (*response.TemplateTaskResponse, error)
 	DeleteTemplateTask(id uuid.UUID) error
-	FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}) (*[]response.TemplateTaskResponse, int64, error)
+	FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}, status entity.TemplateTaskStatusEnum) (*[]response.TemplateTaskResponse, int64, error)
 	FindByID(id uuid.UUID) (*response.TemplateTaskResponse, error)
 }
 
@@ -280,8 +280,8 @@ func (uc *TemplateTaskUseCase) DeleteTemplateTask(id uuid.UUID) error {
 	return nil
 }
 
-func (uc *TemplateTaskUseCase) FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}) (*[]response.TemplateTaskResponse, int64, error) {
-	entities, total, err := uc.Repository.FindAllPaginated(page, pageSize, search, sort)
+func (uc *TemplateTaskUseCase) FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}, status entity.TemplateTaskStatusEnum) (*[]response.TemplateTaskResponse, int64, error) {
+	entities, total, err := uc.Repository.FindAllPaginated(page, pageSize, search, sort, status)
 	if err != nil {
 		uc.Log.Error("[TemplateTaskUseCase.FindAllPaginated] " + err.Error())
 		return nil, 0, err
