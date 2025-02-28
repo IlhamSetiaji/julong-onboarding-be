@@ -24,6 +24,7 @@ type EmployeeTaskResponse struct {
 	Kanban           entity.EmployeeTaskKanbanEnum   `json:"kanban"`
 	Notes            string                          `json:"notes"`
 	Source           string                          `json:"source"`
+	IsChecklist      string                          `json:"is_checklist"`
 	Progress         int                             `json:"progress"`
 	ProgressVerified int                             `json:"progress_verified"`
 	CreatedAt        time.Time                       `json:"created_at"`

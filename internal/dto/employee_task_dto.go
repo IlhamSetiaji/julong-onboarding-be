@@ -103,6 +103,12 @@ func (dto *EmployeeTaskDTO) ConvertEntityToResponse(ent *entity.EmployeeTask) *r
 			path := dto.Viper.GetString("app.url") + *ent.Proof
 			return &path
 		}(),
+		IsChecklist: func() string {
+			if ent.EmployeeTaskChecklists != nil && len(ent.EmployeeTaskChecklists) > 0 {
+				return "YES"
+			}
+			return "NO"
+		}(),
 		Status:           ent.Status,
 		Kanban:           ent.Kanban,
 		Notes:            ent.Notes,

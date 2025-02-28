@@ -1774,6 +1774,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "is_checklist": {
+                    "type": "string"
+                },
                 "is_done": {
                     "type": "string"
                 },
