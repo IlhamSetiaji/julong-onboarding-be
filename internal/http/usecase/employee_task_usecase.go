@@ -389,6 +389,20 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 		return nil, err
 	}
 
+	if req.Status == "TO_DO" {
+		err = uc.EmployeeTaskChecklistRepository.DeleteByEmployeeTaskID(employeeTask.ID)
+		if err != nil {
+			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error deleting employee task checklists: ", err)
+			return nil, err
+		}
+
+		err = uc.EmployeeTaskAttachmentRepository.DeleteByTemplateTaskID(employeeTask.ID)
+		if err != nil {
+			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error deleting employee task attachments: ", err)
+			return nil, err
+		}
+	}
+
 	findById, err := uc.Repository.FindByID(employeeTask.ID)
 	if err != nil {
 		uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error finding employee task by id: ", err)
