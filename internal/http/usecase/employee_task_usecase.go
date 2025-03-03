@@ -389,7 +389,7 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 		return nil, err
 	}
 
-	if req.Status == "TO_DO" {
+	if req.Kanban == string(entity.EMPLOYEE_TASK_KANBAN_ENUM_TODO) {
 		err = uc.EmployeeTaskChecklistRepository.DeleteByEmployeeTaskID(employeeTask.ID)
 		if err != nil {
 			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error deleting employee task checklists: ", err)
