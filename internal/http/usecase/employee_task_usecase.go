@@ -390,16 +390,27 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 	}
 
 	if req.Kanban == string(entity.EMPLOYEE_TASK_KANBAN_ENUM_TODO) {
-		err = uc.EmployeeTaskChecklistRepository.DeleteByEmployeeTaskID(employeeTask.ID)
+		etData, err := uc.Repository.FindByID(employeeTask.ID)
 		if err != nil {
-			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error deleting employee task checklists: ", err)
+			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error finding employee task by id: ", err)
 			return nil, err
 		}
+		if etData == nil {
+			return nil, errors.New("employee task not found")
+		}
 
-		err = uc.EmployeeTaskAttachmentRepository.DeleteByTemplateTaskID(employeeTask.ID)
-		if err != nil {
-			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error deleting employee task attachments: ", err)
-			return nil, err
+		if len(etData.EmployeeTaskChecklists) > 0 {
+			for _, checklist := range etData.EmployeeTaskChecklists {
+				_, err := uc.EmployeeTaskChecklistRepository.UpdateEmployeeTaskChecklist(&entity.EmployeeTaskChecklist{
+					ID:         checklist.ID,
+					IsChecked:  "NO",
+					VerifiedBy: nil,
+				})
+				if err != nil {
+					uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error updating employee task checklist: ", err)
+					return nil, err
+				}
+			}
 		}
 	}
 
