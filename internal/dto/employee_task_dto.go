@@ -76,6 +76,15 @@ func (dto *EmployeeTaskDTO) ConvertEntityToResponse(ent *entity.EmployeeTask) *r
 				progressVerified++
 			}
 		}
+
+		progress = (progress * 100) / len(ent.EmployeeTaskChecklists)
+		progressVerified = (progressVerified * 100) / len(ent.EmployeeTaskChecklists)
+		if progress > 100 {
+			progress = 100
+		}
+		if progressVerified > 100 {
+			progressVerified = 100
+		}
 	}
 
 	return &response.EmployeeTaskResponse{
