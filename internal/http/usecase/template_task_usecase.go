@@ -62,13 +62,14 @@ func (uc *TemplateTaskUseCase) CreateTemplateTask(req *request.CreateTemplateTas
 		duration = req.DueDuration
 	}
 	templateTask, err := uc.Repository.CreateTemplateTask(&entity.TemplateTask{
-		Name:        req.Name,
-		CoverPath:   &req.CoverPath,
-		Priority:    entity.TemplateTaskPriorityEnum(req.Priority),
-		DueDuration: duration,
-		Status:      entity.TemplateTaskStatusEnum(req.Status),
-		Description: req.Description,
-		Source:      "ONBOARDING",
+		Name:             req.Name,
+		CoverPath:        &req.CoverPath,
+		Priority:         entity.TemplateTaskPriorityEnum(req.Priority),
+		DueDuration:      duration,
+		Status:           entity.TemplateTaskStatusEnum(req.Status),
+		Description:      req.Description,
+		Source:           "ONBOARDING",
+		OrganizationType: req.OrganizationType,
 	})
 	if err != nil {
 		uc.Log.Error("[TemplateTaskUseCase.CreateTemplateTask] " + err.Error())
@@ -170,14 +171,15 @@ func (uc *TemplateTaskUseCase) UpdateTemplateTask(req *request.UpdateTemplateTas
 		duration = req.DueDuration
 	}
 	templateTask, err := uc.Repository.UpdateTemplateTask(&entity.TemplateTask{
-		ID:          parsedId,
-		Name:        req.Name,
-		CoverPath:   &req.CoverPath,
-		Priority:    entity.TemplateTaskPriorityEnum(req.Priority),
-		DueDuration: duration,
-		Status:      entity.TemplateTaskStatusEnum(req.Status),
-		Description: req.Description,
-		Source:      "ONBOARDING",
+		ID:               parsedId,
+		Name:             req.Name,
+		CoverPath:        &req.CoverPath,
+		Priority:         entity.TemplateTaskPriorityEnum(req.Priority),
+		DueDuration:      duration,
+		Status:           entity.TemplateTaskStatusEnum(req.Status),
+		Description:      req.Description,
+		Source:           "ONBOARDING",
+		OrganizationType: req.OrganizationType,
 	})
 	if err != nil {
 		uc.Log.Error("[TemplateTaskUseCase.CreateTemplateTask] " + err.Error())

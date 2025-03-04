@@ -43,6 +43,7 @@ type UpdateEmployeeTaskOnlyRequest struct {
 }
 
 type CreateEmployeeTasksForRecruitment struct {
-	EmployeeID string `json:"employee_id" validate:"required,uuid"`
-	JoinedDate string `json:"joined_date" validate:"required,datetime=2006-01-02"`
+	EmployeeID       string `json:"employee_id" validate:"required,uuid"`
+	JoinedDate       string `json:"joined_date" validate:"required,datetime=2006-01-02"`
+	OrganizationType string `json:"organization_type" validate:"required"`
 }

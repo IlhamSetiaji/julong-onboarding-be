@@ -8,6 +8,7 @@ type SendFindOrganizationByIDMessageResponse struct {
 	OrganizationID       string `json:"organization_id"`
 	Name                 string `json:"name"`
 	OrganizationCategory string `json:"organization_category"`
+	OrganizationType     string `json:"organization_type"`
 }
 
 type SendFindOrganizationLocationByIDMessageResponse struct {

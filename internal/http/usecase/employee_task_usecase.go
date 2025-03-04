@@ -573,7 +573,10 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTaskOnly(req *request.UpdateEmploye
 }
 
 func (uc *EmployeeTaskUseCase) CreateEmployeeTasksForRecruitment(req *request.CreateEmployeeTasksForRecruitment) error {
-	templateTasks, err := uc.TemplateTaskRepository.FindAll()
+	templateTasks, err := uc.TemplateTaskRepository.FindAllByKeys(map[string]interface{}{
+		"organization_type": req.OrganizationType,
+		"status":            entity.TEMPLATE_TASK_STATUS_ENUM_ACTIVE,
+	})
 	if err != nil {
 		uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error finding all template tasks: ", err)
 		return err

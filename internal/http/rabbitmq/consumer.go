@@ -203,10 +203,19 @@ func handleMsg(docMsg *request.RabbitMQRequest, log *logrus.Logger, viper *viper
 			}
 			break
 		}
+		organizationType, ok := docMsg.MessageData["organization_type"].(string)
+		if !ok {
+			log.Errorf("Invalid request format: missing 'organization_type'")
+			msgData = map[string]interface{}{
+				"error": errors.New("missing 'organization_type'").Error(),
+			}
+			break
+		}
 		templateTaskUseCaseFactory := usecase.EmployeeTaskUseCaseFactory(log, viper)
 		err := templateTaskUseCaseFactory.CreateEmployeeTasksForRecruitment(&request.CreateEmployeeTasksForRecruitment{
-			EmployeeID: employeeID,
-			JoinedDate: joinedDate,
+			EmployeeID:       employeeID,
+			JoinedDate:       joinedDate,
+			OrganizationType: organizationType,
 		})
 		if err != nil {
 			log.Errorf("ERROR: fail create employee tasks: %s", err.Error())

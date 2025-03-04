@@ -73,6 +73,7 @@ func (m *OrganizationMessage) SendFindOrganizationByIDMessage(req request.SendFi
 		OrganizationID:       resp.MessageData["organization_id"].(string),
 		Name:                 resp.MessageData["name"].(string),
 		OrganizationCategory: resp.MessageData["organization_category"].(string),
+		OrganizationType:     resp.MessageData["organization_type"].(string),
 	}, nil
 }
 

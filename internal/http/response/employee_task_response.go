@@ -10,6 +10,7 @@ import (
 type EmployeeTaskResponse struct {
 	ID               uuid.UUID                       `json:"id"`
 	CoverPath        *string                         `json:"cover_path"`
+	CoverPathOrigin  *string                         `json:"cover_path_origin"`
 	EmployeeID       *uuid.UUID                      `json:"employee_id"`
 	TemplateTaskID   *uuid.UUID                      `json:"template_task_id"`
 	VerifiedBy       *uuid.UUID                      `json:"verified_by"`

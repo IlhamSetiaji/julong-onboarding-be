@@ -8,6 +8,7 @@ type CreateTemplateTaskRequest struct {
 	DueDuration             *int                            `form:"due_duration" validate:"omitempty,numeric"`
 	Status                  string                          `form:"status" validate:"required,template_task_status_validation"`
 	Description             string                          `form:"description" validate:"omitempty"`
+	OrganizationType        string                          `form:"organization_type" validate:"required"`
 	TemplateTaskAttachments []TemplateTaskAttachmentRequest `form:"template_task_attachments" validate:"omitempty,dive"`
 	TemplateTaskChecklists  []TemplateTaskChecklistRequest  `form:"template_task_checklists" validate:"omitempty,dive"`
 }
@@ -21,6 +22,7 @@ type UpdateTemplateTaskRequest struct {
 	DueDuration             *int                            `form:"due_duration" validate:"omitempty,numeric"`
 	Status                  string                          `form:"status" validate:"required,template_task_status_validation"`
 	Description             string                          `form:"description" validate:"omitempty"`
+	OrganizationType        string                          `form:"organization_type" validate:"required"`
 	TemplateTaskAttachments []TemplateTaskAttachmentRequest `form:"template_task_attachments" validate:"omitempty,dive"`
 	TemplateTaskChecklists  []TemplateTaskChecklistRequest  `form:"template_task_checklists" validate:"omitempty,dive"`
 }

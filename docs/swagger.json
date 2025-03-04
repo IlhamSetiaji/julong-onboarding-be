@@ -1366,6 +1366,7 @@
             "required": [
                 "cover_path",
                 "name",
+                "organization_type",
                 "priority",
                 "status"
             ],
@@ -1381,6 +1382,9 @@
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "organization_type": {
                     "type": "string"
                 },
                 "priority": {
@@ -1597,6 +1601,7 @@
                 "cover_path",
                 "id",
                 "name",
+                "organization_type",
                 "priority",
                 "status"
             ],
@@ -1615,6 +1620,9 @@
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "organization_type": {
                     "type": "string"
                 },
                 "priority": {
@@ -1736,6 +1744,9 @@
             "type": "object",
             "properties": {
                 "cover_path": {
+                    "type": "string"
+                },
+                "cover_path_origin": {
                     "type": "string"
                 },
                 "created_at": {
@@ -1931,7 +1942,7 @@
         "response.TemplateTaskResponse": {
             "type": "object",
             "properties": {
-                "coverPath": {
+                "cover_path": {
                     "type": "string"
                 },
                 "cover_path_origin": {
@@ -1950,6 +1961,9 @@
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "organization_type": {
                     "type": "string"
                 },
                 "priority": {

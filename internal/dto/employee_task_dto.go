@@ -96,15 +96,16 @@ func (dto *EmployeeTaskDTO) ConvertEntityToResponse(ent *entity.EmployeeTask) *r
 			path := dto.Viper.GetString("app.url") + *ent.CoverPath
 			return &path
 		}(),
-		EmployeeID:     ent.EmployeeID,
-		TemplateTaskID: ent.TemplateTaskID,
-		VerifiedBy:     ent.VerifiedBy,
-		Name:           ent.Name,
-		Priority:       ent.Priority,
-		Description:    ent.Description,
-		StartDate:      ent.StartDate,
-		EndDate:        ent.EndDate,
-		IsDone:         ent.IsDone,
+		CoverPathOrigin: ent.CoverPath,
+		EmployeeID:      ent.EmployeeID,
+		TemplateTaskID:  ent.TemplateTaskID,
+		VerifiedBy:      ent.VerifiedBy,
+		Name:            ent.Name,
+		Priority:        ent.Priority,
+		Description:     ent.Description,
+		StartDate:       ent.StartDate,
+		EndDate:         ent.EndDate,
+		IsDone:          ent.IsDone,
 		Proof: func() *string {
 			if ent.Proof == nil {
 				return nil

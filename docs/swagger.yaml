@@ -143,6 +143,8 @@ definitions:
         type: integer
       name:
         type: string
+      organization_type:
+        type: string
       priority:
         type: string
       status:
@@ -158,6 +160,7 @@ definitions:
     required:
     - cover_path
     - name
+    - organization_type
     - priority
     - status
     type: object
@@ -302,6 +305,8 @@ definitions:
         type: string
       name:
         type: string
+      organization_type:
+        type: string
       priority:
         type: string
       status:
@@ -318,6 +323,7 @@ definitions:
     - cover_path
     - id
     - name
+    - organization_type
     - priority
     - status
     type: object
@@ -386,6 +392,8 @@ definitions:
   response.EmployeeTaskResponse:
     properties:
       cover_path:
+        type: string
+      cover_path_origin:
         type: string
       created_at:
         type: string
@@ -514,9 +522,9 @@ definitions:
     type: object
   response.TemplateTaskResponse:
     properties:
-      cover_path_origin:
+      cover_path:
         type: string
-      coverPath:
+      cover_path_origin:
         type: string
       created_at:
         type: string
@@ -527,6 +535,8 @@ definitions:
       id:
         type: string
       name:
+        type: string
+      organization_type:
         type: string
       priority:
         $ref: '#/definitions/entity.TemplateTaskPriorityEnum'

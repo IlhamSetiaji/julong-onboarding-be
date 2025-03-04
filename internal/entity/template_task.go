@@ -23,15 +23,16 @@ const (
 )
 
 type TemplateTask struct {
-	gorm.Model  `json:"-"`
-	ID          uuid.UUID                `json:"id" gorm:"type:char(36);primaryKey;"`
-	CoverPath   *string                  `json:"cover_path" gorm:"type:varchar(255);default:null"`
-	Name        string                   `json:"name" gorm:"type:varchar(255);not null"`
-	Priority    TemplateTaskPriorityEnum `json:"priority" gorm:"type:varchar(255);not null"`
-	DueDuration *int                     `json:"due_duration" gorm:"type:int;default:0"`
-	Status      TemplateTaskStatusEnum   `json:"status" gorm:"type:varchar(255);not null"`
-	Description string                   `json:"description" gorm:"type:text;default:null"`
-	Source      string                   `json:"source" gorm:"type:text;default:null"`
+	gorm.Model       `json:"-"`
+	ID               uuid.UUID                `json:"id" gorm:"type:char(36);primaryKey;"`
+	CoverPath        *string                  `json:"cover_path" gorm:"type:varchar(255);default:null"`
+	Name             string                   `json:"name" gorm:"type:varchar(255);not null"`
+	Priority         TemplateTaskPriorityEnum `json:"priority" gorm:"type:varchar(255);not null"`
+	DueDuration      *int                     `json:"due_duration" gorm:"type:int;default:0"`
+	Status           TemplateTaskStatusEnum   `json:"status" gorm:"type:varchar(255);not null"`
+	Description      string                   `json:"description" gorm:"type:text;default:null"`
+	Source           string                   `json:"source" gorm:"type:text;default:null"`
+	OrganizationType string                   `json:"organization_type" gorm:"type:varchar(255);default:null"`
 
 	TemplateTaskAttachments []TemplateTaskAttachment `json:"template_task_attachments" gorm:"foreignKey:TemplateTaskID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	TemplateTaskChecklists  []TemplateTaskChecklist  `json:"template_task_checklists" gorm:"foreignKey:TemplateTaskID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`

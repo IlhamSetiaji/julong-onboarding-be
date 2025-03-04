@@ -1372,6 +1372,7 @@ const docTemplate = `{
             "required": [
                 "cover_path",
                 "name",
+                "organization_type",
                 "priority",
                 "status"
             ],
@@ -1387,6 +1388,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "organization_type": {
                     "type": "string"
                 },
                 "priority": {
@@ -1603,6 +1607,7 @@ const docTemplate = `{
                 "cover_path",
                 "id",
                 "name",
+                "organization_type",
                 "priority",
                 "status"
             ],
@@ -1621,6 +1626,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "organization_type": {
                     "type": "string"
                 },
                 "priority": {
@@ -1742,6 +1750,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "cover_path": {
+                    "type": "string"
+                },
+                "cover_path_origin": {
                     "type": "string"
                 },
                 "created_at": {
@@ -1937,7 +1948,7 @@ const docTemplate = `{
         "response.TemplateTaskResponse": {
             "type": "object",
             "properties": {
-                "coverPath": {
+                "cover_path": {
                     "type": "string"
                 },
                 "cover_path_origin": {
@@ -1956,6 +1967,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "organization_type": {
                     "type": "string"
                 },
                 "priority": {

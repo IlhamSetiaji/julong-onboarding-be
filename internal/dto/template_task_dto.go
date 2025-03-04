@@ -53,10 +53,11 @@ func (dto *TemplateTaskDTO) ConvertEntityToResponse(ent *entity.TemplateTask) *r
 			}
 			return ent.DueDuration
 		}(),
-		Status:    ent.Status,
-		Source:    ent.Source,
-		CreatedAt: ent.CreatedAt,
-		UpdatedAt: ent.UpdatedAt,
+		Status:           ent.Status,
+		Source:           ent.Source,
+		OrganizationType: ent.OrganizationType,
+		CreatedAt:        ent.CreatedAt,
+		UpdatedAt:        ent.UpdatedAt,
 		TemplateTaskAttachments: func() []response.TemplateTaskAttachmentResponse {
 			var res []response.TemplateTaskAttachmentResponse
 			if ent.TemplateTaskAttachments == nil || len(ent.TemplateTaskAttachments) == 0 {
