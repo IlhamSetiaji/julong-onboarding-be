@@ -614,7 +614,7 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTasksForRecruitment(req *request.Cr
 				continue
 			}
 			if empTaskExist == nil {
-				_, err = uc.Repository.CreateEmployeeTask(&entity.EmployeeTask{
+				createdEmpTask, err := uc.Repository.CreateEmployeeTask(&entity.EmployeeTask{
 					EmployeeID:     &parsedEmployeeID,
 					TemplateTaskID: &templateTask.ID,
 					StartDate:      parsedJoinedDate,
@@ -631,6 +631,31 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTasksForRecruitment(req *request.Cr
 				if err != nil {
 					uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error creating employee task: ", err)
 					continue
+				}
+				if len(templateTask.TemplateTaskChecklists) > 0 {
+					for _, checklist := range templateTask.TemplateTaskChecklists {
+						_, err := uc.EmployeeTaskChecklistRepository.CreateEmployeeTaskChecklist(&entity.EmployeeTaskChecklist{
+							EmployeeTaskID: createdEmpTask.ID,
+							Name:           checklist.Name,
+							IsChecked:      "NO",
+						})
+						if err != nil {
+							uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error creating employee task checklist: ", err)
+							continue
+						}
+					}
+				}
+				if len(templateTask.TemplateTaskAttachments) > 0 {
+					for _, attachment := range templateTask.TemplateTaskAttachments {
+						_, err := uc.EmployeeTaskAttachmentRepository.CreateEmployeeTaskAttachment(&entity.EmployeeTaskAttachment{
+							EmployeeTaskID: createdEmpTask.ID,
+							Path:           attachment.Path,
+						})
+						if err != nil {
+							uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error creating employee task attachment: ", err)
+							continue
+						}
+					}
 				}
 			}
 		}
