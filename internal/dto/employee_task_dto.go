@@ -20,15 +20,24 @@ type EmployeeTaskDTO struct {
 	EmployeeTaskAttachmentDTO IEmployeeTaskAttachmentDTO
 	EmployeeTaskChecklistDTO  IEmployeeTaskChecklistDTO
 	EmployeeMessage           messaging.IEmployeeMessage
+	QuestionDTO               IQuestionDTO
 }
 
-func NewEmployeeTaskDTO(log *logrus.Logger, viper *viper.Viper, employeeTaskAttachmentDTO IEmployeeTaskAttachmentDTO, employeeTaskChecklistDTO IEmployeeTaskChecklistDTO, employeeMessage messaging.IEmployeeMessage) IEmployeeTaskDTO {
+func NewEmployeeTaskDTO(
+	log *logrus.Logger,
+	viper *viper.Viper,
+	employeeTaskAttachmentDTO IEmployeeTaskAttachmentDTO,
+	employeeTaskChecklistDTO IEmployeeTaskChecklistDTO,
+	employeeMessage messaging.IEmployeeMessage,
+	questionDTO IQuestionDTO,
+) IEmployeeTaskDTO {
 	return &EmployeeTaskDTO{
 		Log:                       log,
 		Viper:                     viper,
 		EmployeeTaskAttachmentDTO: employeeTaskAttachmentDTO,
 		EmployeeTaskChecklistDTO:  employeeTaskChecklistDTO,
 		EmployeeMessage:           employeeMessage,
+		QuestionDTO:               questionDTO,
 	}
 }
 
@@ -36,7 +45,8 @@ func EmployeeTaskDTOFactory(log *logrus.Logger, viper *viper.Viper) IEmployeeTas
 	employeeTaskAttachmentDTO := EmployeeTaskAttachmentDTOFactory(log, viper)
 	employeeTaskChecklistDTO := EmployeeTaskChecklistDTOFactory(log, viper)
 	employeeMessage := messaging.EmployeeMessageFactory(log)
-	return NewEmployeeTaskDTO(log, viper, employeeTaskAttachmentDTO, employeeTaskChecklistDTO, employeeMessage)
+	questionDTO := QuestionDTOFactory(log, viper)
+	return NewEmployeeTaskDTO(log, viper, employeeTaskAttachmentDTO, employeeTaskChecklistDTO, employeeMessage, questionDTO)
 }
 
 func (dto *EmployeeTaskDTO) ConvertEntityToResponse(ent *entity.EmployeeTask) *response.EmployeeTaskResponse {

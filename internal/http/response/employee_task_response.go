@@ -37,6 +37,7 @@ type EmployeeTaskResponse struct {
 	TemplateTask            *TemplateTaskResponse            `json:"template_task"`
 	EmployeeTaskAttachments []EmployeeTaskAttachmentResponse `json:"employee_task_attachments"`
 	EmployeeTaskChecklists  []EmployeeTaskChecklistResponse  `json:"employee_task_checklists"`
+	SurveyTemplate          *SurveyTemplateResponse          `json:"survey_template"`
 }
 
 type EmployeeTaskKanbanResponse struct {

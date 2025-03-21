@@ -16,6 +16,7 @@ type QuestionResponse struct {
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
 
-	AnswerType      AnswerTypeResponse       `json:"answer_type"`
+	AnswerType      *AnswerTypeResponse      `json:"answer_type"`
 	QuestionOptions []QuestionOptionResponse `json:"question_options"`
+	SurveyResponses []SurveyResponseResponse `json:"survey_responses"`
 }
