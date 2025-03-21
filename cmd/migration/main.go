@@ -56,7 +56,7 @@ func main() {
 		},
 		{
 			Name: "Link",
-		},
+		}, 
 		{
 			Name: "Attachment",
 		},
