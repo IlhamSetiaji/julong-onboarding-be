@@ -6,6 +6,7 @@ type CreateEmployeeTaskRequest struct {
 	CoverPath               *string                         `form:"cover_path" validate:"required"`
 	EmployeeID              *string                         `form:"employee_id" validate:"required,uuid"`
 	TemplateTaskID          *string                         `form:"template_task_id" validate:"omitempty"`
+	SurveyTemplateID        *string                         `form:"survey_template_id" validate:"omitempty"`
 	Name                    string                          `form:"name" validate:"required"`
 	Priority                string                          `form:"priority" validate:"required,employee_task_priority_validation"`
 	Description             string                          `form:"description" validate:"omitempty"`
@@ -20,6 +21,7 @@ type UpdateEmployeeTaskRequest struct {
 	CoverPath               *string                         `form:"cover_path" validate:"required"`
 	EmployeeID              *string                         `form:"employee_id" validate:"required,uuid"`
 	TemplateTaskID          *string                         `form:"template_task_id" validate:"omitempty"`
+	SurveyTemplateID        *string                         `form:"survey_template_id" validate:"omitempty"`
 	Name                    string                          `form:"name" validate:"required"`
 	Priority                string                          `form:"priority" validate:"required,employee_task_priority_validation"`
 	Description             string                          `form:"description" validate:"omitempty"`

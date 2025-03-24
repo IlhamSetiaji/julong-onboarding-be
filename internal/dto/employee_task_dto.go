@@ -21,6 +21,7 @@ type EmployeeTaskDTO struct {
 	EmployeeTaskChecklistDTO  IEmployeeTaskChecklistDTO
 	EmployeeMessage           messaging.IEmployeeMessage
 	QuestionDTO               IQuestionDTO
+	SurveyTemplateDTO         ISurveyTemplateDTO
 }
 
 func NewEmployeeTaskDTO(
@@ -30,6 +31,7 @@ func NewEmployeeTaskDTO(
 	employeeTaskChecklistDTO IEmployeeTaskChecklistDTO,
 	employeeMessage messaging.IEmployeeMessage,
 	questionDTO IQuestionDTO,
+	surveyTemplateDTO ISurveyTemplateDTO,
 ) IEmployeeTaskDTO {
 	return &EmployeeTaskDTO{
 		Log:                       log,
@@ -38,6 +40,7 @@ func NewEmployeeTaskDTO(
 		EmployeeTaskChecklistDTO:  employeeTaskChecklistDTO,
 		EmployeeMessage:           employeeMessage,
 		QuestionDTO:               questionDTO,
+		SurveyTemplateDTO:         surveyTemplateDTO,
 	}
 }
 
@@ -46,7 +49,8 @@ func EmployeeTaskDTOFactory(log *logrus.Logger, viper *viper.Viper) IEmployeeTas
 	employeeTaskChecklistDTO := EmployeeTaskChecklistDTOFactory(log, viper)
 	employeeMessage := messaging.EmployeeMessageFactory(log)
 	questionDTO := QuestionDTOFactory(log, viper)
-	return NewEmployeeTaskDTO(log, viper, employeeTaskAttachmentDTO, employeeTaskChecklistDTO, employeeMessage, questionDTO)
+	surveyTemplateDTO := SurveyTemplateDTOFactory(log, viper)
+	return NewEmployeeTaskDTO(log, viper, employeeTaskAttachmentDTO, employeeTaskChecklistDTO, employeeMessage, questionDTO, surveyTemplateDTO)
 }
 
 func (dto *EmployeeTaskDTO) ConvertEntityToResponse(ent *entity.EmployeeTask) *response.EmployeeTaskResponse {
@@ -155,6 +159,12 @@ func (dto *EmployeeTaskDTO) ConvertEntityToResponse(ent *entity.EmployeeTask) *r
 				attachments = append(attachments, *response)
 			}
 			return attachments
+		}(),
+		SurveyTemplate: func() *response.SurveyTemplateResponse {
+			if ent.SurveyTemplate == nil {
+				return nil
+			}
+			return dto.SurveyTemplateDTO.ConvertEntityToResponse(ent.SurveyTemplate)
 		}(),
 	}
 }

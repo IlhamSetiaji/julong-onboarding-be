@@ -1236,6 +1236,17 @@ const docTemplate = `{
                 "EVENT_STATUS_ENUM_FINISHED"
             ]
         },
+        "entity.SurveyTemplateStatusEnum": {
+            "type": "string",
+            "enum": [
+                "DRAFT",
+                "SUBMITTED"
+            ],
+            "x-enum-varnames": [
+                "SURVEY_TEMPLATE_STATUS_ENUM_DRAFT",
+                "SURVEY_TEMPLATE_STATUS_ENUM_SUBMITTED"
+            ]
+        },
         "entity.TemplateTaskPriorityEnum": {
             "type": "string",
             "enum": [
@@ -1316,6 +1327,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "start_date": {
+                    "type": "string"
+                },
+                "survey_template_id": {
                     "type": "string"
                 },
                 "template_task_id": {
@@ -1545,6 +1559,9 @@ const docTemplate = `{
                 "status": {
                     "type": "string"
                 },
+                "survey_template_id": {
+                    "type": "string"
+                },
                 "template_task_id": {
                     "type": "string"
                 },
@@ -1648,6 +1665,23 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/request.TemplateTaskChecklistRequest"
                     }
+                }
+            }
+        },
+        "response.AnswerTypeResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },
@@ -1821,6 +1855,9 @@ const docTemplate = `{
                 "status": {
                     "$ref": "#/definitions/entity.EmployeeTaskStatusEnum"
                 },
+                "survey_template": {
+                    "$ref": "#/definitions/response.SurveyTemplateResponse"
+                },
                 "template_task": {
                     "$ref": "#/definitions/response.TemplateTaskResponse"
                 },
@@ -1895,6 +1932,125 @@ const docTemplate = `{
                     "$ref": "#/definitions/response.TemplateTaskResponse"
                 },
                 "template_task_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.QuestionOptionResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "option_text": {
+                    "type": "string"
+                },
+                "question_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.QuestionResponse": {
+            "type": "object",
+            "properties": {
+                "answer_type": {
+                    "$ref": "#/definitions/response.AnswerTypeResponse"
+                },
+                "answer_type_id": {
+                    "type": "string"
+                },
+                "attachment": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_completed": {
+                    "type": "string"
+                },
+                "question": {
+                    "type": "string"
+                },
+                "question_options": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.QuestionOptionResponse"
+                    }
+                },
+                "survey_responses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.SurveyResponseResponse"
+                    }
+                },
+                "survey_template_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.SurveyResponseResponse": {
+            "type": "object",
+            "properties": {
+                "answer": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "employee_task_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "question_id": {
+                    "type": "string"
+                },
+                "survey_template_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.SurveyTemplateResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "questions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.QuestionResponse"
+                    }
+                },
+                "status": {
+                    "$ref": "#/definitions/entity.SurveyTemplateStatusEnum"
+                },
+                "survey_number": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 },
                 "updated_at": {

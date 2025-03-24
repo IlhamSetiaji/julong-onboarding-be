@@ -4,7 +4,6 @@ import (
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/entity"
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/http/response"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 type IAnswerTypeDTO interface {
@@ -12,19 +11,17 @@ type IAnswerTypeDTO interface {
 }
 
 type AnswerTypeDTO struct {
-	Log   *logrus.Logger
-	Viper *viper.Viper
+	Log *logrus.Logger
 }
 
-func NewAnswerTypeDTO(log *logrus.Logger, viper *viper.Viper) IAnswerTypeDTO {
+func NewAnswerTypeDTO(log *logrus.Logger) IAnswerTypeDTO {
 	return &AnswerTypeDTO{
-		Log:   log,
-		Viper: viper,
+		Log: log,
 	}
 }
 
-func AnswerTypeDTOFactory(log *logrus.Logger, viper *viper.Viper) IAnswerTypeDTO {
-	return NewAnswerTypeDTO(log, viper)
+func AnswerTypeDTOFactory(log *logrus.Logger) IAnswerTypeDTO {
+	return NewAnswerTypeDTO(log)
 }
 
 func (dto *AnswerTypeDTO) ConvertEntityToResponse(ent *entity.AnswerType) *response.AnswerTypeResponse {

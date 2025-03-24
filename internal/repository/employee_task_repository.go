@@ -81,7 +81,7 @@ func (r *EmployeeTaskRepository) DeleteEmployeeTask(ent *entity.EmployeeTask) er
 
 func (r *EmployeeTaskRepository) FindByID(id uuid.UUID) (*entity.EmployeeTask, error) {
 	var ent entity.EmployeeTask
-	if err := r.DB.Preload("EmployeeTaskAttachments").Preload("EmployeeTaskChecklists").First(&ent, id).Error; err != nil {
+	if err := r.DB.Preload("EmployeeTaskAttachments").Preload("EmployeeTaskChecklists").Preload("SurveyTemplate").First(&ent, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil
 		} else {
@@ -162,7 +162,7 @@ func (r *EmployeeTaskRepository) FindAllByEmployeeIDAndKanbanPaginated(employeeI
 func (r *EmployeeTaskRepository) FindByKeys(keys map[string]interface{}) (*entity.EmployeeTask, error) {
 	var ent entity.EmployeeTask
 
-	if err := r.DB.Preload("EmployeeTaskAttachments").Preload("EmployeeTaskChecklists").Where(keys).First(&ent).Error; err != nil {
+	if err := r.DB.Preload("EmployeeTaskAttachments").Preload("EmployeeTaskChecklists").Preload("SurveyTemplate").Where(keys).First(&ent).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil
 		} else {

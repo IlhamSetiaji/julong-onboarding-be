@@ -22,6 +22,7 @@ type RouteConfig struct {
 	EmployeeTaskHandler           handler.IEmployeeTaskHandler
 	EmployeeTaskAttachmentHandler handler.IEmployeeTaskAttachmentHandler
 	EventHandler                  handler.IEventHandler
+	AnswerTypeHandler             handler.IAnswerTypeHandler
 }
 
 func (c *RouteConfig) SetupRoutes() {
@@ -98,6 +99,11 @@ func (c *RouteConfig) SetupAPIRoutes() {
 				eventRoute.PUT("/update", c.EventHandler.UpdateEvent)
 				eventRoute.DELETE("/:id", c.EventHandler.DeleteEvent)
 			}
+			// answer types
+			answerTypeRoute := apiRoute.Group("/answer-types")
+			{
+				answerTypeRoute.GET("", c.AnswerTypeHandler.FindAll)
+			}
 		}
 	}
 }
@@ -111,6 +117,7 @@ func NewRouteConfig(app *gin.Engine, viper *viper.Viper, log *logrus.Logger) *Ro
 	employeeTaskHandler := handler.EmployeeTaskHandlerFactory(log, viper)
 	employeeTaskAttachmentHandler := handler.EmployeeTaskAttachmentHandlerFactory(log, viper)
 	eventHandler := handler.EventHandlerFactory(log, viper)
+	answerTypeHandler := handler.AnswerTypeHandlerFactory(log, viper)
 	return &RouteConfig{
 		App:                           app,
 		Log:                           log,
@@ -123,5 +130,6 @@ func NewRouteConfig(app *gin.Engine, viper *viper.Viper, log *logrus.Logger) *Ro
 		EmployeeTaskHandler:           employeeTaskHandler,
 		EmployeeTaskAttachmentHandler: employeeTaskAttachmentHandler,
 		EventHandler:                  eventHandler,
+		AnswerTypeHandler:             answerTypeHandler,
 	}
 }

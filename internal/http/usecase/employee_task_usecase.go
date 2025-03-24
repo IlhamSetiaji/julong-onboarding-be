@@ -37,6 +37,7 @@ type EmployeeTaskUseCase struct {
 	EmployeeTaskAttachmentRepository repository.IEmployeeTaskAttachmentRepository
 	EmployeeTaskChecklistRepository  repository.IEmployeeTaskChecklistRepository
 	EmployeeHiringRepository         repository.IEmployeeHiringRepository
+	SurveyTemplateRepository         repository.ISurveyTemplateRepository
 }
 
 func NewEmployeeTaskUseCase(
@@ -48,6 +49,7 @@ func NewEmployeeTaskUseCase(
 	etaRepo repository.IEmployeeTaskAttachmentRepository,
 	etcRepo repository.IEmployeeTaskChecklistRepository,
 	ehRepo repository.IEmployeeHiringRepository,
+	stRepo repository.ISurveyTemplateRepository,
 ) IEmployeeTaskUseCase {
 	return &EmployeeTaskUseCase{
 		Log:                              log,
@@ -58,6 +60,7 @@ func NewEmployeeTaskUseCase(
 		EmployeeTaskAttachmentRepository: etaRepo,
 		EmployeeTaskChecklistRepository:  etcRepo,
 		EmployeeHiringRepository:         ehRepo,
+		SurveyTemplateRepository:         stRepo,
 	}
 }
 
@@ -68,7 +71,8 @@ func EmployeeTaskUseCaseFactory(log *logrus.Logger, viper *viper.Viper) IEmploye
 	etaRepo := repository.EmployeeTaskAttachmentRepositoryFactory(log)
 	etcRepo := repository.EmployeeTaskChecklistRepositoryFactory(log)
 	ehRepo := repository.EmployeeHiringRepositoryFactory(log)
-	return NewEmployeeTaskUseCase(log, etDTO, repo, viper, ttRepository, etaRepo, etcRepo, ehRepo)
+	stRepo := repository.SurveyTemplateRepositoryFactory(log)
+	return NewEmployeeTaskUseCase(log, etDTO, repo, viper, ttRepository, etaRepo, etcRepo, ehRepo, stRepo)
 }
 
 func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTaskRequest) (*response.EmployeeTaskResponse, error) {
@@ -91,6 +95,27 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTas
 		templateTaskUUID = &parsedTemplateTaskID
 	}
 
+	var surveyTemplateUUID *uuid.UUID
+	if req.SurveyTemplateID != nil && *req.SurveyTemplateID != "" {
+		parsedSurveyTemplateID, err := uuid.Parse(*req.SurveyTemplateID)
+		if err != nil {
+			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error parsing survey template id: ", err)
+			return nil, err
+		}
+		surveyTemplate, err := uc.SurveyTemplateRepository.FindByKeys(map[string]interface{}{
+			"id": parsedSurveyTemplateID,
+		})
+		if err != nil {
+			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error finding survey template by id: ", err)
+			return nil, err
+		}
+		if surveyTemplate == nil {
+			return nil, errors.New("survey template not found")
+		}
+
+		surveyTemplateUUID = &parsedSurveyTemplateID
+	}
+
 	parsedEmployeeID, err := uuid.Parse(*req.EmployeeID)
 	if err != nil {
 		uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error parsing employee id: ", err)
@@ -110,15 +135,16 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTas
 	}
 
 	employeeTask, err := uc.Repository.CreateEmployeeTask(&entity.EmployeeTask{
-		CoverPath:      req.CoverPath,
-		EmployeeID:     &parsedEmployeeID,
-		TemplateTaskID: templateTaskUUID,
-		Name:           req.Name,
-		Priority:       entity.EmployeeTaskPriorityEnum(req.Priority),
-		Description:    req.Description,
-		StartDate:      parsedStartDate,
-		EndDate:        parsedEndDate,
-		Source:         "ONBOARDING",
+		CoverPath:        req.CoverPath,
+		EmployeeID:       &parsedEmployeeID,
+		TemplateTaskID:   templateTaskUUID,
+		SurveyTemplateID: surveyTemplateUUID,
+		Name:             req.Name,
+		Priority:         entity.EmployeeTaskPriorityEnum(req.Priority),
+		Description:      req.Description,
+		StartDate:        parsedStartDate,
+		EndDate:          parsedEndDate,
+		Source:           "ONBOARDING",
 	})
 	if err != nil {
 		uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error creating employee task: ", err)
@@ -254,6 +280,27 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 		templateTaskUUID = &parsedTemplateTaskID
 	}
 
+	var surveyTemplateUUID *uuid.UUID
+	if req.SurveyTemplateID != nil && *req.SurveyTemplateID != "" {
+		parsedSurveyTemplateID, err := uuid.Parse(*req.SurveyTemplateID)
+		if err != nil {
+			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error parsing survey template id: ", err)
+			return nil, err
+		}
+		surveyTemplate, err := uc.SurveyTemplateRepository.FindByKeys(map[string]interface{}{
+			"id": parsedSurveyTemplateID,
+		})
+		if err != nil {
+			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error finding survey template by id: ", err)
+			return nil, err
+		}
+		if surveyTemplate == nil {
+			return nil, errors.New("survey template not found")
+		}
+
+		surveyTemplateUUID = &parsedSurveyTemplateID
+	}
+
 	var verifiedBy *uuid.UUID
 	if req.VerifiedBy != nil && *req.VerifiedBy != "" {
 		parsedVerifiedBy, err := uuid.Parse(*req.VerifiedBy)
@@ -283,21 +330,22 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 	}
 
 	employeeTask, err := uc.Repository.UpdateEmployeeTask(&entity.EmployeeTask{
-		ID:             parsedID,
-		CoverPath:      req.CoverPath,
-		EmployeeID:     &parsedEmployeeID,
-		TemplateTaskID: templateTaskUUID,
-		Name:           req.Name,
-		Priority:       entity.EmployeeTaskPriorityEnum(req.Priority),
-		Description:    req.Description,
-		StartDate:      parsedStartDate,
-		EndDate:        parsedEndDate,
-		VerifiedBy:     verifiedBy,
-		IsDone:         req.IsDone,
-		Proof:          req.ProofPath,
-		Status:         entity.EmployeeTaskStatusEnum(req.Status),
-		Kanban:         entity.EmployeeTaskKanbanEnum(req.Kanban),
-		Notes:          req.Notes,
+		ID:               parsedID,
+		CoverPath:        req.CoverPath,
+		EmployeeID:       &parsedEmployeeID,
+		TemplateTaskID:   templateTaskUUID,
+		SurveyTemplateID: surveyTemplateUUID,
+		Name:             req.Name,
+		Priority:         entity.EmployeeTaskPriorityEnum(req.Priority),
+		Description:      req.Description,
+		StartDate:        parsedStartDate,
+		EndDate:          parsedEndDate,
+		VerifiedBy:       verifiedBy,
+		IsDone:           req.IsDone,
+		Proof:            req.ProofPath,
+		Status:           entity.EmployeeTaskStatusEnum(req.Status),
+		Kanban:           entity.EmployeeTaskKanbanEnum(req.Kanban),
+		Notes:            req.Notes,
 	})
 	if err != nil {
 		uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error creating employee task: ", err)
