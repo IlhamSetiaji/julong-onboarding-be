@@ -36,7 +36,7 @@ func NewQuestionDTO(
 }
 
 func QuestionDTOFactory(log *logrus.Logger, viper *viper.Viper) IQuestionDTO {
-	answerTypeDTO := AnswerTypeDTOFactory(log, viper)
+	answerTypeDTO := AnswerTypeDTOFactory(log)
 	questionOptionDTO := QuestionOptionDTOFactory(log, viper)
 	surveyResponseDTO := SurveyResponseDTOFactory(log, viper)
 	return NewQuestionDTO(log, viper, answerTypeDTO, questionOptionDTO, surveyResponseDTO)
