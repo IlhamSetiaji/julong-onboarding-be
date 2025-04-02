@@ -9,10 +9,11 @@ import (
 
 type ISurveyTemplateRepository interface {
 	CreateSurveyTemplate(ent *entity.SurveyTemplate) (*entity.SurveyTemplate, error)
-	UpdateSurveyTemplate(ent *entity.SurveyTemplate) (*entity.SurveyTemplate, error)
+	UpdateSurveyTemplate(entsur *entity.SurveyTemplate) (*entity.SurveyTemplate, error)
 	DeleteSurveyTemplate(ent *entity.SurveyTemplate) error
 	FindByKeys(keys map[string]interface{}) (*entity.SurveyTemplate, error)
 	FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}) (*[]entity.SurveyTemplate, int64, error)
+	FindLatestSurveyNumber() (*entity.SurveyTemplate, error)
 }
 
 type SurveyTemplateRepository struct {
@@ -107,4 +108,17 @@ func (r *SurveyTemplateRepository) FindAllPaginated(page, pageSize int, search s
 	}
 
 	return &ents, total, nil
+}
+
+func (r *SurveyTemplateRepository) FindLatestSurveyNumber() (*entity.SurveyTemplate, error) {
+	var latestSurvey entity.SurveyTemplate
+	if err := r.DB.Order("created_at desc").First(&latestSurvey).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		r.Log.Error("[SurveyTemplateRepository.FindLatestSurveyNumber] Error when find latest survey number: ", err)
+		return nil, err
+	}
+
+	return &latestSurvey, nil
 }

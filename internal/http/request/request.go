@@ -162,3 +162,17 @@ func EventStatusValidation(fl validator.FieldLevel) bool {
 		return false
 	}
 }
+
+func SurveyTemplateStatusValidation(fl validator.FieldLevel) bool {
+	status := fl.Field().String()
+	if status == "" {
+		return true
+	}
+	switch entity.SurveyTemplateStatusEnum(status) {
+	case entity.SURVEY_TEMPLATE_STATUS_ENUM_DRAFT,
+		entity.SURVEY_TEMPLATE_STATUS_ENUM_SUBMITTED:
+		return true
+	default:
+		return false
+	}
+}

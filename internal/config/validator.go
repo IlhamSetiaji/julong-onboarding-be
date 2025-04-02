@@ -18,5 +18,6 @@ func NewValidator(viper *viper.Viper) *validator.Validate {
 	validate.RegisterValidation("employee_task_priority_validation", request.EmployeeTaskPriorityValidation)
 	validate.RegisterValidation("employee_task_kanban_validation", request.EmployeeTaskKanbanValidation)
 	validate.RegisterValidation("event_status_validation", request.EventStatusValidation)
+	validate.RegisterValidation("survey_template_status_validation", request.SurveyTemplateStatusValidation)
 	return validate
 }
