@@ -1980,6 +1980,9 @@ const docTemplate = `{
                 "is_completed": {
                     "type": "string"
                 },
+                "number": {
+                    "type": "integer"
+                },
                 "question": {
                     "type": "string"
                 },

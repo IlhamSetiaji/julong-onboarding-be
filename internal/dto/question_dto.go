@@ -55,6 +55,7 @@ func (dto *QuestionDTO) ConvertEntityToResponse(ent *entity.Question) *response.
 			path := dto.Viper.GetString("app.url") + *ent.Attachment
 			return &path
 		}(),
+		Number:    ent.Number,
 		CreatedAt: ent.CreatedAt,
 		UpdatedAt: ent.UpdatedAt,
 

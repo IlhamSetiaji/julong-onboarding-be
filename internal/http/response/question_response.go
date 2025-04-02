@@ -13,6 +13,7 @@ type QuestionResponse struct {
 	Question         string    `json:"question"`
 	Attachment       *string   `json:"attachment"`
 	IsCompleted      string    `json:"is_completed"`
+	Number           int       `json:"number"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
 

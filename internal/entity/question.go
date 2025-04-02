@@ -15,6 +15,7 @@ type Question struct {
 	Question         string    `json:"question" gorm:"type:text;not null"`
 	Attachment       *string   `json:"attachment" gorm:"type:varchar(255);default:null"`
 	IsCompleted      string    `json:"is_completed" gorm:"type:varchar(255);not null;default:'NO'"`
+	Number           int       `json:"number" gorm:"type:int;not null"`
 
 	SurveyTemplate  *SurveyTemplate  `json:"survey_template" gorm:"foreignKey:SurveyTemplateID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	AnswerType      *AnswerType      `json:"answer_type" gorm:"foreignKey:AnswerTypeID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`

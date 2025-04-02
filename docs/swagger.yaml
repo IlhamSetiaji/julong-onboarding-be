@@ -544,6 +544,8 @@ definitions:
         type: string
       is_completed:
         type: string
+      number:
+        type: integer
       question:
         type: string
       question_options:
