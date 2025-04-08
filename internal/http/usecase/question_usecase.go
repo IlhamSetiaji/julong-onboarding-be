@@ -155,6 +155,8 @@ func (uc *QuestionUseCase) CreateOrUpdateQuestions(req *request.CreateOrUpdateQu
 		return nil, errors.New("[QuestionUseCase.CreateOrUpdateQuestions] error when parsing survey template id: " + err.Error())
 	}
 
+	uc.Log.Info("Payload questions: ", req.Questions)
+
 	// create or update questions
 	for i, question := range req.Questions {
 		if question.ID != "" && question.ID != uuid.Nil.String() {

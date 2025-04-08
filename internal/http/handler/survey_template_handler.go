@@ -95,6 +95,8 @@ func (h *SurveyTemplateHandler) CreateSurveyTemplate(ctx *gin.Context) {
 	optionText := form.Value["questions[question_options][option_text]"]
 	// questionOptions := make([][]string, len(optionText))
 
+	h.Log.Info("Answer Types: ", answerTypes)
+
 	for i, answerType := range answerTypes {
 		ans, err := h.AnswerTypeUseCase.FindByID(answerType)
 		if err != nil {
@@ -108,38 +110,48 @@ func (h *SurveyTemplateHandler) CreateSurveyTemplate(ctx *gin.Context) {
 			utils.ErrorResponse(ctx, http.StatusNotFound, "failed to find answer type by id", "answer type not found")
 			return
 		}
-		if ans.Name == "Attachment" {
-			if len(files) > 0 {
-				for i, file := range files {
-					timestamp := time.Now().UnixNano()
-					filePath := "storage/questions/attachments/" + strconv.FormatInt(timestamp, 10) + "_" + file.Filename
-					if err := ctx.SaveUploadedFile(file, filePath); err != nil {
-						h.Log.Error("failed to save attachment file: ", err)
-						utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to save attachment file", err.Error())
-						return
-					}
 
-					req.Questions = append(req.Questions, request.QuestionRequest{
-						Attachment:     nil,
-						AttachmentPath: filePath,
-						AnswerTypeID:   answerTypes[i],
-					})
+		h.Log.Info("Answer Type: ", ans.Name)
+
+		if ans.Name == "Attachment" {
+			if len(files) > i { // Ensure the file index exists
+				file := files[i]
+				timestamp := time.Now().UnixNano()
+				filePath := "storage/questions/attachments/" + strconv.FormatInt(timestamp, 10) + "_" + file.Filename
+				if err := ctx.SaveUploadedFile(file, filePath); err != nil {
+					h.Log.Error("failed to save attachment file: ", err)
+					utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to save attachment file", err.Error())
+					return
 				}
-			}
-		} else {
-			var questionOptions []request.QuestionOptionRequest
-			for _, option := range optionText {
-				questionOptions = append(questionOptions, request.QuestionOptionRequest{
-					OptionText: option,
+
+				req.Questions = append(req.Questions, request.QuestionRequest{
+					Attachment:     nil,
+					AttachmentPath: filePath,
+					AnswerTypeID:   answerType,
+					Question:       questions[i],
 				})
 			}
-			req.Questions = append(req.Questions, request.QuestionRequest{
-				AnswerTypeID:    answerType,
-				Question:        questions[i],
-				QuestionOptions: questionOptions,
-			})
+		} else {
+			if len(questions) > i { // Ensure the question index exists
+				var questionOptions []request.QuestionOptionRequest
+				if len(optionText) > 0 {
+					for _, option := range optionText {
+						questionOptions = append(questionOptions, request.QuestionOptionRequest{
+							OptionText: option,
+						})
+					}
+				}
+				req.Questions = append(req.Questions, request.QuestionRequest{
+					AnswerTypeID:    answerType,
+					Question:        questions[i],
+					QuestionOptions: questionOptions,
+				})
+			}
 		}
 	}
+
+	h.Log.Info("Questions: ", req.Questions)
+	h.Log.Info("QuestionOptions: ", optionText)
 
 	tx := h.DB.WithContext(ctx.Request.Context()).Begin()
 	if tx.Error != nil {
@@ -190,47 +202,53 @@ func (h *SurveyTemplateHandler) UpdateSurveyTemplate(ctx *gin.Context) {
 	for i, answerType := range answerTypes {
 		ans, err := h.AnswerTypeUseCase.FindByID(answerType)
 		if err != nil {
-			h.Log.Error("[SurveyTemplateHandler.UpdateSurveyTemplate] Error when finding answer type by id: ", err)
+			h.Log.Error("[SurveyTemplateHandler.CreateSurveyTemplate] Error when finding answer type by id: ", err)
 			utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to find answer type by id", err.Error())
 			return
 		}
 
 		if ans == nil {
-			h.Log.Error("[SurveyTemplateHandler.UpdateSurveyTemplate] Error when finding answer type by id: answer type not found")
+			h.Log.Error("[SurveyTemplateHandler.CreateSurveyTemplate] Error when finding answer type by id: answer type not found")
 			utils.ErrorResponse(ctx, http.StatusNotFound, "failed to find answer type by id", "answer type not found")
 			return
 		}
 
-		if ans.Name == "Attachment" {
-			if len(files) > 0 {
-				for i, file := range files {
-					timestamp := time.Now().UnixNano()
-					filePath := "storage/questions/attachments/" + strconv.FormatInt(timestamp, 10) + "_" + file.Filename
-					if err := ctx.SaveUploadedFile(file, filePath); err != nil {
-						h.Log.Error("failed to save attachment file: ", err)
-						utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to save attachment file", err.Error())
-						return
-					}
+		h.Log.Info("Answer Type: ", ans.Name)
 
-					req.Questions = append(req.Questions, request.QuestionRequest{
-						Attachment:     nil,
-						AttachmentPath: filePath,
-						AnswerTypeID:   answerTypes[i],
-					})
+		if ans.Name == "Attachment" {
+			if len(files) > i { // Ensure the file index exists
+				file := files[i]
+				timestamp := time.Now().UnixNano()
+				filePath := "storage/questions/attachments/" + strconv.FormatInt(timestamp, 10) + "_" + file.Filename
+				if err := ctx.SaveUploadedFile(file, filePath); err != nil {
+					h.Log.Error("failed to save attachment file: ", err)
+					utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to save attachment file", err.Error())
+					return
 				}
-			}
-		} else {
-			var questionOptions []request.QuestionOptionRequest
-			for _, option := range optionText {
-				questionOptions = append(questionOptions, request.QuestionOptionRequest{
-					OptionText: option,
+
+				req.Questions = append(req.Questions, request.QuestionRequest{
+					Attachment:     nil,
+					AttachmentPath: filePath,
+					AnswerTypeID:   answerType,
+					Question:       questions[i],
 				})
 			}
-			req.Questions = append(req.Questions, request.QuestionRequest{
-				AnswerTypeID:    answerType,
-				Question:        questions[i],
-				QuestionOptions: questionOptions,
-			})
+		} else {
+			if len(questions) > i { // Ensure the question index exists
+				var questionOptions []request.QuestionOptionRequest
+				if len(optionText) > 0 {
+					for _, option := range optionText {
+						questionOptions = append(questionOptions, request.QuestionOptionRequest{
+							OptionText: option,
+						})
+					}
+				}
+				req.Questions = append(req.Questions, request.QuestionRequest{
+					AnswerTypeID:    answerType,
+					Question:        questions[i],
+					QuestionOptions: questionOptions,
+				})
+			}
 		}
 	}
 

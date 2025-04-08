@@ -92,7 +92,7 @@ func (r *SurveyTemplateRepository) FindAllPaginated(page, pageSize int, search s
 	var ents []entity.SurveyTemplate
 	var total int64
 
-	query := r.DB.Preload("EmployeeTaskAttachments").Preload("EmployeeTaskChecklists").Where("name LIKE ?", "%"+search+"%")
+	query := r.DB.Where("title ILIKE ?", "%"+search+"%")
 	for key, value := range sort {
 		query = query.Order(key + " " + value.(string))
 	}
