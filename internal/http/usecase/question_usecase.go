@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/dto"
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/entity"
@@ -62,19 +63,90 @@ func QuestionUseCaseFactory(log *logrus.Logger, viper *viper.Viper) IQuestionUse
 	return NewQuestionUseCase(log, viper, repo, qDTO, qoRepository, userProfileRepository, surveyTemplateRepository, surveyTemplateDTO)
 }
 
-func (uc *QuestionUseCase) CreateOrUpdateQuestions(req *request.CreateOrUpdateQuestions) (*response.SurveyTemplateResponse, error) {
-	// check if survey template exist
-	tq, err := uc.SurveyTemplateRepository.FindByKeys(map[string]interface{}{
-		"id": req.SurveyTemplateID,
-	})
+func (u *QuestionUseCase) generateRandomSurveyNumber() (*string, error) {
+	// Find the latest survey number
+	latestSurvey, err := u.SurveyTemplateRepository.FindLatestSurveyNumber()
 	if err != nil {
-		uc.Log.Errorf("[QuestionUseCase.CreateOrUpdateQuestions] error when finding survey template by id: %s", err.Error())
-		return nil, errors.New("[QuestionUseCase.CreateOrUpdateQuestions] error when finding survey template by id: " + err.Error())
+		u.Log.Error("[SurveyTemplateUseCase.generateRandomSurveyNumber] Error when finding latest survey number: ", err)
+		return nil, err
 	}
 
-	if tq == nil {
-		uc.Log.Errorf("[QuestionUseCase.CreateOrUpdateQuestions] survey template with id %s not found", req.SurveyTemplateID)
-		return nil, errors.New("[QuestionUseCase.CreateOrUpdateQuestions] survey template with id " + req.SurveyTemplateID + " not found")
+	// Generate the next survey number
+	var nextNumber int
+	if latestSurvey != nil && latestSurvey.SurveyNumber != "" {
+		// Extract the numeric part of the survey number
+		var currentNumber int
+		_, err := fmt.Sscanf(latestSurvey.SurveyNumber, "SURVEY-%05d", &currentNumber)
+		if err != nil {
+			u.Log.Error("[SurveyTemplateUseCase.generateRandomSurveyNumber] Error parsing survey number: ", err)
+			return nil, err
+		}
+		nextNumber = currentNumber + 1
+	} else {
+		// Start from 1 if no survey number exists
+		nextNumber = 1
+	}
+
+	// Format the next survey number
+	newSurveyNumber := fmt.Sprintf("SURVEY-%05d", nextNumber)
+
+	// Check if the generated survey number already exists
+	exist, err := u.SurveyTemplateRepository.FindByKeys(map[string]interface{}{
+		"survey_number": newSurveyNumber,
+	})
+	if err != nil {
+		u.Log.Error("[SurveyTemplateUseCase.generateRandomSurveyNumber] Error when finding survey number: ", err)
+		return nil, err
+	}
+	if exist != nil {
+		// Retry generating a new survey number if it already exists
+		return u.generateRandomSurveyNumber()
+	}
+
+	return &newSurveyNumber, nil
+}
+
+func (uc *QuestionUseCase) CreateOrUpdateQuestions(req *request.CreateOrUpdateQuestions) (*response.SurveyTemplateResponse, error) {
+	// check if survey template exist
+	var tq *entity.SurveyTemplate
+	if req.SurveyTemplateID != "" {
+		tq, err := uc.SurveyTemplateRepository.FindByKeys(map[string]interface{}{
+			"id": req.SurveyTemplateID,
+		})
+		if err != nil {
+			uc.Log.Errorf("[QuestionUseCase.CreateOrUpdateQuestions] error when finding survey template by id: %s", err.Error())
+			return nil, errors.New("[QuestionUseCase.CreateOrUpdateQuestions] error when finding survey template by id: " + err.Error())
+		}
+
+		if tq == nil {
+			uc.Log.Errorf("[QuestionUseCase.CreateOrUpdateQuestions] survey template with id %s not found", req.SurveyTemplateID)
+			return nil, errors.New("[QuestionUseCase.CreateOrUpdateQuestions] survey template with id " + req.SurveyTemplateID + " not found")
+		}
+
+		_, err = uc.SurveyTemplateRepository.UpdateSurveyTemplate(&entity.SurveyTemplate{
+			ID:    tq.ID,
+			Title: req.Title,
+		})
+		if err != nil {
+			uc.Log.Errorf("[QuestionUseCase.CreateOrUpdateQuestions] error when updating survey template: %s", err.Error())
+			return nil, errors.New("[QuestionUseCase.CreateOrUpdateQuestions] error when updating survey template: " + err.Error())
+		}
+	} else {
+		surveyNumber, err := uc.generateRandomSurveyNumber()
+		if err != nil {
+			uc.Log.Error("[SurveyTemplateUseCase.CreateSurveyTemplate] Error when generating random survey number: ", err)
+			return nil, err
+		}
+		tq, err := uc.SurveyTemplateRepository.CreateSurveyTemplate(&entity.SurveyTemplate{
+			Title:        req.Title,
+			SurveyNumber: *surveyNumber,
+			Status:       entity.SURVEY_TEMPLATE_STATUS_ENUM_DRAFT,
+		})
+		if err != nil {
+			uc.Log.Errorf("[QuestionUseCase.CreateOrUpdateQuestions] error when creating survey template: %s", err.Error())
+			return nil, errors.New("[QuestionUseCase.CreateOrUpdateQuestions] error when creating survey template: " + err.Error())
+		}
+		req.SurveyTemplateID = tq.ID.String()
 	}
 
 	// create or update questions
@@ -88,11 +160,16 @@ func (uc *QuestionUseCase) CreateOrUpdateQuestions(req *request.CreateOrUpdateQu
 
 			if exist == nil {
 				createdQuestion, err := uc.Repository.CreateQuestion(&entity.Question{
-					SurveyTemplateID: tq.ID,
-					AnswerTypeID:     uuid.MustParse(question.AnswerTypeID),
-					Question:         question.Question,
-					Number:           i + 1,
-					Attachment:       &question.AttachmentPath,
+					SurveyTemplateID: func() uuid.UUID {
+						if tq != nil {
+							return tq.ID
+						}
+						return uuid.Nil
+					}(),
+					AnswerTypeID: uuid.MustParse(question.AnswerTypeID),
+					Question:     question.Question,
+					Number:       i + 1,
+					Attachment:   &question.AttachmentPath,
 				})
 				if err != nil {
 					uc.Log.Errorf("[QuestionUseCase.CreateOrUpdateQuestions] error when creating question: %s", err.Error())

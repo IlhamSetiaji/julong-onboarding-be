@@ -23,6 +23,7 @@ type RouteConfig struct {
 	EmployeeTaskAttachmentHandler handler.IEmployeeTaskAttachmentHandler
 	EventHandler                  handler.IEventHandler
 	AnswerTypeHandler             handler.IAnswerTypeHandler
+	SurveyTemplateHandler         handler.ISurveyTemplateHandler
 }
 
 func (c *RouteConfig) SetupRoutes() {
@@ -104,6 +105,15 @@ func (c *RouteConfig) SetupAPIRoutes() {
 			{
 				answerTypeRoute.GET("", c.AnswerTypeHandler.FindAll)
 			}
+			// survey templates
+			surveyTemplateRoute := apiRoute.Group("/survey-templates")
+			{
+				surveyTemplateRoute.GET("", c.SurveyTemplateHandler.FindAllSurveyTemplatesPaginated)
+				surveyTemplateRoute.GET("/:id", c.SurveyTemplateHandler.FindSurveyTemplateByID)
+				surveyTemplateRoute.POST("", c.SurveyTemplateHandler.CreateSurveyTemplate)
+				surveyTemplateRoute.PUT("/update", c.SurveyTemplateHandler.UpdateSurveyTemplate)
+				surveyTemplateRoute.DELETE("/:id", c.SurveyTemplateHandler.DeleteSurveyTemplate)
+			}
 		}
 	}
 }
@@ -118,6 +128,7 @@ func NewRouteConfig(app *gin.Engine, viper *viper.Viper, log *logrus.Logger) *Ro
 	employeeTaskAttachmentHandler := handler.EmployeeTaskAttachmentHandlerFactory(log, viper)
 	eventHandler := handler.EventHandlerFactory(log, viper)
 	answerTypeHandler := handler.AnswerTypeHandlerFactory(log, viper)
+	surveyTemplateHandler := handler.SurveyTemplateHandlerFactory(log, viper)
 	return &RouteConfig{
 		App:                           app,
 		Log:                           log,
@@ -131,5 +142,6 @@ func NewRouteConfig(app *gin.Engine, viper *viper.Viper, log *logrus.Logger) *Ro
 		EmployeeTaskAttachmentHandler: employeeTaskAttachmentHandler,
 		EventHandler:                  eventHandler,
 		AnswerTypeHandler:             answerTypeHandler,
+		SurveyTemplateHandler:         surveyTemplateHandler,
 	}
 }
