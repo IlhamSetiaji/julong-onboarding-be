@@ -17,6 +17,7 @@ type IQuestionRepository interface {
 	FindByID(id uuid.UUID) (*entity.Question, error)
 	FindQuestionWithResponsesByIDAndUserProfileID(questionID, userProfileID uuid.UUID) (*entity.Question, error)
 	FindAllByTemplateQuestionIDsAndJobPostingID(templateQuestionIDs []uuid.UUID, jobPostingID uuid.UUID) (*[]entity.Question, error)
+	DeleteQuestionsNotInIDsBySurveyTemplateID(surveyTemplateID uuid.UUID, questionIDs []uuid.UUID) error
 }
 
 type QuestionRepository struct {
@@ -166,4 +167,22 @@ func (r *QuestionRepository) FindAllByTemplateQuestionIDsAndJobPostingID(templat
 	}
 
 	return &questions, nil
+}
+
+func (r *QuestionRepository) DeleteQuestionsNotInIDsBySurveyTemplateID(surveyTemplateID uuid.UUID, questionIDs []uuid.UUID) error {
+	tx := r.DB.Begin()
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	if err := tx.Where("survey_template_id = ? AND id NOT IN (?)", surveyTemplateID, questionIDs).Delete(&entity.Question{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return err
+	}
+
+	return nil
 }

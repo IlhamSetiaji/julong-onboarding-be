@@ -79,6 +79,7 @@ func convertInterfaceToEmployeeResponse(data map[string]interface{}) *response.E
 	email := data["email"].(string)
 	mobilePhone := data["mobile_phone"].(string)
 	employeeJob := data["employee_job"].(map[string]interface{})
+	midsuitID := data["midsuit_id"].(string)
 
 	return &response.EmployeeResponse{
 		ID:             uuid.MustParse(id),
@@ -89,6 +90,7 @@ func convertInterfaceToEmployeeResponse(data map[string]interface{}) *response.E
 		Email:          email,
 		MobilePhone:    mobilePhone,
 		EmployeeJob:    employeeJob,
+		MidsuitID:      midsuitID,
 	}
 }
 

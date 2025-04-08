@@ -14,6 +14,7 @@ type EmployeeResponse struct {
 	RetirementDate time.Time `json:"retirement_date"`
 	Email          string    `json:"email"`
 	MobilePhone    string    `json:"mobile_phone"`
+	MidsuitID      string    `json:"midsuit_id"`
 
 	Organization OrganizationResponse   `json:"organization"`
 	EmployeeJob  map[string]interface{} `json:"employee_job"`

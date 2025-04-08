@@ -139,6 +139,7 @@ func (dto *EmployeeTaskDTO) ConvertEntityToResponse(ent *entity.EmployeeTask) *r
 		Source:           ent.Source,
 		Progress:         progress,
 		ProgressVerified: progressVerified,
+		MidsuitID:        ent.MidsuitID,
 		CreatedAt:        ent.CreatedAt,
 		UpdatedAt:        ent.UpdatedAt,
 

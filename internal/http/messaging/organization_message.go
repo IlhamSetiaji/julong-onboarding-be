@@ -74,6 +74,7 @@ func (m *OrganizationMessage) SendFindOrganizationByIDMessage(req request.SendFi
 		Name:                 resp.MessageData["name"].(string),
 		OrganizationCategory: resp.MessageData["organization_category"].(string),
 		OrganizationType:     resp.MessageData["organization_type"].(string),
+		MidsuitID:            resp.MessageData["midsuit_id"].(string),
 	}, nil
 }
 
@@ -211,6 +212,7 @@ func (m *OrganizationMessage) SendFindOrganizationStructureByIDMessage(req reque
 	return &orgResponse.SendFindOrganizationStructureByIDMessageResponse{
 		OrganizationStructureID: resp.MessageData["organization_structure_id"].(string),
 		Name:                    resp.MessageData["name"].(string),
+		MidsuitID:               resp.MessageData["midsuit_id"].(string),
 	}, nil
 }
 

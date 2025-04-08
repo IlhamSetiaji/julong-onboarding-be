@@ -114,8 +114,9 @@ func (m *JobPlafonMessage) SendFindJobByIDMessage(req request.SendFindJobByIDMes
 	}
 
 	return &jobResponse.SendFindJobByIDMessageResponse{
-		JobID: uuid.MustParse(resp.MessageData["job_id"].(string)),
-		Name:  resp.MessageData["name"].(string),
+		JobID:     uuid.MustParse(resp.MessageData["job_id"].(string)),
+		Name:      resp.MessageData["name"].(string),
+		MidsuitID: resp.MessageData["midsuit_id"].(string),
 	}, nil
 }
 
@@ -160,6 +161,7 @@ func (m *JobPlafonMessage) SendFindJobLevelByIDMessage(req request.SendFindJobLe
 		JobLevelID: uuid.MustParse(resp.MessageData["job_level_id"].(string)),
 		Name:       resp.MessageData["name"].(string),
 		Level:      resp.MessageData["level"].(float64),
+		MidsuitID:  resp.MessageData["midsuit_id"].(string),
 	}, nil
 }
 

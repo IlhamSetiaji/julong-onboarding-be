@@ -216,6 +216,7 @@ func (h *SurveyTemplateHandler) UpdateSurveyTemplate(ctx *gin.Context) {
 		h.Log.Info("Answer Type: ", ans.Name)
 
 		if ans.Name == "Attachment" {
+			var attachmentPath string
 			if len(files) > i { // Ensure the file index exists
 				file := files[i]
 				timestamp := time.Now().UnixNano()
@@ -225,14 +226,14 @@ func (h *SurveyTemplateHandler) UpdateSurveyTemplate(ctx *gin.Context) {
 					utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to save attachment file", err.Error())
 					return
 				}
-
-				req.Questions = append(req.Questions, request.QuestionRequest{
-					Attachment:     nil,
-					AttachmentPath: filePath,
-					AnswerTypeID:   answerType,
-					Question:       questions[i],
-				})
+				attachmentPath = filePath
 			}
+			req.Questions = append(req.Questions, request.QuestionRequest{
+				Attachment:     nil,
+				AttachmentPath: attachmentPath,
+				AnswerTypeID:   answerType,
+				Question:       questions[i],
+			})
 		} else {
 			if len(questions) > i { // Ensure the question index exists
 				var questionOptions []request.QuestionOptionRequest

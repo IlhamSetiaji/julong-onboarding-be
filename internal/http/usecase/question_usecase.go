@@ -157,6 +157,27 @@ func (uc *QuestionUseCase) CreateOrUpdateQuestions(req *request.CreateOrUpdateQu
 
 	uc.Log.Info("Payload questions: ", req.Questions)
 
+	var questionIDs []uuid.UUID
+	for _, question := range req.Questions {
+		if question.ID != "" && question.ID != uuid.Nil.String() {
+			parsedQuestionID, err := uuid.Parse(question.ID)
+			if err != nil {
+				uc.Log.Errorf("[QuestionUseCase.CreateOrUpdateQuestions] error when parsing question id: %s", err.Error())
+				return nil, errors.New("[QuestionUseCase.CreateOrUpdateQuestions] error when parsing question id: " + err.Error())
+			}
+			questionIDs = append(questionIDs, parsedQuestionID)
+		}
+	}
+
+	// delete questions not in ids and survey template id
+	if len(questionIDs) > 0 {
+		err = uc.Repository.DeleteQuestionsNotInIDsBySurveyTemplateID(parsedSurveyTemplateID, questionIDs)
+		if err != nil {
+			uc.Log.Errorf("[QuestionUseCase.CreateOrUpdateQuestions] error when deleting questions not in ids and survey template id: %s", err.Error())
+			return nil, errors.New("[QuestionUseCase.CreateOrUpdateQuestions] error when deleting questions not in ids and survey template id: " + err.Error())
+		}
+	}
+
 	// create or update questions
 	for i, question := range req.Questions {
 		if question.ID != "" && question.ID != uuid.Nil.String() {
@@ -257,15 +278,15 @@ func (uc *QuestionUseCase) CreateOrUpdateQuestions(req *request.CreateOrUpdateQu
 	}
 
 	// delete questions
-	if len(req.DeletedQuestionIDs) > 0 {
-		for _, id := range req.DeletedQuestionIDs {
-			err := uc.Repository.DeleteQuestion(uuid.MustParse(id))
-			if err != nil {
-				uc.Log.Errorf("[QuestionUseCase.CreateOrUpdateQuestions] error when deleting question: %s", err.Error())
-				return nil, errors.New("[QuestionUseCase.CreateOrUpdateQuestions] error when deleting question: " + err.Error())
-			}
-		}
-	}
+	// if len(req.DeletedQuestionIDs) > 0 {
+	// 	for _, id := range req.DeletedQuestionIDs {
+	// 		err := uc.Repository.DeleteQuestion(uuid.MustParse(id))
+	// 		if err != nil {
+	// 			uc.Log.Errorf("[QuestionUseCase.CreateOrUpdateQuestions] error when deleting question: %s", err.Error())
+	// 			return nil, errors.New("[QuestionUseCase.CreateOrUpdateQuestions] error when deleting question: " + err.Error())
+	// 		}
+	// 	}
+	// }
 
 	tQuestion, err := uc.SurveyTemplateRepository.FindByKeys(map[string]interface{}{
 		"id": req.SurveyTemplateID,

@@ -49,3 +49,58 @@ type CreateEmployeeTasksForRecruitment struct {
 	JoinedDate       string `json:"joined_date" validate:"required,datetime=2006-01-02"`
 	OrganizationType string `json:"organization_type" validate:"required"`
 }
+
+type AdOrgId struct {
+	ID         int    `json:"id" binding:"omitempty"`
+	Identifier string `json:"identifier" binding:"required"`
+}
+type HcEmployeeId struct {
+	ID         int    `json:"id" binding:"required"`
+	Identifier string `json:"identifier" binding:"omitempty"`
+}
+
+type HcJobLevelId struct {
+	ID         int    `json:"id" binding:"required"`
+	Identifier string `json:"identifier" binding:"omitempty"`
+}
+
+type HcJobId struct {
+	ID         int    `json:"id" binding:"required"`
+	Identifier string `json:"identifier" binding:"midsuit"`
+}
+
+type HcOrgId struct {
+	ID         int    `json:"id" binding:"required"`
+	Identifier string `json:"identifier" binding:"omitempty"`
+}
+
+type SyncEmployeeTaskMidsuitRequest struct {
+	AdOrgId          AdOrgId          `json:"AD_Org_ID" binding:"required"`
+	Name             string           `json:"Name" binding:"required"`
+	Category         TaskCategory     `json:"Category" binding:"required"`
+	StartDate        string           `json:"StartDate" binding:"required"`
+	EndDate          string           `json:"EndDate" binding:"required"`
+	HCApproverID     HcApproverId     `json:"HC_Approver_ID" binding:"omitempty"`
+	HCEmployeeID     HcEmployeeId     `json:"HC_Employee_ID" binding:"required"`
+	HCJob2ID         HcJobId          `json:"HC_Job2_ID" binding:"omitempty"`
+	HCJobLevel2ID    HcJobLevelId     `json:"HC_JobLevel2_ID" binding:"omitempty"`
+	HCJobLevelID     HcJobLevelId     `json:"HC_JobLevel_ID" binding:"omitempty"`
+	HCJobID          HcJobId          `json:"HC_Job_ID" binding:"omitempty"`
+	HCOrg2ID         HcOrgId          `json:"HC_Org2_ID" binding:"omitempty"`
+	HCOrgID          HcOrgId          `json:"HC_Org_ID" binding:"omitempty"`
+	HCApproverUserID HcApproverUserId `json:"HC_ApproverUser_ID" binding:"omitempty"`
+}
+
+type TaskCategory struct {
+	PropertyLabel string `json:"propertyLabel" binding:"omitempty"`
+	Identifier    string `json:"identifier" binding:"required"`
+	ModelName     string `json:"model-name" binding:"required"`
+}
+
+type HcApproverId struct {
+	ID int `json:"id" binding:"required"`
+}
+
+type HcApproverUserId struct {
+	ID int `json:"id" binding:"required"`
+}

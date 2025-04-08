@@ -1828,6 +1828,9 @@ const docTemplate = `{
                 "kanban": {
                     "$ref": "#/definitions/entity.EmployeeTaskKanbanEnum"
                 },
+                "midsuit_id": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },

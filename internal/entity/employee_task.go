@@ -50,6 +50,7 @@ type EmployeeTask struct {
 	Kanban           EmployeeTaskKanbanEnum   `json:"kanban" gorm:"type:varchar(255);not null;default:'TO_DO'"`
 	Notes            string                   `json:"notes" gorm:"type:text;default:null"`
 	Source           string                   `json:"source" gorm:"type:varchar(255);default:null"`
+	MidsuitID        *string                  `json:"midsuit_id" gorm:"type:varchar(255);default:null"`
 
 	TemplateTask            *TemplateTask            `json:"template_task" gorm:"foreignKey:TemplateTaskID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	EmployeeTaskChecklists  []EmployeeTaskChecklist  `json:"employee_task_checklists" gorm:"foreignKey:EmployeeTaskID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`

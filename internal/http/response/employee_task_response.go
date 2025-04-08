@@ -28,6 +28,7 @@ type EmployeeTaskResponse struct {
 	IsChecklist      string                          `json:"is_checklist"`
 	Progress         int                             `json:"progress"`
 	ProgressVerified int                             `json:"progress_verified"`
+	MidsuitID        *string                         `json:"midsuit_id"`
 	CreatedAt        time.Time                       `json:"created_at"`
 	UpdatedAt        time.Time                       `json:"updated_at"`
 
