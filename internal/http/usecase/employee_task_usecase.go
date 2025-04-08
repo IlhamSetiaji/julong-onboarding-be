@@ -221,8 +221,15 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTas
 
 		midsuitPayload := &request.SyncEmployeeTaskMidsuitRequest{
 			AdOrgId: request.AdOrgId{
-				// ID: orgResp.MidsuitID,
-				ID: 1000024,
+				ID: func() int {
+					id, err := strconv.Atoi(orgResp.MidsuitID)
+					if err != nil {
+						uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error converting orgResp.MidsuitID to int: ", err)
+						return 0 // or handle the error appropriately
+					}
+					return id
+				}(),
+				// ID: 1000024,
 			},
 			Name: req.Name,
 			Category: request.TaskCategory{
