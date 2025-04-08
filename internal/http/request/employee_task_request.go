@@ -104,3 +104,17 @@ type HcApproverId struct {
 type HcApproverUserId struct {
 	ID int `json:"id" binding:"required"`
 }
+
+type SyncEmployeeTaskChecklistMidsuitRequest struct {
+	AdOrgId      AdOrgId      `json:"AD_Org_ID" binding:"required"`
+	Name         string       `json:"Name" binding:"required"`
+	HCTaskID     HCTaskID     `json:"HC_Task_ID" binding:"required"`
+	IsChecked    bool         `json:"IsChecked" binding:"required"`
+	HCEmployeeID HcEmployeeId `json:"HC_Employee_ID" binding:"required"`
+	ModelName    string       `json:"model-name" binding:"required"`
+}
+
+type HCTaskID struct {
+	ID        int    `json:"id" binding:"required"`
+	ModelName string `json:"model-name" binding:"required"`
+}
