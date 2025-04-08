@@ -5,7 +5,7 @@ import "mime/multipart"
 type CreateOrUpdateQuestions struct {
 	SurveyTemplateID   string            `form:"survey_template_id" validate:"omitempty,uuid"`
 	Title              string            `form:"title" validate:"required"`
-	Questions          []QuestionRequest `json:"questions" validate:"required,dive"`
+	Questions          []QuestionRequest `json:"questions" validate:"omitempty,dive"`
 	DeletedQuestionIDs []string          `json:"deleted_question_ids" validate:"omitempty,dive,uuid"`
 }
 

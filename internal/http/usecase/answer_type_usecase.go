@@ -9,6 +9,7 @@ import (
 
 type IAnswerTypeUseCase interface {
 	FindAll() ([]*response.AnswerTypeResponse, error)
+	FindByID(id string) (*response.AnswerTypeResponse, error)
 }
 
 type AnswerTypeUseCase struct {
@@ -52,4 +53,17 @@ func (uc *AnswerTypeUseCase) FindAll() ([]*response.AnswerTypeResponse, error) {
 	}
 
 	return response, nil
+}
+
+func (uc *AnswerTypeUseCase) FindByID(id string) (*response.AnswerTypeResponse, error) {
+	answerType, err := uc.Repository.FindByKeys(map[string]interface{}{"id": id})
+	if err != nil {
+		return nil, err
+	}
+
+	if answerType == nil {
+		return nil, nil
+	}
+
+	return uc.DTO.ConvertEntityToResponse(answerType), nil
 }

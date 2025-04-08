@@ -25,12 +25,13 @@ type ISurveyTemplateHandler interface {
 }
 
 type SurveyTemplateHandler struct {
-	Log             *logrus.Logger
-	Viper           *viper.Viper
-	Validate        *validator.Validate
-	UseCase         usecase.ISurveyTemplateUseCase
-	QuestionUseCase usecase.IQuestionUseCase
-	DB              *gorm.DB
+	Log               *logrus.Logger
+	Viper             *viper.Viper
+	Validate          *validator.Validate
+	UseCase           usecase.ISurveyTemplateUseCase
+	QuestionUseCase   usecase.IQuestionUseCase
+	AnswerTypeUseCase usecase.IAnswerTypeUseCase
+	DB                *gorm.DB
 }
 
 func NewSurveyTemplateHandler(
@@ -39,14 +40,16 @@ func NewSurveyTemplateHandler(
 	validate *validator.Validate,
 	useCase usecase.ISurveyTemplateUseCase,
 	questionUseCase usecase.IQuestionUseCase,
+	answerTypeUseCase usecase.IAnswerTypeUseCase,
 	db *gorm.DB) ISurveyTemplateHandler {
 	return &SurveyTemplateHandler{
-		Log:             log,
-		Viper:           viper,
-		Validate:        validate,
-		UseCase:         useCase,
-		QuestionUseCase: questionUseCase,
-		DB:              db,
+		Log:               log,
+		Viper:             viper,
+		Validate:          validate,
+		UseCase:           useCase,
+		QuestionUseCase:   questionUseCase,
+		AnswerTypeUseCase: answerTypeUseCase,
+		DB:                db,
 	}
 }
 
@@ -56,6 +59,7 @@ func SurveyTemplateHandlerFactory(
 ) ISurveyTemplateHandler {
 	useCase := usecase.SurveyTemplateUseCaseFactory(log, viper)
 	questionUseCase := usecase.QuestionUseCaseFactory(log, viper)
+	answerTypeUseCase := usecase.AnswerTypeUseCaseFactory(log)
 	validate := config.NewValidator(viper)
 	db := config.NewDatabase()
 	return NewSurveyTemplateHandler(
@@ -64,6 +68,7 @@ func SurveyTemplateHandlerFactory(
 		validate,
 		useCase,
 		questionUseCase,
+		answerTypeUseCase,
 		db,
 	)
 }
@@ -91,7 +96,19 @@ func (h *SurveyTemplateHandler) CreateSurveyTemplate(ctx *gin.Context) {
 	// questionOptions := make([][]string, len(optionText))
 
 	for i, answerType := range answerTypes {
-		if answerType == "Attachment" {
+		ans, err := h.AnswerTypeUseCase.FindByID(answerType)
+		if err != nil {
+			h.Log.Error("[SurveyTemplateHandler.CreateSurveyTemplate] Error when finding answer type by id: ", err)
+			utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to find answer type by id", err.Error())
+			return
+		}
+
+		if ans == nil {
+			h.Log.Error("[SurveyTemplateHandler.CreateSurveyTemplate] Error when finding answer type by id: answer type not found")
+			utils.ErrorResponse(ctx, http.StatusNotFound, "failed to find answer type by id", "answer type not found")
+			return
+		}
+		if ans.Name == "Attachment" {
 			if len(files) > 0 {
 				for i, file := range files {
 					timestamp := time.Now().UnixNano()
@@ -171,7 +188,20 @@ func (h *SurveyTemplateHandler) UpdateSurveyTemplate(ctx *gin.Context) {
 	// questionOptions := make([][]string, len(optionText))
 
 	for i, answerType := range answerTypes {
-		if answerType == "Attachment" {
+		ans, err := h.AnswerTypeUseCase.FindByID(answerType)
+		if err != nil {
+			h.Log.Error("[SurveyTemplateHandler.UpdateSurveyTemplate] Error when finding answer type by id: ", err)
+			utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to find answer type by id", err.Error())
+			return
+		}
+
+		if ans == nil {
+			h.Log.Error("[SurveyTemplateHandler.UpdateSurveyTemplate] Error when finding answer type by id: answer type not found")
+			utils.ErrorResponse(ctx, http.StatusNotFound, "failed to find answer type by id", "answer type not found")
+			return
+		}
+
+		if ans.Name == "Attachment" {
 			if len(files) > 0 {
 				for i, file := range files {
 					timestamp := time.Now().UnixNano()

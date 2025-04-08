@@ -108,7 +108,6 @@ func (u *QuestionUseCase) generateRandomSurveyNumber() (*string, error) {
 
 func (uc *QuestionUseCase) CreateOrUpdateQuestions(req *request.CreateOrUpdateQuestions) (*response.SurveyTemplateResponse, error) {
 	// check if survey template exist
-	var tq *entity.SurveyTemplate
 	if req.SurveyTemplateID != "" {
 		tq, err := uc.SurveyTemplateRepository.FindByKeys(map[string]interface{}{
 			"id": req.SurveyTemplateID,
@@ -131,6 +130,7 @@ func (uc *QuestionUseCase) CreateOrUpdateQuestions(req *request.CreateOrUpdateQu
 			uc.Log.Errorf("[QuestionUseCase.CreateOrUpdateQuestions] error when updating survey template: %s", err.Error())
 			return nil, errors.New("[QuestionUseCase.CreateOrUpdateQuestions] error when updating survey template: " + err.Error())
 		}
+		req.SurveyTemplateID = tq.ID.String()
 	} else {
 		surveyNumber, err := uc.generateRandomSurveyNumber()
 		if err != nil {
@@ -149,6 +149,12 @@ func (uc *QuestionUseCase) CreateOrUpdateQuestions(req *request.CreateOrUpdateQu
 		req.SurveyTemplateID = tq.ID.String()
 	}
 
+	parsedSurveyTemplateID, err := uuid.Parse(req.SurveyTemplateID)
+	if err != nil {
+		uc.Log.Errorf("[QuestionUseCase.CreateOrUpdateQuestions] error when parsing survey template id: %s", err.Error())
+		return nil, errors.New("[QuestionUseCase.CreateOrUpdateQuestions] error when parsing survey template id: " + err.Error())
+	}
+
 	// create or update questions
 	for i, question := range req.Questions {
 		if question.ID != "" && question.ID != uuid.Nil.String() {
@@ -160,16 +166,11 @@ func (uc *QuestionUseCase) CreateOrUpdateQuestions(req *request.CreateOrUpdateQu
 
 			if exist == nil {
 				createdQuestion, err := uc.Repository.CreateQuestion(&entity.Question{
-					SurveyTemplateID: func() uuid.UUID {
-						if tq != nil {
-							return tq.ID
-						}
-						return uuid.Nil
-					}(),
-					AnswerTypeID: uuid.MustParse(question.AnswerTypeID),
-					Question:     question.Question,
-					Number:       i + 1,
-					Attachment:   &question.AttachmentPath,
+					SurveyTemplateID: parsedSurveyTemplateID,
+					AnswerTypeID:     uuid.MustParse(question.AnswerTypeID),
+					Question:         question.Question,
+					Number:           i + 1,
+					Attachment:       &question.AttachmentPath,
 				})
 				if err != nil {
 					uc.Log.Errorf("[QuestionUseCase.CreateOrUpdateQuestions] error when creating question: %s", err.Error())
@@ -191,7 +192,7 @@ func (uc *QuestionUseCase) CreateOrUpdateQuestions(req *request.CreateOrUpdateQu
 			} else {
 				updatedQuestion, err := uc.Repository.UpdateQuestion(&entity.Question{
 					ID:               exist.ID,
-					SurveyTemplateID: tq.ID,
+					SurveyTemplateID: parsedSurveyTemplateID,
 					AnswerTypeID:     uuid.MustParse(question.AnswerTypeID),
 					Question:         question.Question,
 					Number:           i + 1,
@@ -225,8 +226,9 @@ func (uc *QuestionUseCase) CreateOrUpdateQuestions(req *request.CreateOrUpdateQu
 			}
 		} else {
 			uc.Log.Info("Payloadku: ", question.Question)
+
 			createdQuestion, err := uc.Repository.CreateQuestion(&entity.Question{
-				SurveyTemplateID: tq.ID,
+				SurveyTemplateID: parsedSurveyTemplateID,
 				AnswerTypeID:     uuid.MustParse(question.AnswerTypeID),
 				Question:         question.Question,
 				Number:           i + 1,
@@ -264,7 +266,7 @@ func (uc *QuestionUseCase) CreateOrUpdateQuestions(req *request.CreateOrUpdateQu
 	}
 
 	tQuestion, err := uc.SurveyTemplateRepository.FindByKeys(map[string]interface{}{
-		"id": tq.ID,
+		"id": req.SurveyTemplateID,
 	})
 	if err != nil {
 		uc.Log.Errorf("[QuestionUseCase.CreateOrUpdateQuestions] error when finding survey template by id: %s", err.Error())

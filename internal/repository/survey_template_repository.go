@@ -77,7 +77,7 @@ func (r *SurveyTemplateRepository) DeleteSurveyTemplate(ent *entity.SurveyTempla
 
 func (r *SurveyTemplateRepository) FindByKeys(keys map[string]interface{}) (*entity.SurveyTemplate, error) {
 	var ent entity.SurveyTemplate
-	if err := r.DB.Where(keys).First(&ent).Error; err != nil {
+	if err := r.DB.Preload("Questions.QuestionOptions").Where(keys).First(&ent).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil
 		}

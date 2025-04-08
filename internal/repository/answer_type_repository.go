@@ -9,6 +9,7 @@ import (
 
 type IAnswerTypeRepository interface {
 	FindAll() ([]*entity.AnswerType, error)
+	FindByKeys(keys map[string]interface{}) (*entity.AnswerType, error)
 }
 
 type AnswerTypeRepository struct {
@@ -39,4 +40,12 @@ func (r *AnswerTypeRepository) FindAll() ([]*entity.AnswerType, error) {
 		return nil, err
 	}
 	return answerTypes, nil
+}
+
+func (r *AnswerTypeRepository) FindByKeys(keys map[string]interface{}) (*entity.AnswerType, error) {
+	var answerType entity.AnswerType
+	if err := r.DB.Where(keys).First(&answerType).Error; err != nil {
+		return nil, err
+	}
+	return &answerType, nil
 }
