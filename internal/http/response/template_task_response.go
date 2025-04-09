@@ -12,7 +12,7 @@ type TemplateTaskResponse struct {
 	CoverPath        *string                         `json:"cover_path"`
 	CoverPathOrigin  *string                         `json:"cover_path_origin"`
 	Name             string                          `json:"name"`
-	SurveyTemplateID uuid.UUID                       `json:"survey_template_id"`
+	SurveyTemplateID *uuid.UUID                      `json:"survey_template_id"`
 	Priority         entity.TemplateTaskPriorityEnum `json:"priority"`
 	DueDuration      *int                            `json:"due_duration"`
 	Status           entity.TemplateTaskStatusEnum   `json:"status"`

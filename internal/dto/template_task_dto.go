@@ -3,6 +3,7 @@ package dto
 import (
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/entity"
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/http/response"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -38,10 +39,16 @@ func TemplateTaskDTOFactory(log *logrus.Logger, viper *viper.Viper) ITemplateTas
 
 func (dto *TemplateTaskDTO) ConvertEntityToResponse(ent *entity.TemplateTask) *response.TemplateTaskResponse {
 	return &response.TemplateTaskResponse{
-		ID:               ent.ID,
-		Name:             ent.Name,
-		SurveyTemplateID: *ent.SurveyTemplateID,
-		Description:      ent.Description,
+		ID:   ent.ID,
+		Name: ent.Name,
+		SurveyTemplateID: func() *uuid.UUID {
+			if ent.SurveyTemplateID == nil {
+				return nil
+			}
+
+			return ent.SurveyTemplateID
+		}(),
+		Description: ent.Description,
 		CoverPath: func() *string {
 			if ent.CoverPath == nil {
 				return nil

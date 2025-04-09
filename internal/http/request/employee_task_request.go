@@ -118,3 +118,8 @@ type HCTaskID struct {
 	ID        int    `json:"id" binding:"required"`
 	ModelName string `json:"model-name" binding:"required"`
 }
+
+type SyncEmployeeTaskAttachmentMidsuitRequest struct {
+	Name string `json:"name" binding:"required"`
+	Data string `json:"data" binding:"required"`
+}

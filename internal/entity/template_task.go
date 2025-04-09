@@ -25,7 +25,7 @@ const (
 type TemplateTask struct {
 	gorm.Model       `json:"-"`
 	ID               uuid.UUID                `json:"id" gorm:"type:char(36);primaryKey;"`
-	SurveyTemplateID *uuid.UUID               `json:"survey_template_id" gorm:"type:char(36);not null"`
+	SurveyTemplateID *uuid.UUID               `json:"survey_template_id" gorm:"type:char(36);default:null"`
 	CoverPath        *string                  `json:"cover_path" gorm:"type:varchar(255);default:null"`
 	Name             string                   `json:"name" gorm:"type:varchar(255);not null"`
 	Priority         TemplateTaskPriorityEnum `json:"priority" gorm:"type:varchar(255);not null"`
