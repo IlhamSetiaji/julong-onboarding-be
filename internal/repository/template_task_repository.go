@@ -80,7 +80,7 @@ func (r *TemplateTaskRepository) DeleteTemplateTask(ent *entity.TemplateTask) er
 
 func (r *TemplateTaskRepository) FindByID(id uuid.UUID) (*entity.TemplateTask, error) {
 	var templateTask entity.TemplateTask
-	if err := r.DB.Preload("TemplateTaskAttachments").Preload("TemplateTaskChecklists").First(&templateTask, id).Error; err != nil {
+	if err := r.DB.Preload("TemplateTaskAttachments").Preload("TemplateTaskChecklists").Preload("SurveyTemplate").First(&templateTask, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil
 		} else {
