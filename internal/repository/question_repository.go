@@ -138,7 +138,7 @@ func (r *QuestionRepository) FindQuestionWithResponsesByIDAndUserProfileID(quest
 	var q entity.Question
 
 	if err := r.DB.
-		Preload("QuestionResponses", "user_profile_id = ?", userProfileID).Preload("QuestionResponses.UserProfile").
+		Preload("SurveyResponses", "employee_task_id = ?", userProfileID).Preload("SurveyResponses.EmployeeTask").
 		Where("id = ?", questionID).
 		First(&q).
 		Error; err != nil {
