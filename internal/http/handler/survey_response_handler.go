@@ -127,11 +127,11 @@ func (h *SurveyResponseHandler) CreateOrUpdateSurveyResponses(ctx *gin.Context) 
 	}
 
 	// embed url to answer file
-	for i, qr := range questionResponse.SurveyResponses {
-		if qr.AnswerFile != "" {
-			(questionResponse.SurveyResponses)[i].AnswerFile = h.Viper.GetString("app.url") + qr.AnswerFile
-		}
-	}
+	// for i, qr := range questionResponse.SurveyResponses {
+	// 	if qr.AnswerFile != "" {
+	// 		(questionResponse.SurveyResponses)[i].AnswerFile = h.Viper.GetString("app.url") + qr.AnswerFile
+	// 	}
+	// }
 
 	utils.SuccessResponse(ctx, 201, "success answer question", questionResponse)
 }
