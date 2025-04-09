@@ -337,6 +337,81 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTas
 
 	// create employee task checklists
 	for _, checklistReq := range req.EmployeeTaskChecklists {
+		// sync emp task checklist midsuit
+		if uc.Viper.GetString("midsuit.sync") == "ACTIVE" {
+			empResp, err := uc.EmployeeMessage.SendFindEmployeeByIDMessage(request.SendFindEmployeeByIDMessageRequest{
+				ID: *req.EmployeeID,
+			})
+			if err != nil {
+				uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error sending find employee by id message: ", err)
+				return nil, err
+			}
+			if empResp == nil {
+				uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] employee not found in midsuit")
+				return nil, errors.New("employee not found in midsuit")
+			}
+
+			orgResp, err := uc.OrganizationMessage.SendFindOrganizationByIDMessage(request.SendFindOrganizationByIDMessageRequest{
+				ID: empResp.OrganizationID.String(),
+			})
+			if err != nil {
+				uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error sending find organization by id message: ", err)
+				return nil, err
+			}
+			if orgResp == nil {
+				uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] organization not found in midsuit")
+				return nil, errors.New("organization not found in midsuit")
+			}
+
+			midsuitChecklistPayload := &request.SyncEmployeeTaskChecklistMidsuitRequest{
+				AdOrgId: request.AdOrgId{
+					ID: func() int {
+						id, err := strconv.Atoi(orgResp.MidsuitID)
+						if err != nil {
+							uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error converting orgResp.MidsuitID to int: ", err)
+							return 0 // or handle the error appropriately
+						}
+						return id
+					}(),
+				},
+				Name:      checklistReq.Name,
+				IsChecked: false,
+				HCTaskID: request.HCTaskID{
+					ID: func() int {
+						id, err := strconv.Atoi(midsuitID)
+						if err != nil {
+							uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error converting employeeTask.MidsuitID to int: ", err)
+							return 0 // or handle the error appropriately
+						}
+						return id
+					}(),
+				},
+				HCEmployeeID: request.HcEmployeeId{
+					ID: func() int {
+						id, err := strconv.Atoi(empResp.MidsuitID)
+						if err != nil {
+							uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error converting empResp.MidsuitID to int: ", err)
+							return 0 // or handle the error appropriately
+						}
+						return id
+					}(),
+				},
+				ModelName: "hc_taskchecklist",
+			}
+
+			authResp, err := uc.MidsuitService.AuthOneStep()
+			if err != nil {
+				uc.Log.Error("[DocumentSendingUseCase.UpdateDocumentSending] " + err.Error())
+				return nil, err
+			}
+
+			_, err = uc.MidsuitService.SyncEmployeeTaskChecklistMidsuit(*midsuitChecklistPayload, authResp.Token)
+			if err != nil {
+				uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error syncing employee task checklist to midsuit: ", err)
+				return nil, err
+			}
+		}
+
 		if checklistReq.ID != nil {
 			parsedChecklistID, err := uuid.Parse(*checklistReq.ID)
 			if err != nil {
