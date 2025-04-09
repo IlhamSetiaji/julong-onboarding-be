@@ -15,6 +15,7 @@ type IEmployeeTaskRepository interface {
 	FindByID(id uuid.UUID) (*entity.EmployeeTask, error)
 	FindAllByEmployeeID(employeeID uuid.UUID) (*[]entity.EmployeeTask, error)
 	FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}) (*[]entity.EmployeeTask, int64, error)
+	FindAllPaginatedByEmployeeID(employeeID uuid.UUID, page, pageSize int, search string, sort map[string]interface{}) (*[]entity.EmployeeTask, int64, error)
 	CountByKeys(keys map[string]interface{}) (int64, error)
 	FindAllByEmployeeIDAndKanbanPaginated(employeeID uuid.UUID, kanban entity.EmployeeTaskKanbanEnum, page, pageSize int, search string, sort map[string]interface{}) (*[]entity.EmployeeTask, int64, error)
 	FindByKeys(keys map[string]interface{}) (*entity.EmployeeTask, error)
@@ -172,4 +173,26 @@ func (r *EmployeeTaskRepository) FindByKeys(keys map[string]interface{}) (*entit
 	}
 
 	return &ent, nil
+}
+
+func (r *EmployeeTaskRepository) FindAllPaginatedByEmployeeID(employeeID uuid.UUID, page, pageSize int, search string, sort map[string]interface{}) (*[]entity.EmployeeTask, int64, error) {
+	var employeeTasks []entity.EmployeeTask
+	var total int64
+
+	query := r.DB.Preload("EmployeeTaskAttachments").Preload("EmployeeTaskChecklists").Preload("SurveyTemplates", "employee_id = ?", employeeID).Where("employee_id = ?", employeeID).Where("name LIKE ?", "%"+search+"%")
+	for key, value := range sort {
+		query = query.Order(key + " " + value.(string))
+	}
+
+	if err := query.Offset((page - 1) * pageSize).Limit(pageSize).Find(&employeeTasks).Error; err != nil {
+		r.Log.Error("[EmployeeTaskRepository.FindAllPaginatedByEmployeeID] Error when get employee tasks by employee id: ", err)
+		return nil, 0, err
+	}
+
+	if err := query.Count(&total).Error; err != nil {
+		r.Log.Error("[EmployeeTaskRepository.FindAllPaginatedByEmployeeID] Error when count employee tasks by employee id: ", err)
+		return nil, 0, err
+	}
+
+	return &employeeTasks, total, nil
 }
