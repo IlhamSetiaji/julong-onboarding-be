@@ -3,7 +3,6 @@ package handler
 import (
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/config"
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/http/request"
@@ -75,7 +74,7 @@ func SurveyTemplateHandlerFactory(
 
 func (h *SurveyTemplateHandler) CreateSurveyTemplate(ctx *gin.Context) {
 	var req request.CreateOrUpdateQuestions
-	if err := ctx.ShouldBind(&req); err != nil {
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		h.Log.Error("[SurveyTemplateHandler.CreateSurveyTemplate] Error when binding request: ", err)
 		utils.BadRequestResponse(ctx, err.Error(), err.Error())
 		return
@@ -88,70 +87,70 @@ func (h *SurveyTemplateHandler) CreateSurveyTemplate(ctx *gin.Context) {
 	}
 
 	// Handle attachments file upload manually
-	form, _ := ctx.MultipartForm()
-	files := form.File["questions[attachment]"]
-	answerTypes := form.Value["questions[answer_type_id]"]
-	questions := form.Value["questions[question]"]
-	optionText := form.Value["questions[question_options][option_text]"]
+	// form, _ := ctx.MultipartForm()
+	// files := form.File["questions[attachment]"]
+	// answerTypes := form.Value["questions[answer_type_id]"]
+	// questions := form.Value["questions[question]"]
+	// optionText := form.Value["questions[question_options][option_text]"]
 	// questionOptions := make([][]string, len(optionText))
 
-	h.Log.Info("Answer Types: ", answerTypes)
+	// h.Log.Info("Answer Types: ", answerTypes)
 
-	for i, answerType := range answerTypes {
-		ans, err := h.AnswerTypeUseCase.FindByID(answerType)
-		if err != nil {
-			h.Log.Error("[SurveyTemplateHandler.CreateSurveyTemplate] Error when finding answer type by id: ", err)
-			utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to find answer type by id", err.Error())
-			return
-		}
+	// for i, answerType := range answerTypes {
+	// 	ans, err := h.AnswerTypeUseCase.FindByID(answerType)
+	// 	if err != nil {
+	// 		h.Log.Error("[SurveyTemplateHandler.CreateSurveyTemplate] Error when finding answer type by id: ", err)
+	// 		utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to find answer type by id", err.Error())
+	// 		return
+	// 	}
 
-		if ans == nil {
-			h.Log.Error("[SurveyTemplateHandler.CreateSurveyTemplate] Error when finding answer type by id: answer type not found")
-			utils.ErrorResponse(ctx, http.StatusNotFound, "failed to find answer type by id", "answer type not found")
-			return
-		}
+	// 	if ans == nil {
+	// 		h.Log.Error("[SurveyTemplateHandler.CreateSurveyTemplate] Error when finding answer type by id: answer type not found")
+	// 		utils.ErrorResponse(ctx, http.StatusNotFound, "failed to find answer type by id", "answer type not found")
+	// 		return
+	// 	}
 
-		h.Log.Info("Answer Type: ", ans.Name)
+	// 	h.Log.Info("Answer Type: ", ans.Name)
 
-		if ans.Name == "Attachment" {
-			if len(files) > i { // Ensure the file index exists
-				file := files[i]
-				timestamp := time.Now().UnixNano()
-				filePath := "storage/questions/attachments/" + strconv.FormatInt(timestamp, 10) + "_" + file.Filename
-				if err := ctx.SaveUploadedFile(file, filePath); err != nil {
-					h.Log.Error("failed to save attachment file: ", err)
-					utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to save attachment file", err.Error())
-					return
-				}
+	// 	if ans.Name == "Attachment" {
+	// 		if len(files) > i { // Ensure the file index exists
+	// 			file := files[i]
+	// 			timestamp := time.Now().UnixNano()
+	// 			filePath := "storage/questions/attachments/" + strconv.FormatInt(timestamp, 10) + "_" + file.Filename
+	// 			if err := ctx.SaveUploadedFile(file, filePath); err != nil {
+	// 				h.Log.Error("failed to save attachment file: ", err)
+	// 				utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to save attachment file", err.Error())
+	// 				return
+	// 			}
 
-				req.Questions = append(req.Questions, request.QuestionRequest{
-					Attachment:     nil,
-					AttachmentPath: filePath,
-					AnswerTypeID:   answerType,
-					Question:       questions[i],
-				})
-			}
-		} else {
-			if len(questions) > i { // Ensure the question index exists
-				var questionOptions []request.QuestionOptionRequest
-				if len(optionText) > 0 {
-					for _, option := range optionText {
-						questionOptions = append(questionOptions, request.QuestionOptionRequest{
-							OptionText: option,
-						})
-					}
-				}
-				req.Questions = append(req.Questions, request.QuestionRequest{
-					AnswerTypeID:    answerType,
-					Question:        questions[i],
-					QuestionOptions: questionOptions,
-				})
-			}
-		}
-	}
+	// 			req.Questions = append(req.Questions, request.QuestionRequest{
+	// 				Attachment:     nil,
+	// 				AttachmentPath: filePath,
+	// 				AnswerTypeID:   answerType,
+	// 				Question:       questions[i],
+	// 			})
+	// 		}
+	// 	} else {
+	// 		if len(questions) > i { // Ensure the question index exists
+	// 			var questionOptions []request.QuestionOptionRequest
+	// 			if len(optionText) > 0 {
+	// 				for _, option := range optionText {
+	// 					questionOptions = append(questionOptions, request.QuestionOptionRequest{
+	// 						OptionText: option,
+	// 					})
+	// 				}
+	// 			}
+	// 			req.Questions = append(req.Questions, request.QuestionRequest{
+	// 				AnswerTypeID:    answerType,
+	// 				Question:        questions[i],
+	// 				QuestionOptions: questionOptions,
+	// 			})
+	// 		}
+	// 	}
+	// }
 
-	h.Log.Info("Questions: ", req.Questions)
-	h.Log.Info("QuestionOptions: ", optionText)
+	// h.Log.Info("Questions: ", req.Questions)
+	// h.Log.Info("QuestionOptions: ", optionText)
 
 	tx := h.DB.WithContext(ctx.Request.Context()).Begin()
 	if tx.Error != nil {
@@ -179,7 +178,7 @@ func (h *SurveyTemplateHandler) CreateSurveyTemplate(ctx *gin.Context) {
 
 func (h *SurveyTemplateHandler) UpdateSurveyTemplate(ctx *gin.Context) {
 	var req request.CreateOrUpdateQuestions
-	if err := ctx.ShouldBind(&req); err != nil {
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		h.Log.Error("[SurveyTemplateHandler.UpdateSurveyTemplate] Error when binding request: ", err)
 		utils.BadRequestResponse(ctx, err.Error(), err.Error())
 		return
@@ -192,66 +191,66 @@ func (h *SurveyTemplateHandler) UpdateSurveyTemplate(ctx *gin.Context) {
 	}
 
 	// Handle attachments file upload manually
-	form, _ := ctx.MultipartForm()
-	files := form.File["questions[attachment]"]
-	answerTypes := form.Value["questions[answer_type_id]"]
-	questions := form.Value["questions[question]"]
-	optionText := form.Value["questions[question_options][option_text]"]
-	// questionOptions := make([][]string, len(optionText))
+	// form, _ := ctx.MultipartForm()
+	// files := form.File["questions[attachment]"]
+	// answerTypes := form.Value["questions[answer_type_id]"]
+	// questions := form.Value["questions[question]"]
+	// optionText := form.Value["questions[question_options][option_text]"]
+	// // questionOptions := make([][]string, len(optionText))
 
-	for i, answerType := range answerTypes {
-		ans, err := h.AnswerTypeUseCase.FindByID(answerType)
-		if err != nil {
-			h.Log.Error("[SurveyTemplateHandler.CreateSurveyTemplate] Error when finding answer type by id: ", err)
-			utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to find answer type by id", err.Error())
-			return
-		}
+	// for i, answerType := range answerTypes {
+	// 	ans, err := h.AnswerTypeUseCase.FindByID(answerType)
+	// 	if err != nil {
+	// 		h.Log.Error("[SurveyTemplateHandler.CreateSurveyTemplate] Error when finding answer type by id: ", err)
+	// 		utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to find answer type by id", err.Error())
+	// 		return
+	// 	}
 
-		if ans == nil {
-			h.Log.Error("[SurveyTemplateHandler.CreateSurveyTemplate] Error when finding answer type by id: answer type not found")
-			utils.ErrorResponse(ctx, http.StatusNotFound, "failed to find answer type by id", "answer type not found")
-			return
-		}
+	// 	if ans == nil {
+	// 		h.Log.Error("[SurveyTemplateHandler.CreateSurveyTemplate] Error when finding answer type by id: answer type not found")
+	// 		utils.ErrorResponse(ctx, http.StatusNotFound, "failed to find answer type by id", "answer type not found")
+	// 		return
+	// 	}
 
-		h.Log.Info("Answer Type: ", ans.Name)
+	// 	h.Log.Info("Answer Type: ", ans.Name)
 
-		if ans.Name == "Attachment" {
-			var attachmentPath string
-			if len(files) > i { // Ensure the file index exists
-				file := files[i]
-				timestamp := time.Now().UnixNano()
-				filePath := "storage/questions/attachments/" + strconv.FormatInt(timestamp, 10) + "_" + file.Filename
-				if err := ctx.SaveUploadedFile(file, filePath); err != nil {
-					h.Log.Error("failed to save attachment file: ", err)
-					utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to save attachment file", err.Error())
-					return
-				}
-				attachmentPath = filePath
-			}
-			req.Questions = append(req.Questions, request.QuestionRequest{
-				Attachment:     nil,
-				AttachmentPath: attachmentPath,
-				AnswerTypeID:   answerType,
-				Question:       questions[i],
-			})
-		} else {
-			if len(questions) > i { // Ensure the question index exists
-				var questionOptions []request.QuestionOptionRequest
-				if len(optionText) > 0 {
-					for _, option := range optionText {
-						questionOptions = append(questionOptions, request.QuestionOptionRequest{
-							OptionText: option,
-						})
-					}
-				}
-				req.Questions = append(req.Questions, request.QuestionRequest{
-					AnswerTypeID:    answerType,
-					Question:        questions[i],
-					QuestionOptions: questionOptions,
-				})
-			}
-		}
-	}
+	// 	if ans.Name == "Attachment" {
+	// 		var attachmentPath string
+	// 		if len(files) > i { // Ensure the file index exists
+	// 			file := files[i]
+	// 			timestamp := time.Now().UnixNano()
+	// 			filePath := "storage/questions/attachments/" + strconv.FormatInt(timestamp, 10) + "_" + file.Filename
+	// 			if err := ctx.SaveUploadedFile(file, filePath); err != nil {
+	// 				h.Log.Error("failed to save attachment file: ", err)
+	// 				utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to save attachment file", err.Error())
+	// 				return
+	// 			}
+	// 			attachmentPath = filePath
+	// 		}
+	// 		req.Questions = append(req.Questions, request.QuestionRequest{
+	// 			Attachment:     nil,
+	// 			AttachmentPath: attachmentPath,
+	// 			AnswerTypeID:   answerType,
+	// 			Question:       questions[i],
+	// 		})
+	// 	} else {
+	// 		if len(questions) > i { // Ensure the question index exists
+	// 			var questionOptions []request.QuestionOptionRequest
+	// 			if len(optionText) > 0 {
+	// 				for _, option := range optionText {
+	// 					questionOptions = append(questionOptions, request.QuestionOptionRequest{
+	// 						OptionText: option,
+	// 					})
+	// 				}
+	// 			}
+	// 			req.Questions = append(req.Questions, request.QuestionRequest{
+	// 				AnswerTypeID:    answerType,
+	// 				Question:        questions[i],
+	// 				QuestionOptions: questionOptions,
+	// 			})
+	// 		}
+	// 	}
+	// }
 
 	tx := h.DB.WithContext(ctx.Request.Context()).Begin()
 	if tx.Error != nil {
