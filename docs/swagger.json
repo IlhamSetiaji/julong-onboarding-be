@@ -1468,6 +1468,9 @@
                 "status": {
                     "type": "string"
                 },
+                "survey_template_id": {
+                    "type": "string"
+                },
                 "template_task_attachments": {
                     "type": "array",
                     "items": {
@@ -1707,6 +1710,9 @@
                     "type": "string"
                 },
                 "status": {
+                    "type": "string"
+                },
+                "survey_template_id": {
                     "type": "string"
                 },
                 "template_task_attachments": {
@@ -2203,6 +2209,12 @@
                 },
                 "status": {
                     "$ref": "#/definitions/entity.TemplateTaskStatusEnum"
+                },
+                "survey_template": {
+                    "$ref": "#/definitions/response.SurveyTemplateResponse"
+                },
+                "survey_template_id": {
+                    "type": "string"
                 },
                 "template_task_attachments": {
                     "type": "array",

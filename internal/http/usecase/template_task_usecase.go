@@ -28,6 +28,7 @@ type TemplateTaskUseCase struct {
 	TemplateTaskAttachmentRepository repository.ITemplateTaskAttachmentRepository
 	TemplateTaskChecklistRepository  repository.ITemplateTaskChecklistRepository
 	Viper                            *viper.Viper
+	SurveyTemplateRepository         repository.ISurveyTemplateRepository
 }
 
 func NewTemplateTaskUseCase(
@@ -37,6 +38,7 @@ func NewTemplateTaskUseCase(
 	attachmentRepo repository.ITemplateTaskAttachmentRepository,
 	checklistRepo repository.ITemplateTaskChecklistRepository,
 	viper *viper.Viper,
+	surveyTemplateRepo repository.ISurveyTemplateRepository,
 ) ITemplateTaskUseCase {
 	return &TemplateTaskUseCase{
 		Log:                              log,
@@ -45,6 +47,7 @@ func NewTemplateTaskUseCase(
 		TemplateTaskAttachmentRepository: attachmentRepo,
 		TemplateTaskChecklistRepository:  checklistRepo,
 		Viper:                            viper,
+		SurveyTemplateRepository:         surveyTemplateRepo,
 	}
 }
 
@@ -53,7 +56,8 @@ func TemplateTaskUseCaseFactory(log *logrus.Logger, viper *viper.Viper) ITemplat
 	repo := repository.TemplateTaskRepositoryFactory(log)
 	attachmentRepo := repository.TemplateTaskAttachmentRepositoryFactory(log)
 	checklistRepo := repository.TemplateTaskChecklistRepositoryFactory(log)
-	return NewTemplateTaskUseCase(log, dto, repo, attachmentRepo, checklistRepo, viper)
+	surveyTemplateRepo := repository.SurveyTemplateRepositoryFactory(log)
+	return NewTemplateTaskUseCase(log, dto, repo, attachmentRepo, checklistRepo, viper, surveyTemplateRepo)
 }
 
 func (uc *TemplateTaskUseCase) CreateTemplateTask(req *request.CreateTemplateTaskRequest) (*response.TemplateTaskResponse, error) {
@@ -61,6 +65,28 @@ func (uc *TemplateTaskUseCase) CreateTemplateTask(req *request.CreateTemplateTas
 	if req.DueDuration != nil {
 		duration = req.DueDuration
 	}
+
+	var surveyTemplateUUID *uuid.UUID
+	if req.SurveyTemplateID != nil && *req.SurveyTemplateID != "" {
+		parsedSurveyTemplateID, err := uuid.Parse(*req.SurveyTemplateID)
+		if err != nil {
+			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error parsing survey template id: ", err)
+			return nil, err
+		}
+		surveyTemplate, err := uc.SurveyTemplateRepository.FindByKeys(map[string]interface{}{
+			"id": parsedSurveyTemplateID,
+		})
+		if err != nil {
+			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error finding survey template by id: ", err)
+			return nil, err
+		}
+		if surveyTemplate == nil {
+			return nil, errors.New("survey template not found")
+		}
+
+		surveyTemplateUUID = &parsedSurveyTemplateID
+	}
+
 	templateTask, err := uc.Repository.CreateTemplateTask(&entity.TemplateTask{
 		Name:             req.Name,
 		CoverPath:        &req.CoverPath,
@@ -70,6 +96,7 @@ func (uc *TemplateTaskUseCase) CreateTemplateTask(req *request.CreateTemplateTas
 		Description:      req.Description,
 		Source:           "ONBOARDING",
 		OrganizationType: req.OrganizationType,
+		SurveyTemplateID: surveyTemplateUUID,
 	})
 	if err != nil {
 		uc.Log.Error("[TemplateTaskUseCase.CreateTemplateTask] " + err.Error())
@@ -170,9 +197,32 @@ func (uc *TemplateTaskUseCase) UpdateTemplateTask(req *request.UpdateTemplateTas
 	if req.DueDuration != nil {
 		duration = req.DueDuration
 	}
+
+	var surveyTemplateUUID *uuid.UUID
+	if req.SurveyTemplateID != nil && *req.SurveyTemplateID != "" {
+		parsedSurveyTemplateID, err := uuid.Parse(*req.SurveyTemplateID)
+		if err != nil {
+			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error parsing survey template id: ", err)
+			return nil, err
+		}
+		surveyTemplate, err := uc.SurveyTemplateRepository.FindByKeys(map[string]interface{}{
+			"id": parsedSurveyTemplateID,
+		})
+		if err != nil {
+			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error finding survey template by id: ", err)
+			return nil, err
+		}
+		if surveyTemplate == nil {
+			return nil, errors.New("survey template not found")
+		}
+
+		surveyTemplateUUID = &parsedSurveyTemplateID
+	}
+
 	templateTask, err := uc.Repository.UpdateTemplateTask(&entity.TemplateTask{
 		ID:               parsedId,
 		Name:             req.Name,
+		SurveyTemplateID: surveyTemplateUUID,
 		CoverPath:        &req.CoverPath,
 		Priority:         entity.TemplateTaskPriorityEnum(req.Priority),
 		DueDuration:      duration,

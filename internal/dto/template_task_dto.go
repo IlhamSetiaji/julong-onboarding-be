@@ -16,28 +16,32 @@ type TemplateTaskDTO struct {
 	Viper                     *viper.Viper
 	TemplateTaskAttachmentDTO ITemplateTaskAttachmentDTO
 	TemplateTaskChecklistDTO  ITemplateTaskChecklistDTO
+	SurveyTemplateDTO         ISurveyTemplateDTO
 }
 
-func NewTemplateTaskDTO(log *logrus.Logger, viper *viper.Viper, templateTaskAttachmentDTO ITemplateTaskAttachmentDTO, templateTaskChecklistDTO ITemplateTaskChecklistDTO) ITemplateTaskDTO {
+func NewTemplateTaskDTO(log *logrus.Logger, viper *viper.Viper, templateTaskAttachmentDTO ITemplateTaskAttachmentDTO, templateTaskChecklistDTO ITemplateTaskChecklistDTO, surveyTemplateDTO ISurveyTemplateDTO) ITemplateTaskDTO {
 	return &TemplateTaskDTO{
 		Log:                       log,
 		Viper:                     viper,
 		TemplateTaskAttachmentDTO: templateTaskAttachmentDTO,
 		TemplateTaskChecklistDTO:  templateTaskChecklistDTO,
+		SurveyTemplateDTO:         surveyTemplateDTO,
 	}
 }
 
 func TemplateTaskDTOFactory(log *logrus.Logger, viper *viper.Viper) ITemplateTaskDTO {
 	templateTaskAttachmentDTO := TemplateTaskAttachmentDTOFactory(log, viper)
 	templateTaskChecklistDTO := TemplateTaskChecklistDTOFactory(log, viper)
-	return NewTemplateTaskDTO(log, viper, templateTaskAttachmentDTO, templateTaskChecklistDTO)
+	surveyTemplateDTO := SurveyTemplateDTOFactory(log, viper)
+	return NewTemplateTaskDTO(log, viper, templateTaskAttachmentDTO, templateTaskChecklistDTO, surveyTemplateDTO)
 }
 
 func (dto *TemplateTaskDTO) ConvertEntityToResponse(ent *entity.TemplateTask) *response.TemplateTaskResponse {
 	return &response.TemplateTaskResponse{
-		ID:          ent.ID,
-		Name:        ent.Name,
-		Description: ent.Description,
+		ID:               ent.ID,
+		Name:             ent.Name,
+		SurveyTemplateID: *ent.SurveyTemplateID,
+		Description:      ent.Description,
 		CoverPath: func() *string {
 			if ent.CoverPath == nil {
 				return nil
@@ -79,6 +83,13 @@ func (dto *TemplateTaskDTO) ConvertEntityToResponse(ent *entity.TemplateTask) *r
 				res = append(res, *resp)
 			}
 			return res
+		}(),
+		SurveyTemplate: func() *response.SurveyTemplateResponse {
+			if ent.SurveyTemplate == nil {
+				return nil
+			}
+			resp := dto.SurveyTemplateDTO.ConvertEntityToResponse(ent.SurveyTemplate)
+			return resp
 		}(),
 	}
 }

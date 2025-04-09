@@ -3,6 +3,7 @@ package request
 type CreateTemplateTaskRequest struct {
 	// CoverFile               *multipart.FileHeader           `form:"cover_file" validate:"required"`
 	CoverPath               string                          `form:"cover_path" validate:"required"`
+	SurveyTemplateID        *string                         `form:"survey_template_id" validate:"omitempty"`
 	Name                    string                          `form:"name" validate:"required"`
 	Priority                string                          `form:"priority" validate:"required,template_task_priority_validation"`
 	DueDuration             *int                            `form:"due_duration" validate:"omitempty,numeric"`
@@ -17,6 +18,7 @@ type UpdateTemplateTaskRequest struct {
 	ID string `form:"id" validate:"required"`
 	// CoverFile               *multipart.FileHeader           `form:"cover_file" validate:"required"`
 	CoverPath               string                          `form:"cover_path" validate:"required"`
+	SurveyTemplateID        *string                         `form:"survey_template_id" validate:"omitempty"`
 	Name                    string                          `form:"name" validate:"required"`
 	Priority                string                          `form:"priority" validate:"required,template_task_priority_validation"`
 	DueDuration             *int                            `form:"due_duration" validate:"omitempty,numeric"`

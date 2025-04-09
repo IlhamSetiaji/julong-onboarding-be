@@ -12,6 +12,7 @@ type TemplateTaskResponse struct {
 	CoverPath        *string                         `json:"cover_path"`
 	CoverPathOrigin  *string                         `json:"cover_path_origin"`
 	Name             string                          `json:"name"`
+	SurveyTemplateID uuid.UUID                       `json:"survey_template_id"`
 	Priority         entity.TemplateTaskPriorityEnum `json:"priority"`
 	DueDuration      *int                            `json:"due_duration"`
 	Status           entity.TemplateTaskStatusEnum   `json:"status"`
@@ -23,4 +24,5 @@ type TemplateTaskResponse struct {
 
 	TemplateTaskAttachments []TemplateTaskAttachmentResponse `json:"template_task_attachments"`
 	TemplateTaskChecklists  []TemplateTaskChecklistResponse  `json:"template_task_checklists"`
+	SurveyTemplate          *SurveyTemplateResponse          `json:"survey_template"`
 }

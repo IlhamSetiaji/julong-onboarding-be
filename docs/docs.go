@@ -1474,6 +1474,9 @@ const docTemplate = `{
                 "status": {
                     "type": "string"
                 },
+                "survey_template_id": {
+                    "type": "string"
+                },
                 "template_task_attachments": {
                     "type": "array",
                     "items": {
@@ -1713,6 +1716,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
+                    "type": "string"
+                },
+                "survey_template_id": {
                     "type": "string"
                 },
                 "template_task_attachments": {
@@ -2209,6 +2215,12 @@ const docTemplate = `{
                 },
                 "status": {
                     "$ref": "#/definitions/entity.TemplateTaskStatusEnum"
+                },
+                "survey_template": {
+                    "$ref": "#/definitions/response.SurveyTemplateResponse"
+                },
+                "survey_template_id": {
+                    "type": "string"
                 },
                 "template_task_attachments": {
                     "type": "array",
