@@ -61,10 +61,10 @@ func (h *SurveyResponseHandler) CreateOrUpdateSurveyResponses(ctx *gin.Context) 
 	}
 
 	questionID := ctx.Request.FormValue("question_id")
-	answerIDs := ctx.PostFormArray("answers.id")
-	jobPostingIDs := ctx.PostFormArray("answers.survey_template_id")
-	userProfileIDs := ctx.PostFormArray("answers.employee_task_id")
-	answers := ctx.PostFormArray("answers.answer")
+	answerIDs := ctx.PostFormArray("answers[id]")
+	jobPostingIDs := ctx.PostFormArray("answers[survey_template_id]")
+	userProfileIDs := ctx.PostFormArray("answers[employee_task_id]")
+	answers := ctx.PostFormArray("answers[answer]")
 	answerFiles := ctx.Request.MultipartForm.File["answers[][answer_file]"]
 	// Process each answer
 	var payload request.SurveyResponseRequest
