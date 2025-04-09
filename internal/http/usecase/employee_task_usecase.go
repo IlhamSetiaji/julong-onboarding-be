@@ -30,6 +30,7 @@ type IEmployeeTaskUseCase interface {
 	UpdateEmployeeTaskOnly(req *request.UpdateEmployeeTaskOnlyRequest) (*response.EmployeeTaskResponse, error)
 	CreateEmployeeTasksForRecruitment(req *request.CreateEmployeeTasksForRecruitment) error
 	CountKanbanProgressByEmployeeID(employeeID uuid.UUID) (*response.EmployeeTaskProgressResponse, error)
+	FindByIDForResponse(id uuid.UUID) (*response.EmployeeTaskResponse, error)
 }
 
 type EmployeeTaskUseCase struct {
@@ -1159,4 +1160,18 @@ func (uc *EmployeeTaskUseCase) FindAllPaginatedByEmployeeID(employeeID uuid.UUID
 	}
 
 	return &responses, total, nil
+}
+
+func (uc *EmployeeTaskUseCase) FindByIDForResponse(id uuid.UUID) (*response.EmployeeTaskResponse, error) {
+	employeeTask, err := uc.Repository.FindByIDForResponse(id)
+	if err != nil {
+		uc.Log.Error("[EmployeeTaskUseCase.FindByIDForResponse] error finding employee task by id: ", err)
+		return nil, err
+	}
+
+	if employeeTask == nil {
+		return nil, errors.New("employee task not found")
+	}
+
+	return uc.DTO.ConvertEntityToResponse(employeeTask), nil
 }

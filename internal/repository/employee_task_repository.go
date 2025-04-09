@@ -19,6 +19,7 @@ type IEmployeeTaskRepository interface {
 	CountByKeys(keys map[string]interface{}) (int64, error)
 	FindAllByEmployeeIDAndKanbanPaginated(employeeID uuid.UUID, kanban entity.EmployeeTaskKanbanEnum, page, pageSize int, search string, sort map[string]interface{}) (*[]entity.EmployeeTask, int64, error)
 	FindByKeys(keys map[string]interface{}) (*entity.EmployeeTask, error)
+	FindByIDForResponse(id uuid.UUID) (*entity.EmployeeTask, error)
 }
 
 type EmployeeTaskRepository struct {
@@ -195,4 +196,22 @@ func (r *EmployeeTaskRepository) FindAllPaginatedByEmployeeID(employeeID uuid.UU
 	}
 
 	return &employeeTasks, total, nil
+}
+
+func (r *EmployeeTaskRepository) FindByIDForResponse(id uuid.UUID) (*entity.EmployeeTask, error) {
+	var ent entity.EmployeeTask
+
+	if err := r.DB.Preload("EmployeeTaskAttachments").Preload("EmployeeTaskChecklists").
+		Preload("SurveyTemplate.Questions.QuestionOptions").
+		Preload("SurveyTemplate.Questions.AnswerType").
+		Preload("SurveyTemplate.Questions.SurveyResponses", "employee_task_id = ?", id).Where("id = ?", id).First(&ent).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		} else {
+			r.Log.Error("[EmployeeTaskRepository.FindByIDAndEmployeeID] Error when get employee task by id and employee id: ", err)
+			return nil, err
+		}
+	}
+
+	return &ent, nil
 }

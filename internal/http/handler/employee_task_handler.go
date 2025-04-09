@@ -29,6 +29,7 @@ type IEmployeeTaskHandler interface {
 	FindAllByEmployeeIDAndKanbanPaginated(ctx *gin.Context)
 	CountKanbanProgressByEmployeeID(ctx *gin.Context)
 	FindAllPaginatedByEmployeeID(ctx *gin.Context)
+	FindByIDForResponse(ctx *gin.Context)
 }
 
 type EmployeeTaskHandler struct {
@@ -638,4 +639,38 @@ func (h *EmployeeTaskHandler) FindAllPaginatedByEmployeeID(ctx *gin.Context) {
 		"employee_tasks": res,
 		"total":          total,
 	})
+}
+
+// FindByIDForResponse find employee task by id for response
+//
+// @Summary Find employee task by id for response
+// @Description Find employee task by id for response
+// @Tags Employee Task
+// @Accept  json
+// @Produce  json
+// @Param id path string true "Employee Task ID"
+// @Success 200 {object} response.EmployeeTaskResponse
+// @Security BearerAuth
+// @Router /employee-tasks/response/{id} [get]
+func (h *EmployeeTaskHandler) FindByIDForResponse(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		utils.BadRequestResponse(ctx, "id is required", "id is required")
+		return
+	}
+
+	employeeTaskID, err := uuid.Parse(id)
+	if err != nil {
+		utils.BadRequestResponse(ctx, "invalid id", "invalid id")
+		return
+	}
+
+	res, err := h.UseCase.FindByIDForResponse(employeeTaskID)
+	if err != nil {
+		h.Log.Error("[EmployeeTaskHandler.FindByIDForResponse] " + err.Error())
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, "internal server error", err.Error())
+		return
+	}
+
+	utils.SuccessResponse(ctx, http.StatusOK, "success find employee task", res)
 }
