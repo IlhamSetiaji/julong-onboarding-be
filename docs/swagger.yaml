@@ -546,6 +546,8 @@ definitions:
         type: string
       is_completed:
         type: string
+      max_stars:
+        type: integer
       number:
         type: integer
       question:
@@ -566,6 +568,8 @@ definitions:
   response.SurveyResponseResponse:
     properties:
       answer:
+        type: string
+      answer_file:
         type: string
       created_at:
         type: string

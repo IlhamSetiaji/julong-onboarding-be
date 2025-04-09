@@ -2044,6 +2044,9 @@ const docTemplate = `{
                 "is_completed": {
                     "type": "string"
                 },
+                "max_stars": {
+                    "type": "integer"
+                },
                 "number": {
                     "type": "integer"
                 },
@@ -2074,6 +2077,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "answer": {
+                    "type": "string"
+                },
+                "answer_file": {
                     "type": "string"
                 },
                 "created_at": {
