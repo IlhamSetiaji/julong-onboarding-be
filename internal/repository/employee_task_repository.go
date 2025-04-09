@@ -20,6 +20,7 @@ type IEmployeeTaskRepository interface {
 	FindAllByEmployeeIDAndKanbanPaginated(employeeID uuid.UUID, kanban entity.EmployeeTaskKanbanEnum, page, pageSize int, search string, sort map[string]interface{}) (*[]entity.EmployeeTask, int64, error)
 	FindByKeys(keys map[string]interface{}) (*entity.EmployeeTask, error)
 	FindByIDForResponse(id uuid.UUID) (*entity.EmployeeTask, error)
+	FindAllPaginatedSurvey(page, pageSize int, search string, sort map[string]interface{}) (*[]entity.EmployeeTask, int64, error)
 }
 
 type EmployeeTaskRepository struct {
@@ -180,7 +181,7 @@ func (r *EmployeeTaskRepository) FindAllPaginatedByEmployeeID(employeeID uuid.UU
 	var employeeTasks []entity.EmployeeTask
 	var total int64
 
-	query := r.DB.Preload("EmployeeTaskAttachments").Preload("EmployeeTaskChecklists").Preload("SurveyTemplate").Where("employee_id = ?", employeeID).Where("name LIKE ?", "%"+search+"%")
+	query := r.DB.Preload("EmployeeTaskAttachments").Preload("EmployeeTaskChecklists").Preload("SurveyTemplate").Where("survey_template_id IS NOT NULL").Where("employee_id = ?", employeeID).Where("name LIKE ?", "%"+search+"%")
 	for key, value := range sort {
 		query = query.Order(key + " " + value.(string))
 	}
@@ -214,4 +215,26 @@ func (r *EmployeeTaskRepository) FindByIDForResponse(id uuid.UUID) (*entity.Empl
 	}
 
 	return &ent, nil
+}
+
+func (r *EmployeeTaskRepository) FindAllPaginatedSurvey(page, pageSize int, search string, sort map[string]interface{}) (*[]entity.EmployeeTask, int64, error) {
+	var employeeTasks []entity.EmployeeTask
+	var total int64
+
+	query := r.DB.Preload("EmployeeTaskAttachments").Preload("EmployeeTaskChecklists").Preload("SurveyTemplate").Where("survey_template_id IS NOT NULL").Where("name LIKE ?", "%"+search+"%")
+	for key, value := range sort {
+		query = query.Order(key + " " + value.(string))
+	}
+
+	if err := query.Offset((page - 1) * pageSize).Limit(pageSize).Find(&employeeTasks).Error; err != nil {
+		r.Log.Error("[EmployeeTaskRepository.FindAllPaginatedSurvey] Error when get employee tasks: ", err)
+		return nil, 0, err
+	}
+
+	if err := query.Count(&total).Error; err != nil {
+		r.Log.Error("[EmployeeTaskRepository.FindAllPaginatedSurvey] Error when count employee tasks: ", err)
+		return nil, 0, err
+	}
+
+	return &employeeTasks, total, nil
 }

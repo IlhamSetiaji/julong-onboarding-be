@@ -470,6 +470,8 @@ definitions:
         $ref: '#/definitions/entity.EmployeeTaskStatusEnum'
       survey_template:
         $ref: '#/definitions/response.SurveyTemplateResponse'
+      survey_template_id:
+        type: string
       template_task:
         $ref: '#/definitions/response.TemplateTaskResponse'
       template_task_id:
@@ -1252,6 +1254,40 @@ paths:
       security:
       - BearerAuth: []
       summary: Find employee task by id for response
+      tags:
+      - Employee Task
+  /employee-tasks/survey:
+    get:
+      consumes:
+      - application/json
+      description: Find all employee task paginated for survey
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Page Size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search
+        in: query
+        name: search
+        type: string
+      - description: Created At
+        in: query
+        name: created_at
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.EmployeeTaskResponse'
+      security:
+      - BearerAuth: []
+      summary: Find all employee task paginated for survey
       tags:
       - Employee Task
   /events:

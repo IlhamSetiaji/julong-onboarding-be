@@ -762,6 +762,60 @@ const docTemplate = `{
                 }
             }
         },
+        "/employee-tasks/survey": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Find all employee task paginated for survey",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employee Task"
+                ],
+                "summary": "Find all employee task paginated for survey",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page Size",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Created At",
+                        "name": "created_at",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.EmployeeTaskResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/employee-tasks/{id}": {
             "get": {
                 "security": [
@@ -1964,6 +2018,9 @@ const docTemplate = `{
                 },
                 "survey_template": {
                     "$ref": "#/definitions/response.SurveyTemplateResponse"
+                },
+                "survey_template_id": {
+                    "type": "string"
                 },
                 "template_task": {
                     "$ref": "#/definitions/response.TemplateTaskResponse"

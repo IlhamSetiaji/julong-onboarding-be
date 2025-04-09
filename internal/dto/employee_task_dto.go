@@ -5,6 +5,7 @@ import (
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/http/messaging"
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/http/request"
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/http/response"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -109,6 +110,13 @@ func (dto *EmployeeTaskDTO) ConvertEntityToResponse(ent *entity.EmployeeTask) *r
 			}
 			path := dto.Viper.GetString("app.url") + *ent.CoverPath
 			return &path
+		}(),
+		SurveyTemplateID: func() *uuid.UUID {
+			if ent.SurveyTemplateID == nil {
+				return nil
+			}
+
+			return ent.SurveyTemplateID
 		}(),
 		CoverPathOrigin: ent.CoverPath,
 		EmployeeID:      ent.EmployeeID,

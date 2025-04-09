@@ -46,6 +46,23 @@ func (s *SurveyTemplate) BeforeDelete(tx *gorm.DB) (err error) {
 		Time:  time.Now().In(loc),
 		Valid: true,
 	}
+
+	if err := tx.Model(&TemplateTask{}).Where("survey_template_id = ?", s.ID).Update("survey_template_id", nil).Error; err != nil {
+		return err
+	}
+
+	if err := tx.Model(&EmployeeTask{}).Where("survey_template_id = ?", s.ID).Update("survey_template_id", nil).Error; err != nil {
+		return err
+	}
+
+	if err := tx.Model(&SurveyResponse{}).Where("survey_template_id = ?", s.ID).Update("deleted_at", time.Now()).Error; err != nil {
+		return err
+	}
+
+	if err := tx.Model(&Question{}).Where("survey_template_id = ?", s.ID).Update("deleted_at", time.Now()).Error; err != nil {
+		return err
+	}
+
 	return
 }
 

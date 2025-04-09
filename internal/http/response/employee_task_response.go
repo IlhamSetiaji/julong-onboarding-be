@@ -13,6 +13,7 @@ type EmployeeTaskResponse struct {
 	CoverPathOrigin  *string                         `json:"cover_path_origin"`
 	EmployeeID       *uuid.UUID                      `json:"employee_id"`
 	TemplateTaskID   *uuid.UUID                      `json:"template_task_id"`
+	SurveyTemplateID *uuid.UUID                      `json:"survey_template_id"`
 	VerifiedBy       *uuid.UUID                      `json:"verified_by"`
 	Name             string                          `json:"name"`
 	Priority         entity.EmployeeTaskPriorityEnum `json:"priority"`
