@@ -13,6 +13,7 @@ type QuestionRequest struct {
 	ID              string                  `json:"id" validate:"omitempty,uuid"`
 	AnswerTypeID    string                  `json:"answer_type_id" validate:"required,uuid"`
 	Question        string                  `json:"question" validate:"omitempty"`
+	MaxStars        int                     `json:"max_stars" validate:"omitempty"`
 	Attachment      *multipart.FileHeader   `json:"attachment" validate:"omitempty"`
 	AttachmentPath  string                  `json:"attachment_path" validate:"omitempty"`
 	QuestionOptions []QuestionOptionRequest `json:"question_options" validate:"omitempty,dive"`

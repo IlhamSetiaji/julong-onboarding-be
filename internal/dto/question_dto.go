@@ -56,6 +56,7 @@ func (dto *QuestionDTO) ConvertEntityToResponse(ent *entity.Question) *response.
 			return &path
 		}(),
 		Number:    ent.Number,
+		MaxStars:  ent.MaxStars,
 		CreatedAt: ent.CreatedAt,
 		UpdatedAt: ent.UpdatedAt,
 

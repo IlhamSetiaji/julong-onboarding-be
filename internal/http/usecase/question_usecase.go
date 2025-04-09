@@ -193,6 +193,7 @@ func (uc *QuestionUseCase) CreateOrUpdateQuestions(req *request.CreateOrUpdateQu
 					AnswerTypeID:     uuid.MustParse(question.AnswerTypeID),
 					Question:         question.Question,
 					Number:           i + 1,
+					MaxStars:         question.MaxStars,
 					Attachment:       &question.AttachmentPath,
 				})
 				if err != nil {
@@ -219,6 +220,7 @@ func (uc *QuestionUseCase) CreateOrUpdateQuestions(req *request.CreateOrUpdateQu
 					AnswerTypeID:     uuid.MustParse(question.AnswerTypeID),
 					Question:         question.Question,
 					Number:           i + 1,
+					MaxStars:         question.MaxStars,
 					Attachment:       &question.AttachmentPath,
 				})
 				if err != nil {
@@ -255,6 +257,7 @@ func (uc *QuestionUseCase) CreateOrUpdateQuestions(req *request.CreateOrUpdateQu
 				AnswerTypeID:     uuid.MustParse(question.AnswerTypeID),
 				Question:         question.Question,
 				Number:           i + 1,
+				MaxStars:         question.MaxStars,
 				Attachment:       &question.AttachmentPath,
 			})
 			if err != nil {
