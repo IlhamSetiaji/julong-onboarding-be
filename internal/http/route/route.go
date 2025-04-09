@@ -24,6 +24,7 @@ type RouteConfig struct {
 	EventHandler                  handler.IEventHandler
 	AnswerTypeHandler             handler.IAnswerTypeHandler
 	SurveyTemplateHandler         handler.ISurveyTemplateHandler
+	SurveyResponseHandler         handler.ISurveyResponseHandler
 }
 
 func (c *RouteConfig) SetupRoutes() {
@@ -115,6 +116,11 @@ func (c *RouteConfig) SetupAPIRoutes() {
 				surveyTemplateRoute.PUT("/update", c.SurveyTemplateHandler.UpdateSurveyTemplate)
 				surveyTemplateRoute.DELETE("/:id", c.SurveyTemplateHandler.DeleteSurveyTemplate)
 			}
+			// survey responses
+			surveyResponseRoute := apiRoute.Group("/survey-responses")
+			{
+				surveyResponseRoute.POST("", c.SurveyResponseHandler.CreateOrUpdateSurveyResponses)
+			}
 		}
 	}
 }
@@ -130,6 +136,7 @@ func NewRouteConfig(app *gin.Engine, viper *viper.Viper, log *logrus.Logger) *Ro
 	eventHandler := handler.EventHandlerFactory(log, viper)
 	answerTypeHandler := handler.AnswerTypeHandlerFactory(log, viper)
 	surveyTemplateHandler := handler.SurveyTemplateHandlerFactory(log, viper)
+	surveyResponseHandler := handler.SurveyResponseHandlerFactory(log, viper)
 	return &RouteConfig{
 		App:                           app,
 		Log:                           log,
@@ -144,5 +151,6 @@ func NewRouteConfig(app *gin.Engine, viper *viper.Viper, log *logrus.Logger) *Ro
 		EventHandler:                  eventHandler,
 		AnswerTypeHandler:             answerTypeHandler,
 		SurveyTemplateHandler:         surveyTemplateHandler,
+		SurveyResponseHandler:         surveyResponseHandler,
 	}
 }
