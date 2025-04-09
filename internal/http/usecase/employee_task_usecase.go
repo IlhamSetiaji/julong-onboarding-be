@@ -1,7 +1,10 @@
 package usecase
 
 import (
+	"encoding/base64"
 	"errors"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -320,12 +323,43 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTas
 
 	// create employee task attachments
 	for _, attachmentReq := range req.EmployeeTaskAttachments {
-		_, err := uc.EmployeeTaskAttachmentRepository.CreateEmployeeTaskAttachment(&entity.EmployeeTaskAttachment{
-			EmployeeTaskID: employeeTask.ID,
-			Path:           attachmentReq.Path,
-		})
+		// Read the file from the given path
+		fileContent, err := os.ReadFile(attachmentReq.Path)
 		if err != nil {
-			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error creating employee task attachment: ", err)
+			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error reading file: ", err)
+			return nil, err
+		}
+
+		// Extract the file name from the path
+		fileName := filepath.Base(attachmentReq.Path)
+
+		// Encode the file content to base64
+		encodedData := base64.StdEncoding.EncodeToString(fileContent)
+
+		// Create the payload
+		midsuitAttachmentPayload := &request.SyncEmployeeTaskAttachmentMidsuitRequest{
+			Name: fileName,
+			Data: encodedData,
+		}
+
+		// Log the payload for debugging
+		// uc.Log.Info("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] midsuit attachment payload: ", midsuitAttachmentPayload)
+
+		// Sync to midsuit
+		authResp, err := uc.MidsuitService.AuthOneStep()
+		if err != nil {
+			uc.Log.Error("[DocumentSendingUseCase.UpdateDocumentSending] " + err.Error())
+			return nil, err
+		}
+
+		midsuitIDInt, err := strconv.Atoi(midsuitID)
+		if err != nil {
+			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error converting midsuitID to int: ", err)
+			return nil, err
+		}
+		_, err = uc.MidsuitService.SyncEmployeeTaskAttachmentMidsuit(midsuitIDInt, *midsuitAttachmentPayload, authResp.Token)
+		if err != nil {
+			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error syncing employee task attachment to midsuit: ", err)
 			return nil, err
 		}
 	}

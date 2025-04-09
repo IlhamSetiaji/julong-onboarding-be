@@ -255,13 +255,15 @@ func (s *MidsuitService) SyncEmployeeTaskAttachmentMidsuit(midsuitID int, payloa
 		return nil, errors.New("[MidsuitService.SyncEmployeeTaskAttachmentMidsuit] Error when fetching response haha: " + string(bodyBytes))
 	}
 
-	bodyBytes, _ := io.ReadAll(res.Body)
-	var syncResponse SyncEmployeeTaskMidsuitResponse
-	if err := json.Unmarshal(bodyBytes, &syncResponse); err != nil {
-		s.Log.Error(err)
-		return nil, errors.New("[MidsuitService.SyncEmployeeTaskAttachmentMidsuit] Error when unmarshalling response: " + err.Error())
-	}
+	// bodyBytes, _ := io.ReadAll(res.Body)
+	// var syncResponse SyncEmployeeTaskMidsuitResponse
+	// if err := json.Unmarshal(bodyBytes, &syncResponse); err != nil {
+	// 	s.Log.Error(err)
+	// 	return nil, errors.New("[MidsuitService.SyncEmployeeTaskAttachmentMidsuit] Error when unmarshalling response: " + err.Error())
+	// }
 
-	idStr := strconv.Itoa(syncResponse.ID)
-	return &idStr, nil
+	// idStr := strconv.Itoa(syncResponse.ID)
+	// return &idStr, nil
+	message := "Success"
+	return &message, nil
 }
