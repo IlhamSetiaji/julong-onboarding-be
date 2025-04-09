@@ -34,6 +34,7 @@ func (dto *SurveyResponseDTO) ConvertEntityToResponse(ent *entity.SurveyResponse
 		EmployeeTaskID:   ent.EmployeeTaskID,
 		QuestionID:       ent.QuestionID,
 		Answer:           ent.Answer,
+		AnswerFile:       ent.AnswerFile,
 		CreatedAt:        ent.CreatedAt,
 		UpdatedAt:        ent.UpdatedAt,
 	}

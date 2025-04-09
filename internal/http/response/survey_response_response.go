@@ -12,6 +12,7 @@ type SurveyResponseResponse struct {
 	EmployeeTaskID   uuid.UUID `json:"employee_task_id"`
 	QuestionID       uuid.UUID `json:"question_id"`
 	Answer           string    `json:"answer"`
+	AnswerFile       string    `json:"answer_file"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
 }

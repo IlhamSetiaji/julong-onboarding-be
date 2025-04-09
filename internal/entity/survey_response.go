@@ -13,7 +13,8 @@ type SurveyResponse struct {
 	SurveyTemplateID uuid.UUID `json:"survey_template_id" gorm:"type:char(36);not null"`
 	EmployeeTaskID   uuid.UUID `json:"employee_task_id" gorm:"type:char(36);not null"`
 	QuestionID       uuid.UUID `json:"question_id" gorm:"type:char(36);not null"`
-	Answer           string    `json:"answer" gorm:"type:text;not null"`
+	Answer           string    `json:"answer" gorm:"type:text;default:null"`
+	AnswerFile       string    `json:"answer_file" gorm:"type:text;default:null"`
 
 	SurveyTemplate *SurveyTemplate `json:"survey_template" gorm:"foreignKey:SurveyTemplateID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	EmployeeTask   *EmployeeTask   `json:"employee_task" gorm:"foreignKey:EmployeeTaskID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
