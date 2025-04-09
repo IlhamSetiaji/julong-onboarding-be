@@ -28,6 +28,7 @@ type IEmployeeTaskHandler interface {
 	FindAllByEmployeeID(ctx *gin.Context)
 	FindAllByEmployeeIDAndKanbanPaginated(ctx *gin.Context)
 	CountKanbanProgressByEmployeeID(ctx *gin.Context)
+	FindAllPaginatedByEmployeeID(ctx *gin.Context)
 }
 
 type EmployeeTaskHandler struct {
@@ -572,4 +573,69 @@ func (h *EmployeeTaskHandler) CountKanbanProgressByEmployeeID(ctx *gin.Context) 
 	}
 
 	utils.SuccessResponse(ctx, http.StatusOK, "success count kanban progress by employee id", res)
+}
+
+// FindAllPaginatedByEmployeeID find all employee task by employee id paginated
+//
+// @Summary Find all employee task by employee id paginated
+// @Description Find all employee task by employee id paginated
+// @Tags Employee Task
+// @Accept  json
+// @Produce  json
+// @Param employee_id query string true "Employee ID"
+// @Param page query int false "Page"
+// @Param page_size query int false "Page Size"
+// @Param search query string false "Search"
+// @Param created_at query string false "Created At"
+// @Success 200 {object} response.EmployeeTaskResponse
+// @Security BearerAuth
+// @Router /employee-tasks/employee-paginated [get]
+func (h *EmployeeTaskHandler) FindAllPaginatedByEmployeeID(ctx *gin.Context) {
+	employeeID := ctx.Query("employee_id")
+	if employeeID == "" {
+		utils.BadRequestResponse(ctx, "employee_id is required", "employee_id is required")
+		return
+	}
+
+	parsedEmployeeID, err := uuid.Parse(employeeID)
+	if err != nil {
+		utils.BadRequestResponse(ctx, "invalid employee_id", "invalid employee_id")
+		return
+	}
+
+	page, err := strconv.Atoi(ctx.Query("page"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	pageSize, err := strconv.Atoi(ctx.Query("page_size"))
+	if err != nil || pageSize < 1 {
+		pageSize = 10
+	}
+
+	search := ctx.Query("search")
+	if search == "" {
+		search = ""
+	}
+
+	createdAt := ctx.Query("created_at")
+	if createdAt == "" {
+		createdAt = "DESC"
+	}
+
+	sort := map[string]interface{}{
+		"created_at": createdAt,
+	}
+
+	res, total, err := h.UseCase.FindAllPaginatedByEmployeeID(parsedEmployeeID, page, pageSize, search, sort)
+	if err != nil {
+		h.Log.Error("[EmployeeTaskHandler.FindAllPaginatedByEmployeeID] " + err.Error())
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, "internal server error", err.Error())
+		return
+	}
+
+	utils.SuccessResponse(ctx, http.StatusOK, "success find all employee task", gin.H{
+		"employee_tasks": res,
+		"total":          total,
+	})
 }

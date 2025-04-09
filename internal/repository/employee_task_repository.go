@@ -179,7 +179,7 @@ func (r *EmployeeTaskRepository) FindAllPaginatedByEmployeeID(employeeID uuid.UU
 	var employeeTasks []entity.EmployeeTask
 	var total int64
 
-	query := r.DB.Preload("EmployeeTaskAttachments").Preload("EmployeeTaskChecklists").Preload("SurveyTemplates", "employee_id = ?", employeeID).Where("employee_id = ?", employeeID).Where("name LIKE ?", "%"+search+"%")
+	query := r.DB.Preload("EmployeeTaskAttachments").Preload("EmployeeTaskChecklists").Preload("SurveyTemplate").Where("employee_id = ?", employeeID).Where("name LIKE ?", "%"+search+"%")
 	for key, value := range sort {
 		query = query.Order(key + " " + value.(string))
 	}

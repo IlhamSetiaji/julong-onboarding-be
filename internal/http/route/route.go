@@ -78,6 +78,7 @@ func (c *RouteConfig) SetupAPIRoutes() {
 				employeeTaskRoute.GET("", c.EmployeeTaskHandler.FindAllPaginated)
 				employeeTaskRoute.GET("/employee-kanban", c.EmployeeTaskHandler.FindAllByEmployeeIDAndKanbanPaginated)
 				employeeTaskRoute.GET("/employee", c.EmployeeTaskHandler.FindAllByEmployeeID)
+				employeeTaskRoute.GET("/employee-paginated", c.EmployeeTaskHandler.FindAllPaginatedByEmployeeID)
 				employeeTaskRoute.GET("/count", c.EmployeeTaskHandler.CountByKanbanAndEmployeeID)
 				employeeTaskRoute.GET("/employee-kanban/count", c.EmployeeTaskHandler.CountKanbanProgressByEmployeeID)
 				employeeTaskRoute.GET("/:id", c.EmployeeTaskHandler.FindByID)

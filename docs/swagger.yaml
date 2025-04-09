@@ -1180,6 +1180,45 @@ paths:
       summary: Count kanban progress by employee id
       tags:
       - Employee Task
+  /employee-tasks/employee-paginated:
+    get:
+      consumes:
+      - application/json
+      description: Find all employee task by employee id paginated
+      parameters:
+      - description: Employee ID
+        in: query
+        name: employee_id
+        required: true
+        type: string
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Page Size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search
+        in: query
+        name: search
+        type: string
+      - description: Created At
+        in: query
+        name: created_at
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.EmployeeTaskResponse'
+      security:
+      - BearerAuth: []
+      summary: Find all employee task by employee id paginated
+      tags:
+      - Employee Task
   /events:
     get:
       consumes:

@@ -22,6 +22,7 @@ type IEmployeeTaskUseCase interface {
 	UpdateEmployeeTask(req *request.UpdateEmployeeTaskRequest) (*response.EmployeeTaskResponse, error)
 	DeleteEmployeeTask(id uuid.UUID) error
 	FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}) (*[]response.EmployeeTaskResponse, int64, error)
+	FindAllPaginatedByEmployeeID(employeeID uuid.UUID, page, pageSize int, search string, sort map[string]interface{}) (*[]response.EmployeeTaskResponse, int64, error)
 	FindByID(id uuid.UUID) (*response.EmployeeTaskResponse, error)
 	CountByKanbanAndEmployeeID(kanban entity.EmployeeTaskKanbanEnum, employeeID uuid.UUID) (int64, error)
 	FindAllByEmployeeID(employeeID uuid.UUID) (*response.EmployeeTaskKanbanResponse, error)
@@ -1143,4 +1144,19 @@ func (uc *EmployeeTaskUseCase) CountKanbanProgressByEmployeeID(employeeID uuid.U
 		NeedReview: int(needReview),
 		Completed:  int(completed),
 	}, nil
+}
+
+func (uc *EmployeeTaskUseCase) FindAllPaginatedByEmployeeID(employeeID uuid.UUID, page, pageSize int, search string, sort map[string]interface{}) (*[]response.EmployeeTaskResponse, int64, error) {
+	employeeTasks, total, err := uc.Repository.FindAllPaginatedByEmployeeID(employeeID, page, pageSize, search, sort)
+	if err != nil {
+		uc.Log.Error("[EmployeeTaskUseCase.FindAllPaginatedByEmployeeID] error finding all employee tasks by employee id: ", err)
+		return nil, 0, err
+	}
+
+	var responses []response.EmployeeTaskResponse
+	for _, employeeTask := range *employeeTasks {
+		responses = append(responses, *uc.DTO.ConvertEntityToResponse(&employeeTask))
+	}
+
+	return &responses, total, nil
 }
