@@ -725,6 +725,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/employee-tasks/response/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Find employee task by id for response",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employee Task"
+                ],
+                "summary": "Find employee task by id for response",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Employee Task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.EmployeeTaskResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/employee-tasks/{id}": {
             "get": {
                 "security": [

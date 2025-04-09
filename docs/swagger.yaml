@@ -1231,6 +1231,29 @@ paths:
       summary: Find all employee task by employee id paginated
       tags:
       - Employee Task
+  /employee-tasks/response/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Find employee task by id for response
+      parameters:
+      - description: Employee Task ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.EmployeeTaskResponse'
+      security:
+      - BearerAuth: []
+      summary: Find employee task by id for response
+      tags:
+      - Employee Task
   /events:
     get:
       consumes:
