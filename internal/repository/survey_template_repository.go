@@ -3,6 +3,7 @@ package repository
 import (
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/config"
 	"github.com/IlhamSetiaji/julong-onboarding-be/internal/entity"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -14,6 +15,7 @@ type ISurveyTemplateRepository interface {
 	FindByKeys(keys map[string]interface{}) (*entity.SurveyTemplate, error)
 	FindAllPaginated(page, pageSize int, search string, sort map[string]interface{}) (*[]entity.SurveyTemplate, int64, error)
 	FindLatestSurveyNumber() (*entity.SurveyTemplate, error)
+	FindByIDForResponse(id, employeeTaskID uuid.UUID) (*entity.SurveyTemplate, error)
 }
 
 type SurveyTemplateRepository struct {
@@ -121,4 +123,18 @@ func (r *SurveyTemplateRepository) FindLatestSurveyNumber() (*entity.SurveyTempl
 	}
 
 	return &latestSurvey, nil
+}
+
+func (r *SurveyTemplateRepository) FindByIDForResponse(id, employeeTaskID uuid.UUID) (*entity.SurveyTemplate, error) {
+	var ent entity.SurveyTemplate
+	if err := r.DB.Where("id = ?", id).Preload("Questions.QuestionOptions").Preload("Questions.AnswerType").
+		Preload("Questions.SurveyResponses", "employee_task_id = ?", employeeTaskID).First(&ent).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		r.Log.Error("[SurveyTemplateRepository.FindByIDForResponse] Error when find survey template by ID: ", err)
+		return nil, err
+	}
+
+	return &ent, nil
 }

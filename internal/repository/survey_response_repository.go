@@ -18,6 +18,7 @@ type ISurveyResponseRepository interface {
 	DeleteByQuestionID(questionID uuid.UUID) error
 	DeleteByQuestionIDs(questionIDs []uuid.UUID) error
 	DeleteNotInIDsAndQuestionID(questionID uuid.UUID, ids []uuid.UUID) error
+	DeleteNotInIDsAndKeys(keys map[string]interface{}, ids []uuid.UUID) error
 }
 
 type SurveyResponseRepository struct {
@@ -134,6 +135,16 @@ func (r *SurveyResponseRepository) DeleteNotInIDsAndQuestionID(questionID uuid.U
 	var surveyResponse entity.SurveyResponse
 	if err := r.DB.Where("question_id = ? AND id NOT IN ?", questionID, ids).Delete(&surveyResponse).Error; err != nil {
 		r.Log.Error("[SurveyResponseRepository.DeleteNotInIDsAndQuestionID] Error when delete survey response: ", err)
+		return err
+	}
+
+	return nil
+}
+
+func (r *SurveyResponseRepository) DeleteNotInIDsAndKeys(keys map[string]interface{}, ids []uuid.UUID) error {
+	var surveyResponse entity.SurveyResponse
+	if err := r.DB.Where(keys).Where("id NOT IN ?", ids).Delete(&surveyResponse).Error; err != nil {
+		r.Log.Error("[SurveyResponseRepository.DeleteNotInIDsAndKeys] Error when delete survey response: ", err)
 		return err
 	}
 

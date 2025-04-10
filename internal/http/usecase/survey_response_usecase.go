@@ -16,6 +16,7 @@ import (
 
 type ISurveyResponseUseCase interface {
 	CreateOrUpdateSurveyResponses(req *request.SurveyResponseRequest) (*response.QuestionResponse, error)
+	CreateOrUpdateSurveyResponsesBulk(req *request.SurveyResponseBulkRequest) (*response.SurveyTemplateResponse, error)
 }
 
 type SurveyResponseUseCase struct {
@@ -27,6 +28,7 @@ type SurveyResponseUseCase struct {
 	EmployeeMessage          messaging.IEmployeeMessage
 	QuestionDTO              dto.IQuestionDTO
 	EmployeeTaskRepository   repository.IEmployeeTaskRepository
+	SurveyTemplateDTO        dto.ISurveyTemplateDTO
 }
 
 func NewSurveyResponseUseCase(
@@ -38,6 +40,7 @@ func NewSurveyResponseUseCase(
 	EmployeeMessage messaging.IEmployeeMessage,
 	QuestionDTO dto.IQuestionDTO,
 	EmployeeTaskRepository repository.IEmployeeTaskRepository,
+	SurveyTemplateDTO dto.ISurveyTemplateDTO,
 ) ISurveyResponseUseCase {
 	return &SurveyResponseUseCase{
 		Log:                      Log,
@@ -48,6 +51,7 @@ func NewSurveyResponseUseCase(
 		EmployeeMessage:          EmployeeMessage,
 		QuestionDTO:              QuestionDTO,
 		EmployeeTaskRepository:   EmployeeTaskRepository,
+		SurveyTemplateDTO:        SurveyTemplateDTO,
 	}
 }
 
@@ -61,6 +65,7 @@ func SurveyResponseUseCaseFactory(
 	employeeMessage := messaging.EmployeeMessageFactory(Log)
 	questionDTO := dto.QuestionDTOFactory(Log, Viper)
 	employeeTaskRepository := repository.EmployeeTaskRepositoryFactory(Log)
+	surveyTemplateDTO := dto.SurveyTemplateDTOFactory(Log, Viper)
 
 	return NewSurveyResponseUseCase(
 		Log,
@@ -71,6 +76,7 @@ func SurveyResponseUseCaseFactory(
 		employeeMessage,
 		questionDTO,
 		employeeTaskRepository,
+		surveyTemplateDTO,
 	)
 }
 
@@ -231,4 +237,148 @@ func (uc *SurveyResponseUseCase) CreateOrUpdateSurveyResponses(req *request.Surv
 	}
 
 	return uc.QuestionDTO.ConvertEntityToResponse(rQuestion), nil
+}
+
+func (uc *SurveyResponseUseCase) CreateOrUpdateSurveyResponsesBulk(req *request.SurveyResponseBulkRequest) (*response.SurveyTemplateResponse, error) {
+	parsedSurveyTemplateID, err := uuid.Parse(req.SurveyTemplateID)
+	if err != nil {
+		uc.Log.Errorf("[SurveyResponseUseCase.CreateOrUpdateSurveyResponsesBulk] error when parsing survey template id: %s", err.Error())
+		return nil, err
+	}
+	surveyTemplate, err := uc.SurveyTemplateRepository.FindByKeys(map[string]interface{}{
+		"id": parsedSurveyTemplateID,
+	})
+	if err != nil {
+		uc.Log.Errorf("[SurveyResponseUseCase.CreateOrUpdateSurveyResponsesBulk] error when finding survey template by id: %s", err.Error())
+		return nil, err
+	}
+	if surveyTemplate == nil {
+		uc.Log.Errorf("[SurveyResponseUseCase.CreateOrUpdateSurveyResponsesBulk] survey template with id %s not found", req.SurveyTemplateID)
+		return nil, errors.New("survey template not found")
+	}
+
+	parsedEmployeeTaskID, err := uuid.Parse(req.EmployeeTaskID)
+	if err != nil {
+		uc.Log.Errorf("[SurveyResponseUseCase.CreateOrUpdateSurveyResponsesBulk] error when parsing employee task id: %s", err.Error())
+		return nil, err
+	}
+	employeeTask, err := uc.EmployeeTaskRepository.FindByID(parsedEmployeeTaskID)
+	if err != nil {
+		uc.Log.Errorf("[SurveyResponseUseCase.CreateOrUpdateSurveyResponsesBulk] error when finding employee task by id: %s", err.Error())
+		return nil, err
+	}
+	if employeeTask == nil {
+		uc.Log.Errorf("[SurveyResponseUseCase.CreateOrUpdateSurveyResponsesBulk] employee task with id %s not found", req.EmployeeTaskID)
+		return nil, errors.New("employee task not found")
+	}
+
+	var answerIDs []uuid.UUID
+	for _, ans := range req.Answers {
+		if ans.ID != nil {
+			parsedAnswerID, err := uuid.Parse(*ans.ID)
+			if err != nil {
+				uc.Log.Errorf("[SurveyResponseUseCase.CreateOrUpdateSurveyResponsesBulk] error when parsing answer id: %s", err.Error())
+				return nil, err
+			}
+			answerIDs = append(answerIDs, parsedAnswerID)
+		}
+	}
+
+	// delete answers by survey template id, employee task id and not in ids
+	if len(answerIDs) > 0 {
+		err := uc.SurveyResponseRepository.DeleteNotInIDsAndKeys(map[string]interface{}{
+			"survey_template_id": parsedSurveyTemplateID,
+			"employee_task_id":   parsedEmployeeTaskID,
+		}, answerIDs)
+		if err != nil {
+			uc.Log.Errorf("[SurveyResponseUseCase.CreateOrUpdateSurveyResponsesBulk] error when deleting answers by survey template id, employee task id and ids: %s", err.Error())
+			return nil, err
+		}
+	}
+
+	// create or update answers
+	for _, ans := range req.Answers {
+		// check if question is exist
+		parsedQuestionID, err := uuid.Parse(ans.QuestionID)
+		if err != nil {
+			uc.Log.Errorf("[SurveyResponseUseCase.CreateOrUpdateSurveyResponsesBulk] error when parsing question id: %s", err.Error())
+			return nil, err
+		}
+		question, err := uc.QuestionRepository.FindByID(parsedQuestionID)
+		if err != nil {
+			uc.Log.Errorf("[SurveyResponseUseCase.CreateOrUpdateSurveyResponsesBulk] error when finding question by id: %s", err.Error())
+			return nil, err
+		}
+		if question == nil {
+			uc.Log.Errorf("[SurveyResponseUseCase.CreateOrUpdateSurveyResponsesBulk] question with id %s not found", ans.QuestionID)
+			return nil, errors.New("question not found")
+		}
+		// check if answer is exist
+		if ans.ID != nil {
+			parsedAnswerID, err := uuid.Parse(*ans.ID)
+			if err != nil {
+				uc.Log.Errorf("[SurveyResponseUseCase.CreateOrUpdateSurveyResponsesBulk] error when parsing answer id: %s", err.Error())
+				return nil, err
+			}
+			exist, err := uc.SurveyResponseRepository.FindByID(parsedAnswerID)
+			if err != nil {
+				uc.Log.Errorf("[SurveyResponseUseCase.CreateOrUpdateSurveyResponsesBulk] error when finding answer by id: %s", err.Error())
+				return nil, err
+			}
+
+			if exist == nil {
+				_, err := uc.SurveyResponseRepository.CreateSurveyResponse(&entity.SurveyResponse{
+					QuestionID:       question.ID,
+					SurveyTemplateID: surveyTemplate.ID,
+					EmployeeTaskID:   employeeTask.ID,
+					Answer:           ans.Answer,
+					AnswerFile:       ans.AnswerPath,
+				})
+				if err != nil {
+					uc.Log.Errorf("[SurveyResponseUseCase.CreateOrUpdateSurveyResponsesBulk] error when creating answer: %s", err.Error())
+					return nil, err
+				}
+			} else {
+				_, err := uc.SurveyResponseRepository.UpdateSurveyResponse(&entity.SurveyResponse{
+					ID:               exist.ID,
+					QuestionID:       question.ID,
+					SurveyTemplateID: surveyTemplate.ID,
+					EmployeeTaskID:   employeeTask.ID,
+					Answer:           ans.Answer,
+					AnswerFile:       ans.AnswerPath,
+				})
+
+				if err != nil {
+					uc.Log.Errorf("[SurveyResponseUseCase.CreateOrUpdateSurveyResponsesBulk] error when updating answer: %s", err.Error())
+					return nil, err
+				}
+			}
+		} else {
+			_, err := uc.SurveyResponseRepository.CreateSurveyResponse(&entity.SurveyResponse{
+				QuestionID:       question.ID,
+				SurveyTemplateID: surveyTemplate.ID,
+				EmployeeTaskID:   employeeTask.ID,
+				Answer:           ans.Answer,
+				AnswerFile:       ans.AnswerPath,
+			})
+			if err != nil {
+				uc.Log.Errorf("[SurveyResponseUseCase.CreateOrUpdateSurveyResponsesBulk] error when creating answer: %s", err.Error())
+				return nil, err
+			}
+		}
+	}
+
+	// get survey template with questions and answers
+	surveyTemplate, err = uc.SurveyTemplateRepository.FindByIDForResponse(parsedSurveyTemplateID, parsedEmployeeTaskID)
+	if err != nil {
+		uc.Log.Errorf("[SurveyResponseUseCase.CreateOrUpdateSurveyResponsesBulk] error when finding survey template by id: %s", err.Error())
+		return nil, err
+	}
+	if surveyTemplate == nil {
+		uc.Log.Errorf("[SurveyResponseUseCase.CreateOrUpdateSurveyResponsesBulk] survey template with id %s not found", req.SurveyTemplateID)
+		return nil, errors.New("survey template not found")
+	}
+
+	resp := uc.SurveyTemplateDTO.ConvertEntityToResponse(surveyTemplate)
+	return resp, nil
 }
