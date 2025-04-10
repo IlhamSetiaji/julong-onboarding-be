@@ -14,6 +14,7 @@ type EmployeeTaskChecklist struct {
 	Name           string     `json:"name" gorm:"type:varchar(255);not null"`
 	IsChecked      string     `json:"is_checked" gorm:"type:varchar(255);not null;default:'NO'"`
 	VerifiedBy     *uuid.UUID `json:"verified_by" gorm:"type:char(36);default:null"`
+	MidsuitID      *string    `json:"midsuit_id" gorm:"type:varchar(255);default:null"`
 
 	EmployeeTask *EmployeeTask `json:"employee_task" gorm:"foreignKey:EmployeeTaskID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }

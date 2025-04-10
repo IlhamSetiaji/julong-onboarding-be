@@ -12,6 +12,7 @@ type EmployeeTaskChecklistResponse struct {
 	Name           string     `json:"name"`
 	IsChecked      string     `json:"is_checked"`
 	VerifiedBy     *uuid.UUID `json:"verified_by"`
+	MidsuitID      *string    `json:"midsuit_id"`
 	CreatedAt      time.Time  `json:"created_at"`
 	UpdatedAt      time.Time  `json:"updated_at"`
 

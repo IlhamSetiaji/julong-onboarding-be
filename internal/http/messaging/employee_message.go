@@ -14,6 +14,7 @@ import (
 
 type IEmployeeMessage interface {
 	SendFindEmployeeByIDMessage(req request.SendFindEmployeeByIDMessageRequest) (*response.EmployeeResponse, error)
+	SendFindEmployeeByMidsuitIDMessage(midsuitID string) (*response.EmployeeResponse, error)
 }
 
 type EmployeeMessage struct {
@@ -61,6 +62,49 @@ func (m *EmployeeMessage) SendFindEmployeeByIDMessage(req request.SendFindEmploy
 
 	if errMsg, ok := resp.MessageData["error"]; ok {
 		return nil, errors.New("[EmployeeMessage.SendFindEmployeeByIDMessage] " + errMsg.(string))
+	}
+
+	employeeData := resp.MessageData["employee"].(map[string]interface{})
+	employee := convertInterfaceToEmployeeResponse(employeeData)
+
+	return employee, nil
+}
+
+func (m *EmployeeMessage) SendFindEmployeeByMidsuitIDMessage(midsuitID string) (*response.EmployeeResponse, error) {
+	payload := map[string]interface{}{
+		"midsuit_id": midsuitID,
+	}
+
+	docMsg := &request.RabbitMQRequest{
+		ID:          uuid.New().String(),
+		MessageType: "find_employee_by_midsuit_id",
+		MessageData: payload,
+		ReplyTo:     "julong_onboarding",
+	}
+
+	log.Printf("INFO: document message: %v", docMsg)
+
+	// create channel and add to rchans with uid
+	rchan := make(chan response.RabbitMQResponse)
+	utils.Rchans[docMsg.ID] = rchan
+
+	// publish rabbit message
+	msg := utils.RabbitMsgPublisher{
+		QueueName: "julong_sso",
+		Message:   *docMsg,
+	}
+	utils.Pchan <- msg
+
+	// wait for reply
+	resp, err := waitReply(docMsg.ID, rchan)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("INFO: response: %v", resp)
+
+	if errMsg, ok := resp.MessageData["error"]; ok {
+		return nil, errors.New("[EmployeeMessage.SendFindEmployeeByMidsuitIDMessage] " + errMsg.(string))
 	}
 
 	employeeData := resp.MessageData["employee"].(map[string]interface{})

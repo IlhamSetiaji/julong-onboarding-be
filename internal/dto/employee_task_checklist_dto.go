@@ -34,6 +34,7 @@ func (dto *EmployeeTaskChecklistDTO) ConvertEntityToResponse(ent *entity.Employe
 		Name:           ent.Name,
 		IsChecked:      ent.IsChecked,
 		VerifiedBy:     ent.VerifiedBy,
+		MidsuitID:      ent.MidsuitID,
 		CreatedAt:      ent.CreatedAt,
 		UpdatedAt:      ent.UpdatedAt,
 	}

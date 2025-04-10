@@ -6,3 +6,10 @@ type EmployeeTaskChecklistRequest struct {
 	IsChecked  *string `form:"is_checked" validate:"omitempty"`
 	VerifiedBy *string `form:"verified_by" validate:"omitempty,uuid"`
 }
+
+type EmployeeTaskChecklistMidsuitRequest struct {
+	MidsuitID  *string `form:"midsuit_id" validate:"omitempty"`
+	Name       string  `form:"name" validate:"required"`
+	IsChecked  *string `form:"is_checked" validate:"omitempty"`
+	VerifiedBy *string `form:"verified_by" validate:"omitempty"`
+}
