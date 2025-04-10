@@ -122,6 +122,7 @@ func (c *RouteConfig) SetupAPIRoutes() {
 			surveyResponseRoute := apiRoute.Group("/survey-responses")
 			{
 				surveyResponseRoute.POST("", c.SurveyResponseHandler.CreateOrUpdateSurveyResponses)
+				surveyResponseRoute.POST("/bulk", c.SurveyResponseHandler.CreateOrUpdateSurveyResponsesBulk)
 			}
 		}
 	}

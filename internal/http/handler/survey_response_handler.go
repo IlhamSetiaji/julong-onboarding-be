@@ -17,6 +17,7 @@ import (
 
 type ISurveyResponseHandler interface {
 	CreateOrUpdateSurveyResponses(ctx *gin.Context)
+	CreateOrUpdateSurveyResponsesBulk(ctx *gin.Context)
 }
 
 type SurveyResponseHandler struct {
@@ -120,6 +121,88 @@ func (h *SurveyResponseHandler) CreateOrUpdateSurveyResponses(ctx *gin.Context) 
 	h.Log.Infof("payload: %v", payload)
 
 	questionResponse, err := h.UseCase.CreateOrUpdateSurveyResponses(&payload)
+	if err != nil {
+		h.Log.Errorf("Error when creating or updating question responses: %v", err)
+		utils.ErrorResponse(ctx, 500, "error", err.Error())
+		return
+	}
+
+	// embed url to answer file
+	// for i, qr := range questionResponse.SurveyResponses {
+	// 	if qr.AnswerFile != "" {
+	// 		(questionResponse.SurveyResponses)[i].AnswerFile = h.Viper.GetString("app.url") + qr.AnswerFile
+	// 	}
+	// }
+
+	utils.SuccessResponse(ctx, 201, "success answer question", questionResponse)
+}
+
+func (h *SurveyResponseHandler) CreateOrUpdateSurveyResponsesBulk(ctx *gin.Context) {
+	if err := ctx.Request.ParseMultipartForm(10 << 20); err != nil { // 10MB limit
+		h.Log.Error("Failed to parse form-data: ", err)
+		utils.BadRequestResponse(ctx, "bad request", err.Error())
+		return
+	}
+
+	surveyTemplateID := ctx.Request.FormValue("survey_template_id")
+	employeeTaskID := ctx.Request.FormValue("employee_task_id")
+	answerIDs := ctx.PostFormArray("answers[id]")
+	questionIDs := ctx.PostFormArray("answers[question_id]")
+	answers := ctx.PostFormArray("answers[answer]")
+	answerFiles := ctx.Request.MultipartForm.File["answers[][answer_file]"]
+	// Process each answer
+	var payload request.SurveyResponseBulkRequest
+	payload.SurveyTemplateID = surveyTemplateID
+	payload.EmployeeTaskID = employeeTaskID
+	for i := range questionIDs {
+		questionID := questionIDs[i]
+		var answer string
+		if len(answers) > i {
+			answer = answers[i]
+		} else {
+			answer = ""
+		}
+
+		var answerID *string
+		if len(answerIDs) > i {
+			answerID = &answerIDs[i]
+		} else {
+			answerID = nil
+		}
+
+		h.Log.Infof("answer: %v", answer)
+
+		var answerFilePath string
+
+		if len(answerFiles) > i {
+			file := answerFiles[i]
+			timestamp := time.Now().UnixNano()
+			filePath := "storage/answers/files/" + strconv.FormatInt(timestamp, 10) + "_" + file.Filename
+			if err := ctx.SaveUploadedFile(file, filePath); err != nil {
+				h.Log.Error("Failed to save answer file: ", err)
+				utils.ErrorResponse(ctx, 500, "error", "Failed to save answer file")
+				return
+			}
+			answerFilePath = filePath
+		}
+
+		payload.Answers = append(payload.Answers, request.AnswerBulkRequest{
+			ID:         answerID,
+			QuestionID: questionID,
+			Answer:     answer,
+			AnswerPath: answerFilePath,
+		})
+	}
+
+	if err := h.Validate.Struct(payload); err != nil {
+		h.Log.Errorf("Error when validating payload: %v", err)
+		utils.ErrorResponse(ctx, 400, "error", err.Error())
+		return
+	}
+
+	h.Log.Infof("payload: %v", payload)
+
+	questionResponse, err := h.UseCase.CreateOrUpdateSurveyResponsesBulk(&payload)
 	if err != nil {
 		h.Log.Errorf("Error when creating or updating question responses: %v", err)
 		utils.ErrorResponse(ctx, 500, "error", err.Error())
