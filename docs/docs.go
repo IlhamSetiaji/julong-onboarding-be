@@ -725,6 +725,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/employee-tasks/midsuit": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create new employee task",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employee Task"
+                ],
+                "summary": "Create new employee task",
+                "parameters": [
+                    {
+                        "description": "Create Template Task",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.CreateEmployeeTaskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.EmployeeTaskResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/employee-tasks/response/{id}": {
             "get": {
                 "security": [
@@ -804,6 +843,52 @@ const docTemplate = `{
                         "description": "Created At",
                         "name": "created_at",
                         "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.EmployeeTaskResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/employee-tasks/update-midsuit": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update employee task",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employee Task"
+                ],
+                "summary": "Update employee task",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Employee Task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update Employee Task",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UpdateEmployeeTaskRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -1899,6 +1984,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "is_checked": {
+                    "type": "string"
+                },
+                "midsuit_id": {
                     "type": "string"
                 },
                 "name": {

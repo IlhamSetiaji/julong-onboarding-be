@@ -1637,12 +1637,17 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTaskMidsuit(req *request.UpdateEmpl
 				checklistIds = append(checklistIds, exist.ID)
 				var verifiedBy *uuid.UUID
 				if checklistReq.VerifiedBy != nil {
-					parsedVerifiedBy, err := uuid.Parse(*checklistReq.VerifiedBy)
+					// parsedVerifiedBy, err := uuid.Parse(*checklistReq.VerifiedBy)
+					// if err != nil {
+					// 	uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error parsing verified by: ", err)
+					// 	return nil, err
+					// }
+					verifiedByResp, err := uc.EmployeeMessage.SendFindEmployeeByMidsuitIDMessage(*checklistReq.VerifiedBy)
 					if err != nil {
-						uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error parsing verified by: ", err)
+						uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error sending find employee by midsuit id message: ", err)
 						return nil, err
 					}
-					verifiedBy = &parsedVerifiedBy
+					verifiedBy = &verifiedByResp.ID
 				}
 				var isChecked string
 				if checklistReq.IsChecked != nil {

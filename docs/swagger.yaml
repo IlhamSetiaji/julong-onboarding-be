@@ -392,6 +392,8 @@ definitions:
         type: string
       is_checked:
         type: string
+      midsuit_id:
+        type: string
       name:
         type: string
       updated_at:
@@ -1233,6 +1235,30 @@ paths:
       summary: Find all employee task by employee id paginated
       tags:
       - Employee Task
+  /employee-tasks/midsuit:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Create new employee task
+      parameters:
+      - description: Create Template Task
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateEmployeeTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.EmployeeTaskResponse'
+      security:
+      - BearerAuth: []
+      summary: Create new employee task
+      tags:
+      - Employee Task
   /employee-tasks/response/{id}:
     get:
       consumes:
@@ -1288,6 +1314,35 @@ paths:
       security:
       - BearerAuth: []
       summary: Find all employee task paginated for survey
+      tags:
+      - Employee Task
+  /employee-tasks/update-midsuit:
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update employee task
+      parameters:
+      - description: Employee Task ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Employee Task
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateEmployeeTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.EmployeeTaskResponse'
+      security:
+      - BearerAuth: []
+      summary: Update employee task
       tags:
       - Employee Task
   /events:

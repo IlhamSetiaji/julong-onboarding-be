@@ -86,7 +86,9 @@ func (c *RouteConfig) SetupAPIRoutes() {
 				employeeTaskRoute.GET("/response/:id", c.EmployeeTaskHandler.FindByIDForResponse)
 				employeeTaskRoute.GET("/:id", c.EmployeeTaskHandler.FindByID)
 				employeeTaskRoute.POST("", c.EmployeeTaskHandler.CreateEmployeeTask)
+				employeeTaskRoute.POST("/midsuit", c.EmployeeTaskHandler.CreateEmployeeTaskMidsuit)
 				employeeTaskRoute.PUT("/update", c.EmployeeTaskHandler.UpdateEmployeeTask)
+				employeeTaskRoute.PUT("/update-midsuit", c.EmployeeTaskHandler.UpdateEmployeeTaskMidsuit)
 				employeeTaskRoute.DELETE("/:id", c.EmployeeTaskHandler.DeleteEmployeeTask)
 			}
 			// employee task attachments

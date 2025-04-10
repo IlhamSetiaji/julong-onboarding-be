@@ -20,7 +20,9 @@ import (
 
 type IEmployeeTaskHandler interface {
 	CreateEmployeeTask(ctx *gin.Context)
+	CreateEmployeeTaskMidsuit(ctx *gin.Context)
 	UpdateEmployeeTask(ctx *gin.Context)
+	UpdateEmployeeTaskMidsuit(ctx *gin.Context)
 	DeleteEmployeeTask(ctx *gin.Context)
 	FindByID(ctx *gin.Context)
 	FindAllPaginated(ctx *gin.Context)
@@ -156,6 +158,95 @@ func (h *EmployeeTaskHandler) CreateEmployeeTask(ctx *gin.Context) {
 	utils.SuccessResponse(ctx, http.StatusCreated, "success create employee task", res)
 }
 
+// CreateEmployeeTaskMidsuit create new employee task midsuit
+//
+// @Summary Create new employee task
+// @Description Create new employee task
+// @Tags Employee Task
+// @Accept  multipart/form-data
+// @Produce  json
+// @Param body body request.CreateEmployeeTaskRequest true "Create Template Task"
+// @Success 201 {object} response.EmployeeTaskResponse
+// @Security BearerAuth
+// @Router /employee-tasks/midsuit [post]
+func (h *EmployeeTaskHandler) CreateEmployeeTaskMidsuit(ctx *gin.Context) {
+	var req request.CreateEmployeeTaskMidsuitRequest
+	if err := ctx.ShouldBind(&req); err != nil {
+		h.Log.Error("[EmployeeTaskHandler.CreateEmployeeTaskMidsuit] " + err.Error())
+		utils.BadRequestResponse(ctx, err.Error(), err.Error())
+		return
+	}
+
+	if err := h.Validate.Struct(req); err != nil {
+		h.Log.Error("[EmployeeTaskHandler.CreateEmployeeTaskMidsuit] " + err.Error())
+		utils.BadRequestResponse(ctx, err.Error(), err.Error())
+		return
+	}
+
+	// Handle attachments file upload manually
+	form, _ := ctx.MultipartForm()
+	files := form.File["employee_task_attachments[file]"]
+	checklistNames := form.Value["employee_task_checklists[name]"]
+	checklistIds := form.Value["employee_task_checklists[id]"]
+
+	if len(files) > 0 {
+		for _, file := range files {
+			timestamp := time.Now().UnixNano()
+			filePath := "storage/employee_tasks/attachments/" + strconv.FormatInt(timestamp, 10) + "_" + file.Filename
+			if err := ctx.SaveUploadedFile(file, filePath); err != nil {
+				h.Log.Error("failed to save attachment file: ", err)
+				utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to save attachment file", err.Error())
+				return
+			}
+
+			req.EmployeeTaskAttachments = append(req.EmployeeTaskAttachments, request.EmployeeTaskAttachmentRequest{
+				File: nil,
+				Path: filePath,
+			})
+		}
+	}
+
+	if len(checklistNames) > 0 {
+		var checklistId *string
+		for i, name := range checklistNames {
+			if i < len(checklistIds) {
+				checklistId = &checklistIds[i]
+			} else {
+				checklistId = nil
+			}
+
+			req.EmployeeTaskChecklists = append(req.EmployeeTaskChecklists, request.EmployeeTaskChecklistMidsuitRequest{
+				MidsuitID: checklistId,
+				Name:      name,
+			})
+		}
+	}
+
+	tx := h.DB.WithContext(ctx).Begin()
+	if tx.Error != nil {
+		h.Log.Warnf("Failed begin transaction : %+v", tx.Error)
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, "Failed to begin transaction", tx.Error.Error())
+		return
+	}
+	defer tx.Rollback()
+
+	res, err := h.UseCase.CreateEmployeeTaskMidsuit(&req)
+	if err != nil {
+		h.Log.Error("[EmployeeTaskHandler.CreateEmployeeTaskMidsuit] " + err.Error())
+		tx.Rollback()
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, "internal server error", err.Error())
+		return
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		h.Log.Warnf("Failed commit transaction : %+v", err)
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, "Failed to commit transaction", err.Error())
+		return
+	}
+
+	utils.SuccessResponse(ctx, http.StatusCreated, "success create employee task midsuit", res)
+}
+
 // UpdateEmployeeTask update employee task
 //
 // @Summary Update employee task
@@ -275,6 +366,127 @@ func (h *EmployeeTaskHandler) UpdateEmployeeTask(ctx *gin.Context) {
 	}
 
 	utils.SuccessResponse(ctx, http.StatusCreated, "success create employee task", res)
+}
+
+// UpdateEmployeeTaskMidsuit update employee task midsuit
+//
+// @Summary Update employee task
+// @Description Update employee task
+// @Tags Employee Task
+// @Accept  multipart/form-data
+// @Produce  json
+// @Param id path string true "Employee Task ID"
+// @Param body body request.UpdateEmployeeTaskRequest true "Update Employee Task"
+// @Success 200 {object} response.EmployeeTaskResponse
+// @Security BearerAuth
+// @Router /employee-tasks/update-midsuit [put]
+func (h *EmployeeTaskHandler) UpdateEmployeeTaskMidsuit(ctx *gin.Context) {
+	var req request.UpdateEmployeeTaskMidsuitRequest
+	if err := ctx.ShouldBind(&req); err != nil {
+		h.Log.Error("[EmployeeTaskHandler.UpdateEmployeeTaskMidsuit] " + err.Error())
+		utils.BadRequestResponse(ctx, err.Error(), err.Error())
+		return
+	}
+
+	if err := h.Validate.Struct(req); err != nil {
+		h.Log.Error("[EmployeeTaskHandler.UpdateEmployeeTaskMidsuit] " + err.Error())
+		utils.BadRequestResponse(ctx, err.Error(), err.Error())
+		return
+	}
+
+	// Handle attachments file upload manually
+	form, _ := ctx.MultipartForm()
+	files := form.File["employee_task_attachments[file]"]
+	checklistNames := form.Value["employee_task_checklists[name]"]
+	checklistIds := form.Value["employee_task_checklists[id]"]
+	checklistIsCheckeds := form.Value["employee_task_checklists[is_checked]"]
+	checklistVerifiedBys := form.Value["employee_task_checklists[verified_by]"]
+
+	if len(files) > 0 {
+		for _, file := range files {
+			timestamp := time.Now().UnixNano()
+			filePath := "storage/employee_tasks/attachments/" + strconv.FormatInt(timestamp, 10) + "_" + file.Filename
+			if err := ctx.SaveUploadedFile(file, filePath); err != nil {
+				h.Log.Error("failed to save attachment file: ", err)
+				utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to save attachment file", err.Error())
+				return
+			}
+
+			req.EmployeeTaskAttachments = append(req.EmployeeTaskAttachments, request.EmployeeTaskAttachmentRequest{
+				File: nil,
+				Path: filePath,
+			})
+		}
+	}
+
+	if len(checklistNames) > 0 {
+		var checklistId *string
+		var checklistIsChecked *string
+		var checklistVerifiedBy *string
+		for i, name := range checklistNames {
+			if i < len(checklistIds) {
+				checklistId = &checklistIds[i]
+			} else {
+				checklistId = nil
+			}
+
+			if i < len(checklistIsCheckeds) {
+				checklistIsChecked = &checklistIsCheckeds[i]
+			} else {
+				checklistIsChecked = nil
+			}
+
+			if i < len(checklistVerifiedBys) {
+				checklistVerifiedBy = &checklistVerifiedBys[i]
+			} else {
+				checklistVerifiedBy = nil
+			}
+
+			req.EmployeeTaskChecklists = append(req.EmployeeTaskChecklists, request.EmployeeTaskChecklistMidsuitRequest{
+				MidsuitID:  checklistId,
+				Name:       name,
+				IsChecked:  checklistIsChecked,
+				VerifiedBy: checklistVerifiedBy,
+			})
+		}
+	}
+
+	if req.Proof != nil {
+		timestamp := time.Now().UnixNano()
+		filePath := "storage/covers/" + strconv.FormatInt(timestamp, 10) + "_" + req.Proof.Filename
+		if err := ctx.SaveUploadedFile(req.Proof, filePath); err != nil {
+			h.Log.Error("failed to save cover file: ", err)
+			utils.ErrorResponse(ctx, http.StatusInternalServerError, "failed to save cover file", err.Error())
+			return
+		}
+
+		req.Proof = nil
+		req.ProofPath = &filePath
+	}
+
+	tx := h.DB.WithContext(ctx).Begin()
+	if tx.Error != nil {
+		h.Log.Warnf("Failed begin transaction : %+v", tx.Error)
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, "Failed to begin transaction", tx.Error.Error())
+		return
+	}
+	defer tx.Rollback()
+
+	res, err := h.UseCase.UpdateEmployeeTaskMidsuit(&req)
+	if err != nil {
+		h.Log.Error("[EmployeeTaskHandler.UpdateEmployeeTaskMidsuit] " + err.Error())
+		tx.Rollback()
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, "internal server error", err.Error())
+		return
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		h.Log.Warnf("Failed commit transaction : %+v", err)
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, "Failed to commit transaction", err.Error())
+		return
+	}
+
+	utils.SuccessResponse(ctx, http.StatusCreated, "success update employee task", res)
 }
 
 // DeleteEmployeeTask delete employee task
