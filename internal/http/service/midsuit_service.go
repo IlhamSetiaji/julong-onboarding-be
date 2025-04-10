@@ -21,6 +21,7 @@ type IMidsuitService interface {
 	SyncEmployeeTaskMidsuit(payload request.SyncEmployeeTaskMidsuitRequest, jwtToken string) (*string, error)
 	SyncEmployeeTaskChecklistMidsuit(payload request.SyncEmployeeTaskChecklistMidsuitRequest, jwtToken string) (*string, error)
 	SyncEmployeeTaskAttachmentMidsuit(midsuitID int, payload request.SyncEmployeeTaskAttachmentMidsuitRequest, jwtToken string) (*string, error)
+	SyncUpdateEmployeeTaskMidsuit(midsuitID int, payload request.SyncEmployeeTaskMidsuitRequest, jwtToken string) (*string, error)
 }
 
 type MidsuitService struct {
@@ -266,4 +267,53 @@ func (s *MidsuitService) SyncEmployeeTaskAttachmentMidsuit(midsuitID int, payloa
 	// return &idStr, nil
 	message := "Success"
 	return &message, nil
+}
+
+func (s *MidsuitService) SyncUpdateEmployeeTaskMidsuit(midsuitID int, payload request.SyncEmployeeTaskMidsuitRequest, jwtToken string) (*string, error) {
+	url := s.Viper.GetString("midsuit.url") + s.Viper.GetString("midsuit.api_endpoint") + "/models/HC_Task/" + strconv.Itoa(midsuitID)
+	method := "PUT"
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		s.Log.Error(err)
+		return nil, errors.New("[MidsuitService.SyncUpdateEmployeeTaskMidsuit] Error when marshalling payload: " + err.Error())
+	}
+
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+	req, err := http.NewRequest(method, url, bytes.NewBuffer(payloadBytes))
+	if err != nil {
+		s.Log.Error(err)
+		return nil, errors.New("[MidsuitService.SyncUpdateEmployeeTaskMidsuit] Error when creating request: " + err.Error())
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Authorization", "Bearer "+jwtToken)
+
+	res, err := client.Do(req)
+	if err != nil {
+		s.Log.Error(err)
+		return nil, errors.New("[MidsuitService.SyncUpdateEmployeeTaskMidsuit] Error when fetching response: " + err.Error())
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		bodyBytes, _ := io.ReadAll(res.Body)
+		s.Log.Error(err)
+		return nil, errors.New("[MidsuitService.SyncUpdateEmployeeTaskMidsuit] Error when fetching response haha: " + string(bodyBytes))
+	}
+
+	bodyBytes, _ := io.ReadAll(res.Body)
+	var syncResponse SyncEmployeeTaskMidsuitResponse
+	if err := json.Unmarshal(bodyBytes, &syncResponse); err != nil {
+		s.Log.Error(err)
+		return nil, errors.New("[MidsuitService.SyncUpdateEmployeeTaskMidsuit] Error when unmarshalling response: " + err.Error())
+	}
+
+	idStr := strconv.Itoa(syncResponse.ID)
+	return &idStr, nil
 }
