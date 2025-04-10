@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -149,13 +150,16 @@ func (h *SurveyResponseHandler) CreateOrUpdateSurveyResponsesBulk(ctx *gin.Conte
 	answerIDs := ctx.PostFormArray("answers[id]")
 	questionIDs := ctx.PostFormArray("answers[question_id]")
 	answers := ctx.PostFormArray("answers[answer]")
-	answerFiles := ctx.Request.MultipartForm.File["answers[][answer_file]"]
+
 	// Process each answer
 	var payload request.SurveyResponseBulkRequest
 	payload.SurveyTemplateID = surveyTemplateID
 	payload.EmployeeTaskID = employeeTaskID
+
 	for i := range questionIDs {
 		questionID := questionIDs[i]
+
+		// Get the answer text if available
 		var answer string
 		if len(answers) > i {
 			answer = answers[i]
@@ -163,6 +167,7 @@ func (h *SurveyResponseHandler) CreateOrUpdateSurveyResponsesBulk(ctx *gin.Conte
 			answer = ""
 		}
 
+		// Get the answer ID if available
 		var answerID *string
 		if len(answerIDs) > i {
 			answerID = &answerIDs[i]
@@ -170,12 +175,12 @@ func (h *SurveyResponseHandler) CreateOrUpdateSurveyResponsesBulk(ctx *gin.Conte
 			answerID = nil
 		}
 
-		h.Log.Infof("answer: %v", answer)
-
+		// Get the answer file if available
 		var answerFilePath string
-
-		if len(answerFiles) > i {
-			file := answerFiles[i]
+		fileKey := fmt.Sprintf("answers[%d][answer_file]", i) // Dynamically construct the file key
+		fileHeaders := ctx.Request.MultipartForm.File[fileKey]
+		if len(fileHeaders) > 0 && fileHeaders[0] != nil {
+			file := fileHeaders[0]
 			timestamp := time.Now().UnixNano()
 			filePath := "storage/answers/files/" + strconv.FormatInt(timestamp, 10) + "_" + file.Filename
 			if err := ctx.SaveUploadedFile(file, filePath); err != nil {
@@ -184,8 +189,11 @@ func (h *SurveyResponseHandler) CreateOrUpdateSurveyResponsesBulk(ctx *gin.Conte
 				return
 			}
 			answerFilePath = filePath
+
+			h.Log.Infof("answer file path: %v", answerFilePath)
 		}
 
+		// Append the answer to the payload
 		payload.Answers = append(payload.Answers, request.AnswerBulkRequest{
 			ID:         answerID,
 			QuestionID: questionID,
@@ -208,13 +216,6 @@ func (h *SurveyResponseHandler) CreateOrUpdateSurveyResponsesBulk(ctx *gin.Conte
 		utils.ErrorResponse(ctx, 500, "error", err.Error())
 		return
 	}
-
-	// embed url to answer file
-	// for i, qr := range questionResponse.SurveyResponses {
-	// 	if qr.AnswerFile != "" {
-	// 		(questionResponse.SurveyResponses)[i].AnswerFile = h.Viper.GetString("app.url") + qr.AnswerFile
-	// 	}
-	// }
 
 	utils.SuccessResponse(ctx, 201, "success answer question", questionResponse)
 }
