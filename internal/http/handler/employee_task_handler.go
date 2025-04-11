@@ -262,15 +262,19 @@ func (h *EmployeeTaskHandler) CreateEmployeeTaskMidsuit(ctx *gin.Context) {
 func (h *EmployeeTaskHandler) UpdateEmployeeTask(ctx *gin.Context) {
 	var req request.UpdateEmployeeTaskRequest
 	if err := ctx.ShouldBind(&req); err != nil {
-		h.Log.Error("[EmployeeTaskHandler.CreateEmployeeTask] " + err.Error())
+		h.Log.Error("[EmployeeTaskHandler.UpdateEmployeeTask] " + err.Error())
 		utils.BadRequestResponse(ctx, err.Error(), err.Error())
 		return
 	}
 
 	if err := h.Validate.Struct(req); err != nil {
-		h.Log.Error("[EmployeeTaskHandler.CreateEmployeeTask] " + err.Error())
+		h.Log.Error("[EmployeeTaskHandler.UpdateEmployeeTask] " + err.Error())
 		utils.BadRequestResponse(ctx, err.Error(), err.Error())
 		return
+	}
+
+	if req.TemplateTaskID != nil && *req.TemplateTaskID == "null" {
+		req.TemplateTaskID = nil
 	}
 
 	// Handle attachments file upload manually
@@ -353,7 +357,7 @@ func (h *EmployeeTaskHandler) UpdateEmployeeTask(ctx *gin.Context) {
 
 	res, err := h.UseCase.UpdateEmployeeTask(&req)
 	if err != nil {
-		h.Log.Error("[EmployeeTaskHandler.CreateEmployeeTask] " + err.Error())
+		h.Log.Error("[EmployeeTaskHandler.UpdateEmployeeTask] " + err.Error())
 		tx.Rollback()
 		utils.ErrorResponse(ctx, http.StatusInternalServerError, "internal server error", err.Error())
 		return
@@ -392,6 +396,10 @@ func (h *EmployeeTaskHandler) UpdateEmployeeTaskMidsuit(ctx *gin.Context) {
 		h.Log.Error("[EmployeeTaskHandler.UpdateEmployeeTaskMidsuit] " + err.Error())
 		utils.BadRequestResponse(ctx, err.Error(), err.Error())
 		return
+	}
+
+	if req.TemplateTaskID != nil && *req.TemplateTaskID == "null" {
+		req.TemplateTaskID = nil
 	}
 
 	// Handle attachments file upload manually
