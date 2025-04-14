@@ -16,13 +16,13 @@ services:
       - APP_SECRET=wanhasib
       - FRONTEND_URL=http://localhost:3000,https://julong-mpp.avolut.com,https://julong-recruitment.avolut.com,https://julong-onboarding.avolut.com,https://mobile-dev.junior-dev.my.id
       - COOKIE_SECRET=wanhasib
-      - SESSION_NAME=julong-sync-onboarding
+      - SESSION_NAME=julong-onboarding
       - CSRF_SECRET=wanhasib
       - DB_HOST=prasi.avolut.com
       - DB_PORT=8741
       - DB_USER=postgres
       - DB_PASSWORD=gEJIfovgvDAroHhqRiKhYVvrkn2OqXfF3tw8xJmnvw7JhrZgN24pTD9iWMIUIUL6
-      - DB_NAME=julong-onboarding
+      - DB_NAME=julong-sync-onboarding
       - RABBITMQ_URL=amqp://julong:HR9hWL5jxSD09XeLIIccOyt1863WvIsy@prasi.avolut.com:5672/
       - RABBITMQ_QUEUE=julong_onboarding
       - JWT_SECRET=wanhasib
