@@ -2065,7 +2065,8 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTasksForRecruitment(req *request.Cr
 				})
 				if err != nil {
 					uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error creating employee task: ", err)
-					continue
+					// continue
+					return err
 				}
 				if len(templateTask.TemplateTaskChecklists) > 0 {
 					for _, checklist := range templateTask.TemplateTaskChecklists {
@@ -2076,7 +2077,8 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTasksForRecruitment(req *request.Cr
 						})
 						if err != nil {
 							uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error creating employee task checklist: ", err)
-							continue
+							// continue
+							return err
 						}
 					}
 				}
@@ -2088,7 +2090,8 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTasksForRecruitment(req *request.Cr
 						})
 						if err != nil {
 							uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error creating employee task attachment: ", err)
-							continue
+							// continue
+							return err
 						}
 					}
 				}
