@@ -2394,6 +2394,11 @@ func (uc *EmployeeTaskUseCase) FindByIDForResponse(id string) (*response.Employe
 			uc.Log.Error("[EmployeeTaskUseCase.FindByIDForResponse] error finding employee task by keys: ", err)
 			return nil, err
 		}
+
+		if empTask == nil {
+			return nil, errors.New("employee task not found")
+		}
+
 		modifiedId = empTask.ID
 	} else {
 		modifiedId = parsedId
