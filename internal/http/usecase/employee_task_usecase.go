@@ -1065,7 +1065,7 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 		return nil, err
 	}
 
-	if uc.Viper.GetString("midsuit.sync") == "ACTIVE" {
+	if uc.Viper.GetString("midsuit.sync") == "$ACTIVE" {
 		empResp, err := uc.EmployeeMessage.SendFindEmployeeByIDMessage(request.SendFindEmployeeByIDMessageRequest{
 			ID: parsedEmployeeID.String(),
 		})
