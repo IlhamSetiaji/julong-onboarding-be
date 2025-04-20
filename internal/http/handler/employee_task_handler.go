@@ -402,6 +402,10 @@ func (h *EmployeeTaskHandler) UpdateEmployeeTaskMidsuit(ctx *gin.Context) {
 		req.TemplateTaskID = nil
 	}
 
+	if req.SurveyTemplateID != nil && *req.SurveyTemplateID == "null" {
+		req.SurveyTemplateID = nil
+	}
+
 	// Handle attachments file upload manually
 	form, _ := ctx.MultipartForm()
 	files := form.File["employee_task_attachments[file]"]

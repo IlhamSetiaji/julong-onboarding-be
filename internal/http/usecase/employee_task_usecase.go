@@ -1016,7 +1016,8 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 	}
 
 	var surveyTemplateUUID *uuid.UUID
-	if req.SurveyTemplateID != nil && *req.SurveyTemplateID != "" {
+	if req.SurveyTemplateID != nil && *req.SurveyTemplateID != "" && *req.SurveyTemplateID != "null" {
+		uc.Log.Info("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] survey template id mantap: ", *req.SurveyTemplateID)
 		parsedSurveyTemplateID, err := uuid.Parse(*req.SurveyTemplateID)
 		if err != nil {
 			uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error parsing survey template id: ", err)
@@ -1158,19 +1159,50 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 			}
 
 			verifiedByMidsuitID = &verifiedByMidsuitIDInt
-			verifiedByJobLevelIDInt, err := strconv.Atoi(empRespVerifiedBy.EmployeeJob["job_level_id"].(string))
+			uc.Log.Infof("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] verified By job level menghehe: %d", empRespVerifiedBy.EmployeeJob["job_level_id"].(string))
+
+			jobLevelResp2, err := uc.JobPlafonMessage.SendFindJobLevelByIDMessage(request.SendFindJobLevelByIDMessageRequest{
+				ID: jobLevelId,
+			})
+			if err != nil {
+				uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error sending find job level by id message: ", err)
+				return nil, err
+			}
+			if jobLevelResp2 == nil {
+				uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] job level not found in midsuit")
+				return nil, errors.New("job level not found in midsuit")
+			}
+			verifiedByJobLevelIDInt, err := strconv.Atoi(jobLevelResp2.MidsuitID)
 			if err != nil {
 				uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error converting empRespVerifiedBy.EmployeeJob.job_level_id to int: ", err)
 				return nil, err
 			}
 			verifiedByJobLevelID = &verifiedByJobLevelIDInt
-			verifiedByJobIDInt, err := strconv.Atoi(empRespVerifiedBy.EmployeeJob["job_id"].(string))
+
+			jobResp2, err := uc.JobPlafonMessage.SendFindJobByIDMessage(request.SendFindJobByIDMessageRequest{
+				ID: jobId,
+			})
+			if err != nil {
+				uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error sending find job by id message: ", err)
+				return nil, err
+			}
+			if jobResp2 == nil {
+				uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] job not found in midsuit")
+				return nil, errors.New("job not found in midsuit")
+			}
+
+			uc.Log.Infof("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] verified By job level: %d", jobLevelResp2.MidsuitID)
+			uc.Log.Infof("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] verified By job menghehe: %d", jobResp2.MidsuitID)
+
+			verifiedByJobIDInt, err := strconv.Atoi(jobResp2.MidsuitID)
 			if err != nil {
 				uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error converting empRespVerifiedBy.EmployeeJob.job_id to int: ", err)
 				return nil, err
 			}
-
 			verifiedByJobID = &verifiedByJobIDInt
+
+			uc.Log.Infof("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] verified By job level: %d", verifiedByJobLevelIDInt)
+			uc.Log.Infof("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] verified By job: %d", verifiedByJobIDInt)
 
 			userEmployeeMessage, err := uc.UserMessage.SendFindUserByEmployeeIDMessage(empRespVerifiedBy.ID.String())
 			if err != nil {
@@ -1196,6 +1228,8 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 				uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error converting userProfileMessage.UserProfile to map[string]interface{}")
 				return nil, errors.New("error converting userProfileMessage.UserProfile to map[string]interface{}")
 			}
+
+			uc.Log.Infof("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] user profile: %v", userProfile)
 			userProfileMidsuitID, ok := userProfile["midsuit_id"].(string)
 			if !ok {
 				uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error converting userProfileMidsuitID to string")
@@ -1264,7 +1298,7 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 				},
 				HCJob2ID: request.HcJobId{
 					ID: *verifiedByJobID,
-					// ID: 1000472,
+					// ID: 1000397,
 				},
 				HCJobLevel2ID: request.HcJobLevelId{
 					ID: *verifiedByJobLevelID,
