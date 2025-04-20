@@ -33,8 +33,9 @@ type EmployeeTaskResponse struct {
 	CreatedAt        time.Time                       `json:"created_at"`
 	UpdatedAt        time.Time                       `json:"updated_at"`
 
-	VerifiedByName string `json:"verified_by_name"`
-	EmployeeName   string `json:"employee_name"`
+	VerifiedByName    string  `json:"verified_by_name"`
+	EmployeeName      string  `json:"employee_name"`
+	EmployeeMidsuitID *string `json:"employee_midsuit_id"`
 
 	TemplateTask            *TemplateTaskResponse            `json:"template_task"`
 	EmployeeTaskAttachments []EmployeeTaskAttachmentResponse `json:"employee_task_attachments"`

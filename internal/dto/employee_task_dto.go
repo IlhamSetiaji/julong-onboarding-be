@@ -69,6 +69,7 @@ func (dto *EmployeeTaskDTO) ConvertEntityToResponse(ent *entity.EmployeeTask) *r
 	}
 
 	var employeeName string
+	var employeeMidsuitID string
 	if ent.EmployeeID != nil {
 		employee, err := dto.EmployeeMessage.SendFindEmployeeByIDMessage(request.SendFindEmployeeByIDMessageRequest{
 			ID: ent.EmployeeID.String(),
@@ -76,8 +77,10 @@ func (dto *EmployeeTaskDTO) ConvertEntityToResponse(ent *entity.EmployeeTask) *r
 		if err != nil {
 			dto.Log.Errorf("[ProjectPicDTO.ConvertEntityToResponse] " + err.Error())
 			employeeName = ""
+			employeeMidsuitID = ""
 		} else {
 			employeeName = employee.Name
+			employeeMidsuitID = employee.MidsuitID
 		}
 	}
 
@@ -128,6 +131,12 @@ func (dto *EmployeeTaskDTO) ConvertEntityToResponse(ent *entity.EmployeeTask) *r
 		StartDate:       ent.StartDate,
 		EndDate:         ent.EndDate,
 		IsDone:          ent.IsDone,
+		EmployeeMidsuitID: func() *string {
+			if employeeMidsuitID == "" {
+				return nil
+			}
+			return &employeeMidsuitID
+		}(),
 		Proof: func() *string {
 			if ent.Proof == nil {
 				return nil
