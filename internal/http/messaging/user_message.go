@@ -16,6 +16,8 @@ type IUserMessage interface {
 	SendFindUserByIDMessage(request request.SendFindUserByIDMessageRequest) (*response.SendFindUserByIDResponse, error)
 	SendGetUserMe(request request.SendFindUserByIDMessageRequest) (*response.SendGetUserMeResponse, error)
 	FindUserProfileByUserIDMessage(userId string) (*response.UserProfileResponse, error)
+	SendFindUserProfileByUserIDMessage(userId string) (*response.ISendFindUserProfileMessageResponse, error)
+	SendFindUserByEmployeeIDMessage(employeeID string) (*response.SendFindUserByIDResponse, error)
 }
 
 type UserMessage struct {
@@ -141,5 +143,92 @@ func (m *UserMessage) FindUserProfileByUserIDMessage(userId string) (*response.U
 		UserID: userProfile.UserID,
 		Name:   userProfile.Name,
 		Status: userProfile.Status,
+	}, nil
+}
+
+func (m *UserMessage) SendFindUserProfileByUserIDMessage(userId string) (*response.ISendFindUserProfileMessageResponse, error) {
+	payload := map[string]interface{}{
+		"user_id": userId,
+	}
+
+	docMsg := &request.RabbitMQRequest{
+		ID:          uuid.New().String(),
+		MessageType: "find_user_profile_by_user_id",
+		MessageData: payload,
+		ReplyTo:     "julong_onboarding",
+	}
+
+	log.Printf("INFO: document message: %v", docMsg)
+
+	// create channel and add to rchans with uid
+	rchan := make(chan response.RabbitMQResponse)
+	utils.Rchans[docMsg.ID] = rchan
+
+	// publish rabbit message
+	msg := utils.RabbitMsgPublisher{
+		QueueName: "julong_recruitment",
+		Message:   *docMsg,
+	}
+	utils.Pchan <- msg
+
+	log.Printf("Message published")
+
+	// wait for reply
+	resp, err := waitReply(docMsg.ID, rchan)
+	if err != nil {
+		return nil, err
+	}
+
+	if errMsg, ok := resp.MessageData["error"].(string); ok && errMsg != "" {
+		return nil, errors.New("[SendFindUserProfileMessage] " + errMsg)
+	}
+
+	log.Printf("INFO: response: %v", resp)
+
+	return &response.ISendFindUserProfileMessageResponse{
+		UserProfile: resp.MessageData,
+	}, nil
+}
+
+func (m *UserMessage) SendFindUserByEmployeeIDMessage(employeeID string) (*response.SendFindUserByIDResponse, error) {
+	payload := map[string]interface{}{
+		"employee_id": employeeID,
+	}
+
+	docMsg := &request.RabbitMQRequest{
+		ID:          uuid.New().String(),
+		MessageType: "find_user_by_employee_id",
+		MessageData: payload,
+		ReplyTo:     "julong_onboarding",
+	}
+
+	log.Printf("INFO: document message: %v", docMsg)
+
+	// create channel and add to rchans with uid
+	rchan := make(chan response.RabbitMQResponse)
+	utils.Rchans[docMsg.ID] = rchan
+
+	// publish rabbit message
+	msg := utils.RabbitMsgPublisher{
+		QueueName: "julong_sso",
+		Message:   *docMsg,
+	}
+	utils.Pchan <- msg
+
+	log.Printf("Message published")
+
+	// wait for reply
+	resp, err := waitReply(docMsg.ID, rchan)
+	if err != nil {
+		return nil, err
+	}
+
+	if errMsg, ok := resp.MessageData["error"].(string); ok && errMsg != "" {
+		return nil, errors.New("[SendFindUserByEmployeeIDMessage] " + errMsg)
+	}
+
+	return &response.SendFindUserByIDResponse{
+		ID:   resp.MessageData["user_id"].(string),
+		Name: resp.MessageData["name"].(string),
 	}, nil
 }

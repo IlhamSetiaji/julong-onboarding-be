@@ -129,8 +129,9 @@ type SyncEmployeeTaskMidsuitRequest struct {
 
 type TaskCategory struct {
 	PropertyLabel string `json:"propertyLabel" binding:"omitempty"`
-	Identifier    string `json:"identifier" binding:"required"`
-	ModelName     string `json:"model-name" binding:"required"`
+	ID            string `json:"id" binding:"omitempty"`
+	Identifier    string `json:"identifier" binding:"omitempty"`
+	ModelName     string `json:"model-name" binding:"omitempty"`
 }
 
 type HcApproverId struct {

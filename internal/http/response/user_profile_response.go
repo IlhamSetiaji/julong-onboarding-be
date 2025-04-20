@@ -22,6 +22,7 @@ type UserProfileResponse struct {
 	Ktp             *string                   `json:"ktp"`
 	Avatar          *string                   `json:"avatar"`
 	CurriculumVitae *string                   `json:"curriculum_vitae"`
+	MidsuitID       *string                   `json:"midsuit_id"`
 	Status          entity.UserStatus         `json:"status"`
 	CreatedAt       time.Time                 `json:"created_at"`
 	UpdatedAt       time.Time                 `json:"updated_at"`
@@ -29,4 +30,8 @@ type UserProfileResponse struct {
 	Educations      *[]EducationResponse      `json:"educations"`
 	Skills          *[]SkillResponse          `json:"skills"`
 	User            *map[string]interface{}   `json:"user"`
+}
+
+type ISendFindUserProfileMessageResponse struct {
+	UserProfile map[string]interface{} `json:"user_profile"`
 }
