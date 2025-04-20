@@ -19,6 +19,7 @@ type AnswerRequest struct {
 
 type SurveyResponseBulkRequest struct {
 	SurveyTemplateID string              `form:"survey_template_id" validate:"required,uuid"`
+	Kanban           string              `form:"kanban_id" validate:"required"`
 	EmployeeTaskID   string              `form:"employee_task_id" validate:"required,uuid"`
 	Answers          []AnswerBulkRequest `form:"answers" validate:"omitempty,dive"`
 }

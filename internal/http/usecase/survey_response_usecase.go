@@ -272,6 +272,15 @@ func (uc *SurveyResponseUseCase) CreateOrUpdateSurveyResponsesBulk(req *request.
 		return nil, errors.New("employee task not found")
 	}
 
+	_, err = uc.EmployeeTaskRepository.UpdateEmployeeTask(&entity.EmployeeTask{
+		ID:     employeeTask.ID,
+		Kanban: entity.EmployeeTaskKanbanEnum(req.Kanban),
+	})
+	if err != nil {
+		uc.Log.Errorf("[SurveyResponseUseCase.CreateOrUpdateSurveyResponsesBulk] error when updating employee task: %s", err.Error())
+		return nil, err
+	}
+
 	var answerIDs []uuid.UUID
 	for _, ans := range req.Answers {
 		if ans.ID != nil {
