@@ -55,7 +55,7 @@ type UpdateEmployeeTaskRequest struct {
 type UpdateEmployeeTaskMidsuitRequest struct {
 	ID                      *string                               `form:"id" validate:"required"`
 	CoverPath               *string                               `form:"cover_path" validate:"required"`
-	EmployeeMidsuitID       *string                               `form:"employee_midsuit_id" validate:"required,uuid"`
+	EmployeeMidsuitID       *string                               `form:"employee_midsuit_id" validate:"required"`
 	TemplateTaskID          *string                               `form:"template_task_id" validate:"omitempty"`
 	SurveyTemplateID        *string                               `form:"survey_template_id" validate:"omitempty"`
 	Name                    string                                `form:"name" validate:"required"`
