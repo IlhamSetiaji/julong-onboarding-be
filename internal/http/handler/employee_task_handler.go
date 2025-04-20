@@ -880,13 +880,7 @@ func (h *EmployeeTaskHandler) FindByIDForResponse(ctx *gin.Context) {
 		return
 	}
 
-	employeeTaskID, err := uuid.Parse(id)
-	if err != nil {
-		utils.BadRequestResponse(ctx, "invalid id", "invalid id")
-		return
-	}
-
-	res, err := h.UseCase.FindByIDForResponse(employeeTaskID)
+	res, err := h.UseCase.FindByIDForResponse(id)
 	if err != nil {
 		h.Log.Error("[EmployeeTaskHandler.FindByIDForResponse] " + err.Error())
 		utils.ErrorResponse(ctx, http.StatusInternalServerError, "internal server error", err.Error())

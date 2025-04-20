@@ -35,7 +35,7 @@ type IEmployeeTaskUseCase interface {
 	UpdateEmployeeTaskOnly(req *request.UpdateEmployeeTaskOnlyRequest) (*response.EmployeeTaskResponse, error)
 	CreateEmployeeTasksForRecruitment(req *request.CreateEmployeeTasksForRecruitment) error
 	CountKanbanProgressByEmployeeID(employeeID uuid.UUID) (*response.EmployeeTaskProgressResponse, error)
-	FindByIDForResponse(id uuid.UUID) (*response.EmployeeTaskResponse, error)
+	FindByIDForResponse(id string) (*response.EmployeeTaskResponse, error)
 	FindAllPaginatedSurvey(page, pageSize int, search string, sort map[string]interface{}) (*[]response.EmployeeTaskResponse, int64, error)
 }
 
@@ -2381,8 +2381,25 @@ func (uc *EmployeeTaskUseCase) FindAllPaginatedByEmployeeID(employeeID uuid.UUID
 	return &responses, total, nil
 }
 
-func (uc *EmployeeTaskUseCase) FindByIDForResponse(id uuid.UUID) (*response.EmployeeTaskResponse, error) {
-	employeeTask, err := uc.Repository.FindByIDForResponse(id)
+func (uc *EmployeeTaskUseCase) FindByIDForResponse(id string) (*response.EmployeeTaskResponse, error) {
+	// check if id is uuid or not
+	var modifiedId uuid.UUID
+	parsedId, err := uuid.Parse(id)
+	if err != nil {
+		uc.Log.Error("[EmployeeTaskUseCase.FindByIDForResponse] error parsing id: ", err)
+		empTask, err := uc.Repository.FindByKeys(map[string]interface{}{
+			"midsuit_id": id,
+		})
+		if err != nil {
+			uc.Log.Error("[EmployeeTaskUseCase.FindByIDForResponse] error finding employee task by keys: ", err)
+			return nil, err
+		}
+		modifiedId = empTask.ID
+	} else {
+		modifiedId = parsedId
+	}
+
+	employeeTask, err := uc.Repository.FindByIDForResponse(modifiedId)
 	if err != nil {
 		uc.Log.Error("[EmployeeTaskUseCase.FindByIDForResponse] error finding employee task by id: ", err)
 		return nil, err
