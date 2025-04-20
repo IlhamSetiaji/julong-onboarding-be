@@ -391,6 +391,7 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTas
 	}
 
 	// create employee task checklists
+	var midsuitChecklistID string
 	for _, checklistReq := range req.EmployeeTaskChecklists {
 		// sync emp task checklist midsuit
 		if uc.Viper.GetString("midsuit.sync") == "ACTIVE" {
@@ -460,11 +461,12 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTas
 				return nil, err
 			}
 
-			_, err = uc.MidsuitService.SyncEmployeeTaskChecklistMidsuit(*midsuitChecklistPayload, authResp.Token)
+			respChecklist, err := uc.MidsuitService.SyncEmployeeTaskChecklistMidsuit(*midsuitChecklistPayload, authResp.Token)
 			if err != nil {
 				uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error syncing employee task checklist to midsuit: ", err)
 				return nil, err
 			}
+			midsuitChecklistID = *respChecklist
 		}
 
 		if checklistReq.ID != nil {
@@ -511,6 +513,7 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTas
 					Name:           checklistReq.Name,
 					IsChecked:      isChecked,
 					VerifiedBy:     verifiedBy,
+					MidsuitID:      &midsuitChecklistID,
 				})
 				if err != nil {
 					uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error updating employee task checklist: ", err)
@@ -521,6 +524,7 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTask(req *request.CreateEmployeeTas
 			_, err := uc.EmployeeTaskChecklistRepository.CreateEmployeeTaskChecklist(&entity.EmployeeTaskChecklist{
 				EmployeeTaskID: employeeTask.ID,
 				Name:           checklistReq.Name,
+				MidsuitID:      &midsuitChecklistID,
 			})
 			if err != nil {
 				uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error creating employee task checklist: ", err)
@@ -1870,6 +1874,7 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTaskMidsuit(req *request.UpdateEmpl
 					Name:           checklistReq.Name,
 					IsChecked:      isChecked,
 					VerifiedBy:     verifiedBy,
+					MidsuitID:      checklistReq.MidsuitID,
 				})
 				if err != nil {
 					uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error updating employee task checklist: ", err)
@@ -1880,6 +1885,7 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTaskMidsuit(req *request.UpdateEmpl
 			_, err := uc.EmployeeTaskChecklistRepository.CreateEmployeeTaskChecklist(&entity.EmployeeTaskChecklist{
 				EmployeeTaskID: employeeTask.ID,
 				Name:           checklistReq.Name,
+				MidsuitID:      checklistReq.MidsuitID,
 			})
 			if err != nil {
 				uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error creating employee task checklist: ", err)
