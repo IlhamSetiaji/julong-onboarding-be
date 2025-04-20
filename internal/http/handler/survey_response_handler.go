@@ -147,6 +147,7 @@ func (h *SurveyResponseHandler) CreateOrUpdateSurveyResponsesBulk(ctx *gin.Conte
 
 	surveyTemplateID := ctx.Request.FormValue("survey_template_id")
 	employeeTaskID := ctx.Request.FormValue("employee_task_id")
+	kanban := ctx.Request.FormValue("kanban")
 	answerIDs := ctx.PostFormArray("answers[id]")
 	questionIDs := ctx.PostFormArray("answers[question_id]")
 	answers := ctx.PostFormArray("answers[answer]")
@@ -155,6 +156,7 @@ func (h *SurveyResponseHandler) CreateOrUpdateSurveyResponsesBulk(ctx *gin.Conte
 	var payload request.SurveyResponseBulkRequest
 	payload.SurveyTemplateID = surveyTemplateID
 	payload.EmployeeTaskID = employeeTaskID
+	payload.Kanban = kanban
 
 	for i := range questionIDs {
 		questionID := questionIDs[i]
