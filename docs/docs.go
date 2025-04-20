@@ -2044,6 +2044,9 @@ const docTemplate = `{
                 "employee_id": {
                     "type": "string"
                 },
+                "employee_midsuit_id": {
+                    "type": "string"
+                },
                 "employee_name": {
                     "type": "string"
                 },

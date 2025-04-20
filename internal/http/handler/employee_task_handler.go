@@ -406,9 +406,11 @@ func (h *EmployeeTaskHandler) UpdateEmployeeTaskMidsuit(ctx *gin.Context) {
 	form, _ := ctx.MultipartForm()
 	files := form.File["employee_task_attachments[file]"]
 	checklistNames := form.Value["employee_task_checklists[name]"]
-	checklistIds := form.Value["employee_task_checklists[id]"]
+	checklistIds := form.Value["employee_task_checklists[midsuit_id]"]
 	checklistIsCheckeds := form.Value["employee_task_checklists[is_checked]"]
 	checklistVerifiedBys := form.Value["employee_task_checklists[verified_by]"]
+
+	h.Log.Infof("checklistIsCheckeds memek: %v", checklistIds)
 
 	if len(files) > 0 {
 		for _, file := range files {
@@ -449,6 +451,16 @@ func (h *EmployeeTaskHandler) UpdateEmployeeTaskMidsuit(ctx *gin.Context) {
 			} else {
 				checklistVerifiedBy = nil
 			}
+
+			var checklistCok string
+
+			if checklistId != nil {
+				checklistCok = *checklistId
+			} else {
+				checklistCok = ""
+			}
+
+			h.Log.Infof("checklistId cok: %v, name: %s, isChecked: %s, verifiedBy: %s", checklistCok, name, checklistIsChecked, checklistVerifiedBy)
 
 			req.EmployeeTaskChecklists = append(req.EmployeeTaskChecklists, request.EmployeeTaskChecklistMidsuitRequest{
 				MidsuitID:  checklistId,

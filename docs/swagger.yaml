@@ -430,6 +430,8 @@ definitions:
         type: string
       employee_id:
         type: string
+      employee_midsuit_id:
+        type: string
       employee_name:
         type: string
       employee_task_attachments:

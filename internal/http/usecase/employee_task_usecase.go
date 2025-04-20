@@ -1829,6 +1829,7 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTaskMidsuit(req *request.UpdateEmpl
 	// create employee task checklists
 	var checklistIds []uuid.UUID
 	for _, checklistReq := range req.EmployeeTaskChecklists {
+		uc.Log.Info("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] checklistReq cok: ", checklistReq.MidsuitID)
 		if checklistReq.MidsuitID != nil {
 			exist, err := uc.EmployeeTaskChecklistRepository.FindByKeys(map[string]interface{}{
 				"midsuit_id": *checklistReq.MidsuitID,
