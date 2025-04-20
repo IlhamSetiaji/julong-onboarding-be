@@ -1612,15 +1612,7 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTaskMidsuit(req *request.UpdateEmpl
 		var verifiedByJobID *int
 		var verifiedUserProfileID *int
 		if req.VerifiedBy != nil && *req.VerifiedBy != "" {
-			parsedVerifiedBy, err := uuid.Parse(*req.VerifiedBy)
-			if err != nil {
-				uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error parsing verified by: ", err)
-				return nil, err
-			}
-
-			empRespVerifiedBy, err := uc.EmployeeMessage.SendFindEmployeeByIDMessage(request.SendFindEmployeeByIDMessageRequest{
-				ID: parsedVerifiedBy.String(),
-			})
+			empRespVerifiedBy, err := uc.EmployeeMessage.SendFindEmployeeByMidsuitIDMessage(*req.VerifiedBy)
 			if err != nil {
 				uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error sending find employee by id message: ", err)
 				return nil, err
