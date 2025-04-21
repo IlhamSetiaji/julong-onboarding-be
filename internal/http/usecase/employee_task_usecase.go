@@ -1065,7 +1065,7 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 		return nil, err
 	}
 
-	if uc.Viper.GetString("midsuit.sync") == "$ACTIVE" {
+	if uc.Viper.GetString("midsuit.sync") == "ACTIVE" {
 		empResp, err := uc.EmployeeMessage.SendFindEmployeeByIDMessage(request.SendFindEmployeeByIDMessageRequest{
 			ID: parsedEmployeeID.String(),
 		})
@@ -1250,7 +1250,9 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 			verifiedByJobLevelID = nil
 			verifiedByJobID = nil
 		}
-		if req.VerifiedBy != nil && *req.VerifiedBy != "" {
+
+		var test = "YES"
+		if req.VerifiedBy != nil && *req.VerifiedBy != "" && test == "YES" {
 			midsuitPayload := &request.SyncEmployeeTaskMidsuitRequest{
 				AdOrgId: request.AdOrgId{
 					ID: func() int {
@@ -1265,8 +1267,7 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 				},
 				Name: req.Name,
 				Category: request.TaskCategory{
-					Identifier: "Onboarding",
-					ModelName:  "ad_ref_list",
+					ID: "ON",
 				},
 				StartDate: parsedStartDate.String(),
 				EndDate:   parsedEndDate.String(),
@@ -1326,7 +1327,7 @@ func (uc *EmployeeTaskUseCase) UpdateEmployeeTask(req *request.UpdateEmployeeTas
 					}(),
 					// ID: 1000622,
 				},
-				HCOrg2ID: request.HcOrgId{
+				HCApproverUserID: request.HcApproverUserId{
 					ID: *verifiedUserProfileID,
 					// ID: 1000622,
 				},
