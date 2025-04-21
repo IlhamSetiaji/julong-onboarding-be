@@ -34,8 +34,13 @@ func (dto *SurveyResponseDTO) ConvertEntityToResponse(ent *entity.SurveyResponse
 		EmployeeTaskID:   ent.EmployeeTaskID,
 		QuestionID:       ent.QuestionID,
 		Answer:           ent.Answer,
-		AnswerFile:       dto.Viper.GetString("app.url") + ent.AnswerFile,
-		CreatedAt:        ent.CreatedAt,
-		UpdatedAt:        ent.UpdatedAt,
+		AnswerFile: func() string {
+			if ent.AnswerFile != "" {
+				return dto.Viper.GetString("app.url") + ent.AnswerFile
+			}
+			return ""
+		}(),
+		CreatedAt: ent.CreatedAt,
+		UpdatedAt: ent.UpdatedAt,
 	}
 }
