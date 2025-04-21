@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -14,19 +15,32 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/xuri/excelize/v2"
 )
+
+// contains checks if a string exists in a slice of strings.
+func contains(slice []string, item string) bool {
+	for _, v := range slice {
+		if v == item {
+			return true
+		}
+	}
+	return false
+}
 
 type ISurveyResponseHandler interface {
 	CreateOrUpdateSurveyResponses(ctx *gin.Context)
 	CreateOrUpdateSurveyResponsesBulk(ctx *gin.Context)
+	ExportSurveyResponses(ctx *gin.Context)
 }
 
 type SurveyResponseHandler struct {
-	Log        *logrus.Logger
-	Viper      *viper.Viper
-	Validate   *validator.Validate
-	UseCase    usecase.ISurveyResponseUseCase
-	UserHelper helper.IUserHelper
+	Log                 *logrus.Logger
+	Viper               *viper.Viper
+	Validate            *validator.Validate
+	UseCase             usecase.ISurveyResponseUseCase
+	UserHelper          helper.IUserHelper
+	EmployeeTaskUseCase usecase.IEmployeeTaskUseCase
 }
 
 func NewSurveyResponseHandler(
@@ -35,13 +49,15 @@ func NewSurveyResponseHandler(
 	validate *validator.Validate,
 	useCase usecase.ISurveyResponseUseCase,
 	userHelper helper.IUserHelper,
+	employeeTaskUseCase usecase.IEmployeeTaskUseCase,
 ) ISurveyResponseHandler {
 	return &SurveyResponseHandler{
-		Log:        log,
-		Viper:      viper,
-		Validate:   validate,
-		UseCase:    useCase,
-		UserHelper: userHelper,
+		Log:                 log,
+		Viper:               viper,
+		Validate:            validate,
+		UseCase:             useCase,
+		UserHelper:          userHelper,
+		EmployeeTaskUseCase: employeeTaskUseCase,
 	}
 }
 
@@ -52,7 +68,8 @@ func SurveyResponseHandlerFactory(
 	useCase := usecase.SurveyResponseUseCaseFactory(log, viper)
 	validate := config.NewValidator(viper)
 	userHelper := helper.UserHelperFactory(log)
-	return NewSurveyResponseHandler(log, viper, validate, useCase, userHelper)
+	employeeTaskUseCase := usecase.EmployeeTaskUseCaseFactory(log, viper)
+	return NewSurveyResponseHandler(log, viper, validate, useCase, userHelper, employeeTaskUseCase)
 }
 
 func (h *SurveyResponseHandler) CreateOrUpdateSurveyResponses(ctx *gin.Context) {
@@ -220,4 +237,131 @@ func (h *SurveyResponseHandler) CreateOrUpdateSurveyResponsesBulk(ctx *gin.Conte
 	}
 
 	utils.SuccessResponse(ctx, 201, "success answer question", questionResponse)
+}
+
+func (h *SurveyResponseHandler) ExportSurveyResponses(ctx *gin.Context) {
+	employeeTasks, err := h.EmployeeTaskUseCase.FindAllSurvey()
+	if err != nil {
+		h.Log.Errorf("Error when getting employee tasks: %v", err)
+		utils.ErrorResponse(ctx, 500, "error", err.Error())
+		return
+	}
+
+	if len(*employeeTasks) == 0 {
+		h.Log.Error("No employee tasks found")
+		utils.ErrorResponse(ctx, 404, "error", "No employee tasks found")
+		return
+	}
+
+	f := excelize.NewFile()
+	defer func() {
+		if err := f.Close(); err != nil {
+			fmt.Println(err)
+			utils.ErrorResponse(ctx, http.StatusInternalServerError, "Failed to export survey responses", err.Error())
+			return
+		}
+	}()
+
+	f.SetSheetName("Sheet1", "Survey Responses")
+
+	headers := []string{"Employee Task Name", "Employee Name", "Survey Name"}
+
+	var maxQuestions int
+	for _, employeeTask := range *employeeTasks {
+		if len(employeeTask.SurveyTemplate.Questions) > maxQuestions {
+			maxQuestions = len(employeeTask.SurveyTemplate.Questions)
+		}
+
+		for _, question := range employeeTask.SurveyTemplate.Questions {
+			if !contains(headers, question.Question) {
+				headers = append(headers, question.Question)
+			}
+		}
+	}
+	// for i := 1; i <= maxQuestions; i++ {
+	// 	headers = append(headers, fmt.Sprintf("Question %d", i))
+	// }
+
+	// Define header style
+	headerStyle, err := f.NewStyle(&excelize.Style{
+		Font: &excelize.Font{
+			Bold:  true,
+			Size:  12,
+			Color: "#000000",
+		},
+		Fill: excelize.Fill{
+			Type:    "pattern",
+			Color:   []string{"#90EE90"}, // Light green background
+			Pattern: 1,
+		},
+		Alignment: &excelize.Alignment{
+			Horizontal: "center",
+			Vertical:   "center",
+		},
+	})
+	if err != nil {
+		h.Log.Errorf("Error when creating header style: %v", err)
+		utils.ErrorResponse(ctx, 500, "error", err.Error())
+		return
+	}
+
+	// Write headers to the Excel file
+	for i, header := range headers {
+		col := string(rune('A' + i))
+		cell := fmt.Sprintf("%s1", col)
+		f.SetCellValue("Survey Responses", cell, header)
+		f.SetCellStyle("Survey Responses", cell, cell, headerStyle)
+	}
+
+	// Write data rows
+	for rowIndex, employeeTask := range *employeeTasks {
+		row := rowIndex + 2 // Start from the second row
+		f.SetCellValue("Survey Responses", fmt.Sprintf("A%d", row), employeeTask.EmployeeName)
+		f.SetCellValue("Survey Responses", fmt.Sprintf("B%d", row), employeeTask.SurveyTemplate.Title)
+
+		// Fetch survey responses
+		surveyResponses, err := h.EmployeeTaskUseCase.FindByIDForResponse(employeeTask.ID.String())
+		if err != nil {
+			h.Log.Errorf("Error when getting survey responses: %v", err)
+			utils.ErrorResponse(ctx, 500, "error", err.Error())
+			return
+		}
+
+		// Write answers to the corresponding question columns
+		for questionIndex, question := range surveyResponses.SurveyTemplate.Questions {
+			col := string(rune('C' + questionIndex))
+			var concatenatedValue string
+
+			if len(question.SurveyResponses) > 0 {
+				for _, answer := range question.SurveyResponses {
+					if concatenatedValue != "" {
+						concatenatedValue += ", "
+					}
+					if answer.AnswerFile == "" {
+						concatenatedValue += answer.Answer
+					} else {
+						concatenatedValue += h.Viper.GetString("app.url") + answer.AnswerFile
+					}
+				}
+			}
+
+			f.SetCellValue("Survey Responses", fmt.Sprintf("%s%d", col, row), concatenatedValue)
+		}
+	}
+
+	// Set column widths for better readability
+	f.SetColWidth("Survey Responses", "A", "C", 20)
+	f.SetColWidth("Survey Responses", "D", string(rune('C'+maxQuestions-1)), 30)
+
+	// Set response headers for file download
+	ctx.Header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	ctx.Header("Content-Disposition", "attachment; filename=survey_responses.xlsx")
+	ctx.Header("Content-Transfer-Encoding", "binary")
+
+	// Write the Excel file to the response
+	if err := f.Write(ctx.Writer); err != nil {
+		fmt.Println(err)
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, "Failed to export survey responses", err.Error())
+		return
+	}
 }

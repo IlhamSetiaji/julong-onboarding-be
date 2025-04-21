@@ -21,6 +21,7 @@ type IEmployeeTaskRepository interface {
 	FindByKeys(keys map[string]interface{}) (*entity.EmployeeTask, error)
 	FindByIDForResponse(id uuid.UUID) (*entity.EmployeeTask, error)
 	FindAllPaginatedSurvey(page, pageSize int, search string, sort map[string]interface{}) (*[]entity.EmployeeTask, int64, error)
+	FindAllSurvey() (*[]entity.EmployeeTask, error)
 }
 
 type EmployeeTaskRepository struct {
@@ -237,4 +238,15 @@ func (r *EmployeeTaskRepository) FindAllPaginatedSurvey(page, pageSize int, sear
 	}
 
 	return &employeeTasks, total, nil
+}
+
+func (r *EmployeeTaskRepository) FindAllSurvey() (*[]entity.EmployeeTask, error) {
+	var employeeTasks []entity.EmployeeTask
+
+	if err := r.DB.Preload("EmployeeTaskAttachments").Preload("EmployeeTaskChecklists").Preload("SurveyTemplate.Questions").Where("survey_template_id IS NOT NULL").Find(&employeeTasks).Error; err != nil {
+		r.Log.Error("[EmployeeTaskRepository.FindAllSurvey] Error when get employee tasks: ", err)
+		return nil, err
+	}
+
+	return &employeeTasks, nil
 }

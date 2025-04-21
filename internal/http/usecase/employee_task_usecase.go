@@ -37,6 +37,7 @@ type IEmployeeTaskUseCase interface {
 	CountKanbanProgressByEmployeeID(employeeID uuid.UUID) (*response.EmployeeTaskProgressResponse, error)
 	FindByIDForResponse(id string) (*response.EmployeeTaskResponse, error)
 	FindAllPaginatedSurvey(page, pageSize int, search string, sort map[string]interface{}) (*[]response.EmployeeTaskResponse, int64, error)
+	FindAllSurvey() (*[]response.EmployeeTaskResponse, error)
 }
 
 type EmployeeTaskUseCase struct {
@@ -2472,4 +2473,19 @@ func (uc *EmployeeTaskUseCase) FindAllPaginatedSurvey(page, pageSize int, search
 	}
 
 	return &responses, total, nil
+}
+
+func (uc *EmployeeTaskUseCase) FindAllSurvey() (*[]response.EmployeeTaskResponse, error) {
+	employeeTasks, err := uc.Repository.FindAllSurvey()
+	if err != nil {
+		uc.Log.Error("[EmployeeTaskUseCase.FindAllSurvey] error finding all employee tasks: ", err)
+		return nil, err
+	}
+
+	var responses []response.EmployeeTaskResponse
+	for _, employeeTask := range *employeeTasks {
+		responses = append(responses, *uc.DTO.ConvertEntityToResponse(&employeeTask))
+	}
+
+	return &responses, nil
 }
