@@ -73,6 +73,7 @@ func InitConsumer(viper *viper.Viper, log *logrus.Logger) {
 			err = json.Unmarshal(msg.Body, docRply)
 			if err != nil {
 				log.Printf("ERROR: fail unmarshl: %s", msg.Body)
+				msg.Nack(false, true)
 				continue
 			}
 			log.Printf("INFO: received docRply: %v", docRply)
@@ -80,6 +81,7 @@ func InitConsumer(viper *viper.Viper, log *logrus.Logger) {
 			err = json.Unmarshal(msg.Body, docMsg)
 			if err != nil {
 				log.Printf("ERROR: fail unmarshl: %s", msg.Body)
+				msg.Nack(false, true)
 				continue
 			}
 			log.Printf("INFO: received docMsg: %v", docMsg)
@@ -211,11 +213,61 @@ func handleMsg(docMsg *request.RabbitMQRequest, log *logrus.Logger, viper *viper
 			}
 			break
 		}
+		employeeMidsuitID, ok := docMsg.MessageData["employee_midsuit_id"].(string)
+		if !ok {
+			log.Errorf("Invalid request format: missing 'employee_midsuit_id'")
+			msgData = map[string]interface{}{
+				"error": errors.New("missing 'employee_midsuit_id'").Error(),
+			}
+			break
+		}
+
+		jobMidsuitID, ok := docMsg.MessageData["job_midsuit_id"].(string)
+		if !ok {
+			log.Errorf("Invalid request format: missing 'job_midsuit_id'")
+			msgData = map[string]interface{}{
+				"error": errors.New("missing 'job_midsuit_id'").Error(),
+			}
+			break
+		}
+
+		jobLevelMidsuitID, ok := docMsg.MessageData["job_level_midsuit_id"].(string)
+		if !ok {
+			log.Errorf("Invalid request format: missing 'job_level_midsuit_id'")
+			msgData = map[string]interface{}{
+				"error": errors.New("missing 'job_level_midsuit_id'").Error(),
+			}
+			break
+		}
+
+		orgMidsuitID, ok := docMsg.MessageData["org_midsuit_id"].(string)
+		if !ok {
+			log.Errorf("Invalid request format: missing 'org_midsuit_id'")
+			msgData = map[string]interface{}{
+				"error": errors.New("missing 'org_midsuit_id'").Error(),
+			}
+			break
+		}
+
+		orgStructureMidsuitID, ok := docMsg.MessageData["org_structure_midsuit_id"].(string)
+		if !ok {
+			log.Errorf("Invalid request format: missing 'org_structure_midsuit_id'")
+			msgData = map[string]interface{}{
+				"error": errors.New("missing 'org_structure_midsuit_id'").Error(),
+			}
+			break
+		}
+
 		templateTaskUseCaseFactory := usecase.EmployeeTaskUseCaseFactory(log, viper)
 		err := templateTaskUseCaseFactory.CreateEmployeeTasksForRecruitment(&request.CreateEmployeeTasksForRecruitment{
-			EmployeeID:       employeeID,
-			JoinedDate:       joinedDate,
-			OrganizationType: organizationType,
+			EmployeeID:            employeeID,
+			JoinedDate:            joinedDate,
+			OrganizationType:      organizationType,
+			EmployeeMidsuitID:     employeeMidsuitID,
+			JobMidsuitID:          jobMidsuitID,
+			JobLevelMidsuitID:     jobLevelMidsuitID,
+			OrgMidsuitID:          orgMidsuitID,
+			OrgStructureMidsuitID: orgStructureMidsuitID,
 		})
 		if err != nil {
 			log.Errorf("ERROR: fail create employee tasks: %s", err.Error())
