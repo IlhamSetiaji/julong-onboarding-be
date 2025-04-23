@@ -2166,69 +2166,6 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTasksForRecruitment(req *request.Cr
 				// post to midsuit
 				var midsuitID string
 				if uc.Viper.GetString("midsuit.sync") == "ACTIVE" {
-					// empResp, err := uc.EmployeeMessage.SendFindEmployeeByIDMessage(request.SendFindEmployeeByIDMessageRequest{
-					// 	ID: parsedEmployeeID.String(),
-					// })
-					// if err != nil {
-					// 	uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error sending find employee by id message: ", err)
-					// 	return err
-					// }
-					// if empResp == nil {
-					// 	uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] employee not found in midsuit")
-					// 	return errors.New("employee not found in midsuit")
-					// }
-
-					// orgResp, err := uc.OrganizationMessage.SendFindOrganizationByIDMessage(request.SendFindOrganizationByIDMessageRequest{
-					// 	ID: empResp.OrganizationID.String(),
-					// })
-					// if err != nil {
-					// 	uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error sending find organization by id message: ", err)
-					// 	return err
-					// }
-					// if orgResp == nil {
-					// 	uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] organization not found in midsuit")
-					// 	return errors.New("organization not found in midsuit")
-					// }
-
-					// jobId := empResp.EmployeeJob["job_id"].(string)
-					// jobResp, err := uc.JobPlafonMessage.SendFindJobByIDMessage(request.SendFindJobByIDMessageRequest{
-					// 	ID: jobId,
-					// })
-					// if err != nil {
-					// 	uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error sending find job by id message: ", err)
-					// 	return err
-					// }
-					// if jobResp == nil {
-					// 	uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] job not found in midsuit")
-					// 	return errors.New("job not found in midsuit")
-					// }
-
-					// jobLevelId := empResp.EmployeeJob["job_level_id"].(string)
-					// jobLevelResp, err := uc.JobPlafonMessage.SendFindJobLevelByIDMessage(request.SendFindJobLevelByIDMessageRequest{
-					// 	ID: jobLevelId,
-					// })
-					// if err != nil {
-					// 	uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error sending find job level by id message: ", err)
-					// 	return err
-					// }
-					// if jobLevelResp == nil {
-					// 	uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] job level not found in midsuit")
-					// 	return errors.New("job level not found in midsuit")
-					// }
-
-					// orgStructureId := empResp.EmployeeJob["organization_structure_id"].(string)
-					// orgStructureResp, err := uc.OrganizationMessage.SendFindOrganizationStructureByIDMessage(request.SendFindOrganizationStructureByIDMessageRequest{
-					// 	ID: orgStructureId,
-					// })
-					// if err != nil {
-					// 	uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error sending find organization structure by id message: ", err)
-					// 	return err
-					// }
-					// if orgStructureResp == nil {
-					// 	uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] organization structure not found in midsuit")
-					// 	return errors.New("organization structure not found in midsuit")
-					// }
-
 					midsuitPayload := &request.SyncEmployeeTaskMidsuitRequest{
 						AdOrgId: request.AdOrgId{
 							// ID: orgResp.MidsuitID,
