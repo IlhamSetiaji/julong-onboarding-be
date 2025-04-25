@@ -2169,7 +2169,15 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTasksForRecruitment(req *request.Cr
 					midsuitPayload := &request.SyncEmployeeTaskMidsuitRequest{
 						AdOrgId: request.AdOrgId{
 							// ID: orgResp.MidsuitID,
-							ID: 1000024,
+							// ID: 1000024,
+							ID: func() int {
+								id, err := strconv.Atoi(req.OrgMidsuitID)
+								if err != nil {
+									uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error converting req.OrgMidsuitID to int: ", err)
+									return 0 // or handle the error appropriately
+								}
+								return id
+							}(),
 						},
 						Name: templateTask.Name,
 						Category: request.TaskCategory{
@@ -2261,28 +2269,147 @@ func (uc *EmployeeTaskUseCase) CreateEmployeeTasksForRecruitment(req *request.Cr
 					return err
 				}
 				if len(templateTask.TemplateTaskChecklists) > 0 {
-					for _, checklist := range templateTask.TemplateTaskChecklists {
+					// for _, checklist := range templateTask.TemplateTaskChecklists {
+					// 	_, err := uc.EmployeeTaskChecklistRepository.CreateEmployeeTaskChecklist(&entity.EmployeeTaskChecklist{
+					// 		EmployeeTaskID: createdEmpTask.ID,
+					// 		Name:           checklist.Name,
+					// 		IsChecked:      "NO",
+					// 	})
+					// 	if err != nil {
+					// 		uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error creating employee task checklist: ", err)
+					// 		// continue
+					// 		return err
+					// 	}
+					// }
+
+					var midsuitChecklistID string
+					for _, checklistReq := range templateTask.TemplateTaskChecklists {
+						// sync emp task checklist midsuit
+						if uc.Viper.GetString("midsuit.sync") == "ACTIVE" {
+
+							midsuitChecklistPayload := &request.SyncEmployeeTaskChecklistMidsuitRequest{
+								AdOrgId: request.AdOrgId{
+									ID: func() int {
+										id, err := strconv.Atoi(req.OrgMidsuitID)
+										if err != nil {
+											uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error converting orgResp.MidsuitID to int: ", err)
+											return 0 // or handle the error appropriately
+										}
+										return id
+									}(),
+								},
+								Name:      checklistReq.Name,
+								IsChecked: false,
+								HCTaskID: request.HCTaskID{
+									ID: func() int {
+										id, err := strconv.Atoi(midsuitID)
+										if err != nil {
+											uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error converting employeeTask.MidsuitID to int: ", err)
+											return 0 // or handle the error appropriately
+										}
+										return id
+									}(),
+								},
+								HCEmployeeID: request.HcEmployeeId{
+									ID: func() int {
+										// id, err := strconv.Atoi(empResp.MidsuitID)
+										id, err := strconv.Atoi(req.EmployeeMidsuitID)
+										if err != nil {
+											uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error converting empResp.MidsuitID to int: ", err)
+											return 0 // or handle the error appropriately
+										}
+										return id
+									}(),
+									// ID: 1000108,
+								},
+								ModelName: "hc_taskchecklist",
+							}
+
+							authResp, err := uc.MidsuitService.AuthOneStep()
+							if err != nil {
+								uc.Log.Error("[DocumentSendingUseCase.UpdateDocumentSending] " + err.Error())
+								return err
+							}
+
+							respChecklist, err := uc.MidsuitService.SyncEmployeeTaskChecklistMidsuit(*midsuitChecklistPayload, authResp.Token)
+							if err != nil {
+								uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error syncing employee task checklist to midsuit: ", err)
+								return err
+							}
+							midsuitChecklistID = *respChecklist
+						}
 						_, err := uc.EmployeeTaskChecklistRepository.CreateEmployeeTaskChecklist(&entity.EmployeeTaskChecklist{
 							EmployeeTaskID: createdEmpTask.ID,
-							Name:           checklist.Name,
-							IsChecked:      "NO",
+							Name:           checklistReq.Name,
+							MidsuitID:      &midsuitChecklistID,
 						})
 						if err != nil {
-							uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error creating employee task checklist: ", err)
-							// continue
+							uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error creating employee task checklist: ", err)
 							return err
 						}
 					}
 				}
 				if len(templateTask.TemplateTaskAttachments) > 0 {
-					for _, attachment := range templateTask.TemplateTaskAttachments {
-						_, err := uc.EmployeeTaskAttachmentRepository.CreateEmployeeTaskAttachment(&entity.EmployeeTaskAttachment{
+					// for _, attachment := range templateTask.TemplateTaskAttachments {
+					// 	_, err := uc.EmployeeTaskAttachmentRepository.CreateEmployeeTaskAttachment(&entity.EmployeeTaskAttachment{
+					// 		EmployeeTaskID: createdEmpTask.ID,
+					// 		Path:           attachment.Path,
+					// 	})
+					// 	if err != nil {
+					// 		uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error creating employee task attachment: ", err)
+					// 		// continue
+					// 		return err
+					// 	}
+					// }
+					for _, attachmentReq := range templateTask.TemplateTaskAttachments {
+						if uc.Viper.GetString("midsuit.sync") == "ACTIVE" {
+							// Read the file from the given path
+							fileContent, err := os.ReadFile(attachmentReq.Path)
+							if err != nil {
+								uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error reading file: ", err)
+								return err
+							}
+
+							// Extract the file name from the path
+							fileName := filepath.Base(attachmentReq.Path)
+
+							// Encode the file content to base64
+							encodedData := base64.StdEncoding.EncodeToString(fileContent)
+
+							// Create the payload
+							midsuitAttachmentPayload := &request.SyncEmployeeTaskAttachmentMidsuitRequest{
+								Name: fileName,
+								Data: encodedData,
+							}
+
+							// Log the payload for debugging
+							// uc.Log.Info("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] midsuit attachment payload: ", midsuitAttachmentPayload)
+
+							// Sync to midsuit
+							authResp, err := uc.MidsuitService.AuthOneStep()
+							if err != nil {
+								uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] " + err.Error())
+								return err
+							}
+
+							midsuitIDInt, err := strconv.Atoi(midsuitID)
+							if err != nil {
+								uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error converting midsuitID to int: ", err)
+								return err
+							}
+							_, err = uc.MidsuitService.SyncEmployeeTaskAttachmentMidsuit(midsuitIDInt, *midsuitAttachmentPayload, authResp.Token)
+							if err != nil {
+								uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTaskUseCase] error syncing employee task attachment to midsuit: ", err)
+								return err
+							}
+						}
+
+						_, err = uc.EmployeeTaskAttachmentRepository.CreateEmployeeTaskAttachment(&entity.EmployeeTaskAttachment{
 							EmployeeTaskID: createdEmpTask.ID,
-							Path:           attachment.Path,
+							Path:           attachmentReq.Path,
 						})
 						if err != nil {
-							uc.Log.Error("[EmployeeTaskUseCase.CreateEmployeeTasksForRecruitment] error creating employee task attachment: ", err)
-							// continue
+							uc.Log.Error("[EmployeeTaskUseCase.UpdateEmployeeTaskUseCase] error creating employee task attachment: ", err)
 							return err
 						}
 					}
