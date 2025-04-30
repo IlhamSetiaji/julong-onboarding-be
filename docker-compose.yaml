@@ -23,7 +23,7 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=gEJIfovgvDAroHhqRiKhYVvrkn2OqXfF3tw8xJmnvw7JhrZgN24pTD9iWMIUIUL6
       - DB_NAME=julong-sync-onboarding
-      - RABBITMQ_URL=amqp://julong:HR9hWL5jxSD09XeLIIccOyt1863WvIsy@prasi.avolut.com:5672/
+      - RABBITMQ_URL=amqp://guest:guest@192.168.12.39:5672/
       - RABBITMQ_QUEUE=julong_onboarding
       - JWT_SECRET=wanhasib
       - MAIL_HOST=smtp.mailtrap.io
@@ -49,5 +49,5 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: "/root/data/julong-onboarding/storage"
+      device: "~/avolut/data/julong-onboarding/storage"
       o: bind
