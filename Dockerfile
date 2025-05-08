@@ -53,6 +53,9 @@ COPY init-config.sh /app/init-config.sh
 # Copy the storage directory
 COPY storage /app/storage
 
+# Copy the certificates directory
+COPY cert /app/cert
+
 # Make the initialization script executable
 RUN chmod +x /app/init-config.sh
 

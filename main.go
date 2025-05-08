@@ -123,10 +123,27 @@ func main() {
 	routeConfig.SetupRoutes()
 
 	// run server
-	webPort := strconv.Itoa(viper.GetInt("web.port"))
-	err := app.Run(":" + webPort)
-	if err != nil {
-		log.Panicf("Failed to start server: %v", err)
+	// webPort := strconv.Itoa(viper.GetInt("web.port"))
+	// err := app.Run(":" + webPort)
+	// if err != nil {
+	// 	log.Panicf("Failed to start server: %v", err)
+	// }
+	if viper.GetString("web.mode") == "debug" {
+		webPort := strconv.Itoa(viper.GetInt("web.port"))
+		log.Printf("Port configured: " + webPort)
+		err := app.Run(":" + webPort)
+		if err != nil {
+			log.Panicf("Failed to start server: %v", err)
+		}
+	} else {
+		webPort := strconv.Itoa(viper.GetInt("web.port"))
+		certFile := "cert/cert.crt"
+		keyFile := "cert/privkey.key"
+
+		err := app.RunTLS(":"+webPort, certFile, keyFile)
+		if err != nil {
+			log.Panicf("Failed to start HTTPS server: %v", err)
+		}
 	}
 
 	wg.Wait()

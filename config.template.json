@@ -10,6 +10,7 @@
   "web": {
     "prefork": false,
     "port": 8001,
+    "mode": "release",
     "cookie": {
       "name": "julong-onboarding",
       "secure": false,
