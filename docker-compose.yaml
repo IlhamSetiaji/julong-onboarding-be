@@ -11,10 +11,10 @@ services:
       - storage_data:/app/storage
     environment:
       - APP_ENV=production
-      - APP_URL=https://api-onboarding.avolut.com/
-      - APP_DOMAIN=avolut.com
+      - APP_URL=https://hris.julongindonesia.com:5504/
+      - APP_DOMAIN=julongindonesia.com
       - APP_SECRET=wanhasib
-      - FRONTEND_URL=http://localhost:3000,https://julong-mpp.avolut.com,https://julong-recruitment.avolut.com,https://julong-onboarding.avolut.com,https://mobile-dev.junior-dev.my.id
+      - FRONTEND_URL=http://localhost:3000,https://julong-mpp.avolut.com,https://julong-recruitment.avolut.com,https://julong-onboarding.avolut.com,https://mobile-dev.junior-dev.my.id,https://hris.julongindonesia.com:3010,https://hris.julongindonesia.com:3002,https://hris.julongindonesia.com:3003
       - COOKIE_SECRET=wanhasib
       - SESSION_NAME=julong-onboarding
       - CSRF_SECRET=wanhasib
@@ -22,7 +22,7 @@ services:
       - DB_PORT=8741
       - DB_USER=postgres
       - DB_PASSWORD=gEJIfovgvDAroHhqRiKhYVvrkn2OqXfF3tw8xJmnvw7JhrZgN24pTD9iWMIUIUL6
-      - DB_NAME=julong-sync-onboarding
+      - DB_NAME=coba-onboarding
       - RABBITMQ_URL=amqp://guest:guest@192.168.12.39:5672/
       - RABBITMQ_QUEUE=julong_onboarding
       - JWT_SECRET=wanhasib
